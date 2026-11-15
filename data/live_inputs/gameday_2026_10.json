@@ -368,5 +368,95 @@
 "at": "2026-11-15T16:41:00+00:00",
 "post": 0.974,
 "status": "Active (LLF)"
+},
+"00-0035700": {
+"name": "Josh Jacobs",
+"team": "GB",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0036265": {
+"name": "AJ Dillon",
+"team": "CAR",
+"pos": "RB",
+"pre": 0.6721,
+"ruling": "INA",
+"at": "2026-11-15T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038098": {
+"name": "Pierre Strong",
+"team": "GB",
+"pos": "RB",
+"pre": 0.9612,
+"ruling": "INA",
+"at": "2026-11-15T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038728": {
+"name": "Jared Wayne",
+"team": "MIA",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-15T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive (FLD)"
+},
+"00-0039356": {
+"name": "Ja'Tavion Sanders",
+"team": "CAR",
+"pos": "TE",
+"pre": 0.5351,
+"ruling": "INA",
+"at": "2026-11-15T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040206": {
+"name": "Riley Leonard",
+"team": "IND",
+"pos": "QB",
+"pre": 0.0936,
+"ruling": "INA",
+"at": "2026-11-15T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041077": {
+"name": "Justin Joly",
+"team": "MIA",
+"pos": "TE",
+"pre": 0.1687,
+"ruling": "INA",
+"at": "2026-11-15T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041149": {
+"name": "Haynes King",
+"team": "CAR",
+"pos": "QB",
+"pre": 0.0952,
+"ruling": "INA",
+"at": "2026-11-15T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041525": {
+"name": "Chris Bell",
+"team": "MIA",
+"pos": "WR",
+"pre": 0.01,
+"ruling": "INA",
+"at": "2026-11-15T16:41:00+00:00",
+"post": 0.0,
+"status": "Inactive (LDD)"
 }
 }
