@@ -24,7 +24,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426844,Elijah Higgins,Arizona Cardinals,Active,2026-11-13T17:59Z,,,,,,"Higgins is signing a contract extension with the Cardinals through 2029, Darren Urban of the Cardinals' official site reports.",TE
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-12T03:26Z,,,,,,Baker recorded 11 tackles (three solo) in Sunday's 17-3 loss to the Cardinals.,S
 4569609,Evan Hull,Arizona Cardinals,Active,2026-11-11T02:09Z,,,,,,Hull failed to haul in his lone target during the Cardinals' 17-3 loss to the Seahawks on Sunday.,RB
-4426502,Drake London,Atlanta Falcons,Active,2026-11-16T18:11Z,,,,,,,WR
+4426502,Drake London,Atlanta Falcons,Active,2026-11-16T18:18Z,,,,,,"Head coach Kevin Stefanski said Monday that London was cleared of a concussion near the end of Sunday's 35-13 loss to the Chiefs, Will McFadden of the Falcons' official site reports.",WR
 4037626,Divine Deablo,Atlanta Falcons,Out,2026-11-16T17:39Z,Forearm,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,out,LB
 4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-16T17:38Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,out,WR
 4685590,Cameron Williams,Atlanta Falcons,Active,2026-11-16T17:37Z,,,,,,,OL
@@ -499,6 +499,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034729,Tucker Addington,Miami Dolphins,Active,2026-11-13T21:58Z,,,,,,,LS
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-12T02:48Z,,,,,,Brooks recorded 12 tackles (four solo) during Sunday's 19-9 loss versus the Lions.,LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-12T02:44Z,,,,,,Rodriguez recorded 10 tackles (seven solo) including 1.0 sacks during Sunday's 19-9 loss versus the Lions.,LB
+4036133,T.J. Hockenson,Minnesota Vikings,Out,2026-11-16T18:46Z,Wrist,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,TE
+4629149,Tyrion Ingram-Dawkins,Minnesota Vikings,Out,2026-11-16T18:40Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,DE
+3728281,Blake Cashman,Minnesota Vikings,Out,2026-11-16T18:40Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,out,LB
+4573398,Max Brosmer,Minnesota Vikings,Active,2026-11-16T18:40Z,,,,,,,QB
+3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-16T18:39Z,Calf,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,WR
+3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-16T18:39Z,Hamstring,Strain,Not Specified,2026-11-29,OUT,out,QB
+4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-16T18:38Z,Thumb,Not Specified,Not Specified,2026-11-22,DOUBTFUL,out,WR
 4708049,Gavin Bartholomew,Minnesota Vikings,Active,2026-11-16T03:05Z,,,,,,Bartholomew caught three of four targets for 36 yards and a touchdown in Sunday's 30-10 win over the Packers.,TE
 4430656,Myles Price,Minnesota Vikings,Active,2026-11-16T02:11Z,,,,,,Price caught all four targets for 49 yards and a touchdown in Sunday's 30-10 win over the Packers.,WR
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-16T00:29Z,,,,,,Jones carried the ball 11 times for 47 yards and a touchdown and caught his only target for eight yards in Sunday's 30-10 win over the Packers.,RB
@@ -509,15 +516,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360637,Jeshaun Jones,Minnesota Vikings,Questionable,2026-11-15T20:10Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Jones (shoulder) is questionable to return to Sunday's game against the Packers.,WR
 4875564,Bo Richter,Minnesota Vikings,Questionable,2026-11-15T19:23Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Richter (foot) has been ruled out for the rest of Sunday's game against the Packers.,LB
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-11-15T17:36Z,,,,,,Van Noy (calf) is active for Sunday's game against the Packers.,LB
-4573398,Max Brosmer,Minnesota Vikings,Out,2026-11-15T17:05Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Brosmer (coach's decision) is inactive but will serve as the Vikings' emergency third quarterback against the Packers on Sunday.,QB
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-15T17:03Z,,,,,,Metellus (shoulder) is active for Sunday's game against the Packers.,S
-4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-15T16:38Z,Thumb,Not Specified,Not Specified,2026-11-22,INACTIVE,"Addison (thumb) is inactive for Sunday's game at Green Bay, Tom Pelissero of Netflix reports.",WR
-4036133,T.J. Hockenson,Minnesota Vikings,Out,2026-11-15T16:32Z,Wrist,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,TE
-4629149,Tyrion Ingram-Dawkins,Minnesota Vikings,Out,2026-11-15T16:32Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,DE
-3886598,Jauan Jennings,Minnesota Vikings,Out,2026-11-15T16:32Z,Calf,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,WR
-3728281,Blake Cashman,Minnesota Vikings,Out,2026-11-15T16:32Z,Concussion,Concussion,Not Specified,2026-11-22,INACTIVE,inactive,LB
 4361112,Devin Culp,Minnesota Vikings,Active,2026-11-15T00:20Z,,,,,,Culp was elevated from the Vikings' practice squad to their active roster Saturday.,TE
-3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-14T19:54Z,Hamstring,Strain,Not Specified,2026-11-29,INACTIVE,"The Vikings are hopeful that Murray (hamstring) will be available to play Week 12 against the Falcons, Tom Pelissero of Netflix reports.",QB
 4568007,Jay Ward,Minnesota Vikings,Active,2026-11-13T22:38Z,,,,,,,S
 2573079,Carson Wentz,Minnesota Vikings,Active,2026-11-13T22:03Z,,,,,,"Wentz (ankle) doesn't have an injury designation for Sunday's game at Green Bay, but Kirk Cousins will be Minnesota's starting quarterback.",QB
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-12T03:38Z,,,,,,Wilson recorded nine tackles (three solo) in Monday night's 23-6 loss to the Bills.,LB
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429636,Blake Freeland,New York Jets,Active,2026-11-09T21:31Z,,,,,,,OL
 4361767,Will McDonald IV,New York Jets,Active,2026-11-09T15:02Z,,,,,,"McDonald put in a request for the Jets to trade him ahead of Tuesday's deadline, Ian Rapoport and Rich Cimini of ESPN report.",DE
 3124679,Jason Sanders,New York Jets,Active,2026-11-09T04:48Z,,,,,,Sanders went 4-for-5 on field-goal tries during Sunday's 35-12 loss to the Chiefs.,PK
+15835,Zach Ertz,Philadelphia Eagles,Active,2026-11-16T18:31Z,,,,,,The Eagles signed Ertz from the practice squad to the active roster Monday.,TE
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
 4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-11T02:24Z,,,,,,Moore caught one of two targets for minus-3 yards during the Eagles' 19-11 loss to the Giants on Sunday.,WR
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-11T01:14Z,,,,,,Cooper caught just two of eight targets for 25 yards in Sunday's 19-11 loss to the Giants.,WR
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-02T19:19Z,,,,,,,C
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
-3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-11-16T15:58Z,,,,,,Rudolph completed one of three pass attempts for two yards and rushed once for nine yards in Sunday's 38-18 loss to the Bengals.,QB
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-16T05:19Z,,,,,,Metcalf brought in two of six targets for 54 yards and a touchdown and added a two-point conversion catch in the Steelers' 38-18 loss to the Bengals on Sunday night.,WR
 4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-11-16T05:14Z,,,,,,Warren rushed seven times for 15 yards and brought in five of six targets for 26 yards in the Steelers' 38-18 loss to the Bengals on Sunday night. He committed a fumble recovered by Pittsburgh.,RB
