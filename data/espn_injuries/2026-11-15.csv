@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-11-06T05:28Z,,,,,,Andrews secured both targets for 19 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,TE
 4429582,Joe Fagnano,Baltimore Ravens,Active,2026-11-06T05:23Z,,,,,,Fagnano completed 10 of 18 passes for 60 yards with no touchdowns and two interceptions while adding three rushes for 13 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,QB
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-06T05:03Z,,,,,,Flowers brought in three of six targets for six yards and rushed three times for 17 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,WR
+4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-16T00:38Z,,,,,,Kincaid caught two of three targets for 58 yards in Sunday's 31-12 win over the Jets.,TE
 3915416,DJ Moore,Buffalo Bills,Active,2026-11-16T00:30Z,,,,,,Moore caught four of six targets for 90 yards and a touchdown while rushing once for four yards in Sunday's 31-12 win over the Jets.,WR
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-15T22:00Z,,,,,,"Allen completed 11 of 21 passes for 196 yards, one touchdown and one interception while rushing five times for five yards and two touchdowns in Sunday's 31-12 win over the Jets.",QB
 4379399,James Cook III,Buffalo Bills,Active,2026-11-15T21:58Z,,,,,,Cook rushed 18 times for 157 yards and a touchdown but didn't catch his only target in Sunday's 31-12 win over the Jets.,RB
@@ -95,7 +96,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3051324,Dion Dawkins,Buffalo Bills,Active,2026-11-14T02:36Z,,,,,,Dawkins (ribs) does not have any injury designation ahead of Sunday's game against the Jets.,OT
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-13T23:11Z,,,,,,"Head coach Joe Brady confirmed Friday that Hooker will play Sunday against the Jets, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",S
 4033748,Connor McGovern,Buffalo Bills,Active,2026-11-13T22:39Z,,,,,,,C
-4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-13T21:15Z,,,,,,Kincaid (ankle) doesn't have an injury designation for Sunday's game against the Jets.,TE
 4259166,Terrel Bernard,Buffalo Bills,Active,2026-11-12T03:43Z,,,,,,"Bernard recorded six tackles (two solo) and a pair of pass breakups, including an interception, in Monday night's 23-6 win over the Vikings.",LB
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-11T02:14Z,,,,,,Latu caught his lone target for a 25-yard touchdown Monday in a 23-6 win against the Vikings.,TE
 4573699,Jackson Hawes,Buffalo Bills,Active,2026-11-11T02:10Z,,,,,,Hawes caught his lone target for eight yards during Buffalo's win over the Vikings on Monday.,TE
@@ -274,6 +274,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4896353,Jimmy Rolder,Detroit Lions,Injured Reserve,2026-11-04T02:07Z,Hamstring,Not Specified,Not Specified,2027-02-15,IR,Rolder (hamstring) was placed on injured reserve Tuesday.,LB
 4429187,Seth McLaughlin,Detroit Lions,Active,2026-11-02T18:51Z,,,,,,,C
 4371973,Roger McCreary,Detroit Lions,Active,2026-11-01T16:42Z,,,,,,McCreary (foot) is active for Sunday's game against the Vikings.,CB
+4248528,Christian Watson,Green Bay Packers,Active,2026-11-16T00:41Z,,,,,,Watson caught three of five targets for 37 yards in Sunday's 30-10 loss to Minnesota.,WR
+4036378,Jordan Love,Green Bay Packers,Active,2026-11-16T00:37Z,,,,,,Love completed 17 of 27 passes for 220 yards and a touchdown with an interception in Sunday's 30-10 loss to the Vikings.,QB
 4259305,Bo Melton,Green Bay Packers,Questionable,2026-11-15T19:56Z,Thigh,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Melton (thigh) has been ruled out for the rest of Sunday's game against the Vikings, Rob Demovsky of ESPN.com reports.",WR
 4430191,Skyy Moore,Green Bay Packers,Questionable,2026-11-15T19:54Z,Ankle,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Moore (ankle) has been ruled out for the rest of Sunday's game against the Vikings, Rob Demovsky of ESPN.com reports.",WR
 5076652,Brandon Cisse,Green Bay Packers,Questionable,2026-11-15T18:44Z,Ribs,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Cisse (ribs) is questionable to return to Sunday's game against the Vikings.,CB
@@ -297,8 +299,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429136,Warren Brinson,Green Bay Packers,Injured Reserve,2026-11-13T01:07Z,Calf,Not Specified,Not Specified,2026-11-25,IR,"Coach Matt LaFleur said Thursday that he expects Brinson (IR, calf) to play again at some point this season, Matt Schneidman of The Athletic reports.",DT
 4869461,Trey Smack,Green Bay Packers,Active,2026-11-12T22:39Z,,,,,,"Smack (calf) was a full participant in Thursday's practice, Weston Hodkiewicz of the Packers' official site reports.",PK
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-12T02:55Z,,,,,,Williams logged five tackles (four solo) and one interception during the Packers' 45-27 win over the Patriots in Week 9.,S
-4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-12T02:43Z,,,,,,"McDuffie registered 10 tackles (five solo), including 1.0 sacks, one forced fumble and one fumble recovery during the Packers' 45-27 win over the Patriots in Week 9.",LB
-4429023,MarShawn Lloyd,Green Bay Packers,Active,2026-11-11T22:13Z,,,,,,Lloyd (knee) is not listed on the Packers' injury report Wednesday.,RB
 4035538,David Montgomery,Houston Texans,Out,2026-11-16T00:12Z,Groin,Not Specified,Not Specified,2026-11-19,INACTIVE,"Texans head coach DeMeco Ryans said Sunday that he's ""not certain"" if Montgomery (groin) will be able to play Thursday against Indianapolis, DJ Bien-Aime of ESPN reports.",RB
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-15T23:56Z,,,,,,Stroud completed 20 of 38 passes for 211 yards with three touchdowns and one interception while adding three rushes for 20 yards in the Texans' 27-24 loss to the Browns on Sunday.,QB
 4429059,Woody Marks,Houston Texans,Doubtful,2026-11-15T23:18Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,"Coach DeMeco Ryans acknowledged after Sunday's 27-24 loss to the Browns that Marks (concussion) is unlikely to play in Thursday night's game against the Colts, ESPN.com's DJ Bien-Aime reports.",RB
@@ -399,8 +399,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-11T18:17Z,,,,,,"Butker will remain Kansas City's kicker ahead of Sunday's game against the Falcons, Sam McDowell of The Kansas City Star reports.",PK
 4362887,Justin Fields,Kansas City Chiefs,Active,2026-11-11T15:55Z,,,,,,Fields carried twice for minus-one yard and lost a fumble while logging five snaps on offense in Sunday's 35-12 win over the Jets.,QB
 5082630,Jalen Royals,Kansas City Chiefs,Active,2026-11-11T03:01Z,,,,,,Royals caught both of his targets for 18 yards Sunday in a 35-12 rout of the Jets.,WR
+4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-16T00:29Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle) will be evaluated further Monday, Ryan McFadden of ESPN reports.",TE
 4258194,Kwity Paye,Las Vegas Raiders,Questionable,2026-11-15T23:31Z,Neck,,,2026-11-15,QUESTIONABLE,Paye (neck) is questionable to return to Sunday's game against the Seahawks,DE
-4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-15T22:42Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle) won't return to Sunday's game against the Seahawks, Mike Garafolo of NFL Network and ESPN reports.",TE
 5150247,Malik Benson,Las Vegas Raiders,Out,2026-11-15T19:59Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Benson (coach's decision) is inactive for Sunday's game against the Seahawks.,WR
 4360749,Thomas Booker IV,Las Vegas Raiders,Out,2026-11-15T19:50Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,Booker (ankle) is inactive for Sunday's game against the Seahawks.,DT
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-15T19:48Z,Back,Not Specified,Not Specified,2026-11-22,INACTIVE,Thornton (back) is inactive for Sunday's game against the Seahawks.,WR
@@ -599,10 +599,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4725996,Abdul Carter,New York Giants,Active,2026-11-11T23:30Z,,,,,,Carter (knee/back) doesn't have an injury designation for Thursday night's game against the Commanders.,LB
 4691889,Greg Desrosiers Jr.,New York Giants,Active,2026-11-11T02:56Z,,,,,,Desrosiers carried the ball three times for 20 yards during the Giants' win over the Eagles on Sunday.,RB
 4921249,Colton Hood,New York Giants,Active,2026-11-11T01:35Z,,,,,,"Head coach John Harbaugh told reporters that Hood dislocated his finger during Tuesday's practice, Ryan Dunleavy of the New York Post reports.",CB
+15864,Geno Smith,New York Jets,Questionable,2026-11-16T00:40Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Jets head coach Aaron Glenn said after Sunday's loss to Buffalo that Smith, who departed the contest due to an ankle injury, will have his status for Week 11 determined during the upcoming week of practice, Jack Bell of the Jets' official site reports.",QB
 4685413,Cade Klubnik,New York Jets,Active,2026-11-15T23:54Z,,,,,,"Klubnik completed 11 of 20 passes for 137 yards, no touchdowns and one interception in Sunday's 31-12 loss to the Bills. He added three rushing attempts for 26 yards.",QB
 4427366,Breece Hall,New York Jets,Active,2026-11-15T22:06Z,,,,,,Hall rushed 11 times for 41 yards and caught all four of his targets for 67 yards in Sunday's 31-12 loss to the Bills.,RB
 4569618,Garrett Wilson,New York Jets,Active,2026-11-15T22:05Z,,,,,,Wilson (concussion) caught seven of 14 targets for 106 yards and lost a fumble in Sunday's 31-12 loss to the Bills.,WR
-15864,Geno Smith,New York Jets,Questionable,2026-11-15T20:55Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Smith (ankle) has been ruled out for the remainder of Sunday's game against the Bills, Brian Costello of the New York Post reports.",QB
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-15T19:57Z,Ankle,Not Specified,Right,2026-11-22,QUESTIONABLE,"Cooper (ankle) won't return to Sunday's game against the Bills, Zack Rosenblatt of The Athletic reports.",WR
 4243375,Dylan Parham,New York Jets,Questionable,2026-11-15T19:02Z,Knee,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Parham (knee) is questionable to return to Sunday's game against the Bills.,G
 4837388,VJ Payne,New York Jets,Active,2026-11-15T17:39Z,,,,,,Payne (knee) is active for Sunday's game against Buffalo.,S
