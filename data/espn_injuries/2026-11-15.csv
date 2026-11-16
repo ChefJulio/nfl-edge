@@ -174,6 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710752,Cashius Howell,Cincinnati Bengals,Injured Reserve,2026-11-04T01:35Z,Wrist,Surgery,Right,2026-12-06,IR,Howell (wrist) was placed on injured reserve by the Bengals on Tuesday.,DE
 4690070,Mitchell Tinsley,Cincinnati Bengals,Active,2026-11-02T18:48Z,,,,,,,WR
 5092508,Colbie Young,Cincinnati Bengals,Active,2026-11-02T15:53Z,,,,,,Young went without a target while playing 19 of the Bengals' 74 snaps on offense in Sunday's 43-36 overtime win over the Titans.,WR
+3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-16T00:06Z,,,,,,Watson completed 25 of 40 passes for 312 yards with no touchdowns and one interception while adding eight rushes for 49 yards and a score in the Browns' 27-24 win over the Texans on Sunday. He also committed a fumble that remained with Cleveland.,QB
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-15T23:44Z,,,,,,Fannin brought in seven of nine targets for 91 yards in the Browns' 27-24 win over the Texans on Sunday.,TE
 4685702,Quinshon Judkins,Cleveland Browns,Active,2026-11-15T23:37Z,,,,,,Judkins rushed 10 times for 38 yards and a touchdown and brought in three of five targets for 33 yards in the Browns' 27-24 win over the Texans on Sunday.,RB
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-15T19:12Z,,,,,,"Concepcion (undisclosed) returned to Sunday's game against the Texans, Scott Petrak of the Elyria Chronicle-Telegram reports.",WR
@@ -197,7 +198,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597310,Austin Barber,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
 4695783,Myles Harden,Cleveland Browns,Active,2026-11-12T03:32Z,,,,,,"Harden recorded five tackles (four solo), including 2.0 sacks, and one pass defense during the Browns' 23-22 overtime loss to the Saints in Week 9.",CB
 4432762,Shedeur Sanders,Cleveland Browns,Active,2026-11-11T14:44Z,,,,,,"Sanders will return to a backup role for Sunday's game against the Texans after the Browns announced Wednesday that Deshaun Watson (concussion) will draw the Week 10 start, Kelsey Russo of the team's official site reports.",QB
-3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-11T14:38Z,,,,,,"The Browns announced Wednesday that Watson (concussion) will start Sunday's game against the Texans, Kelsey Russo of the team's official site reports.",QB
 4258620,Andre Szmyt,Cleveland Browns,Active,2026-11-09T05:08Z,,,,,,Szmyt went 3-for-3 on field-goal attempts and made his only PAT during Sunday's 23-22 overtime loss to New Orleans.,PK
 4367210,Otito Ogbonnia,Dallas Cowboys,Active,2026-11-15T23:15Z,,,,,,"Ogbonnia (finger) has re-entered Sunday's matchup against San Francisco, Joe Hoyt of The Dallas Morning News reports.",DT
 4248911,DaRon Bland,Dallas Cowboys,Questionable,2026-11-15T22:04Z,Ankle,Not Specified,,2026-11-15,QUESTIONABLE,"Bland (ankle) is questionable to return to Sunday's matchup versus San Francisco, Calvin Watkins of The Dallas Morning News reports.",CB
@@ -299,6 +299,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-12T02:55Z,,,,,,Williams logged five tackles (four solo) and one interception during the Packers' 45-27 win over the Patriots in Week 9.,S
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-12T02:43Z,,,,,,"McDuffie registered 10 tackles (five solo), including 1.0 sacks, one forced fumble and one fumble recovery during the Packers' 45-27 win over the Patriots in Week 9.",LB
 4429023,MarShawn Lloyd,Green Bay Packers,Active,2026-11-11T22:13Z,,,,,,Lloyd (knee) is not listed on the Packers' injury report Wednesday.,RB
+4035538,David Montgomery,Houston Texans,Out,2026-11-16T00:12Z,Groin,Not Specified,Not Specified,2026-11-19,INACTIVE,"Texans head coach DeMeco Ryans said Sunday that he's ""not certain"" if Montgomery (groin) will be able to play Thursday against Indianapolis, DJ Bien-Aime of ESPN reports.",RB
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-15T23:56Z,,,,,,Stroud completed 20 of 38 passes for 211 yards with three touchdowns and one interception while adding three rushes for 20 yards in the Texans' 27-24 loss to the Browns on Sunday.,QB
 4429059,Woody Marks,Houston Texans,Doubtful,2026-11-15T23:18Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,"Coach DeMeco Ryans acknowledged after Sunday's 27-24 loss to the Browns that Marks (concussion) is unlikely to play in Thursday night's game against the Colts, ESPN.com's DJ Bien-Aime reports.",RB
 4258173,Nico Collins,Houston Texans,Active,2026-11-15T22:17Z,,,,,,Collins secured nine of 16 targets for 94 yards and a touchdown in the Texans' 27-24 loss to the Browns on Sunday.,WR
@@ -314,7 +315,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043109,Trent Brown,Houston Texans,Active,2026-11-15T16:37Z,,,,,,,OT
 3919117,Azeez Al-Shaair,Houston Texans,Out,2026-11-15T16:37Z,Groin,Not Specified,Not Specified,2026-11-19,INACTIVE,inactive,LB
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-14T19:10Z,,,,,,The Texans signed Ogunbowale to the practice squad and elevated him to the active roster Saturday.,RB
-4035538,David Montgomery,Houston Texans,Out,2026-11-14T18:18Z,Groin,Not Specified,Not Specified,2026-11-19,INACTIVE,Montgomery (groin) has been downgraded from questionable to out for Sunday's game against the Browns.,RB
 4243956,Reed Blankenship,Houston Texans,Active,2026-11-13T23:47Z,,,,,,Blankenship (concussion/hand) does not carry an injury designation into Sunday's game against the Browns.,S
 4366031,Tank Dell,Houston Texans,Active,2026-11-13T22:53Z,,,,,,"Dell (hand) doesn't have an injury designation for Sunday's game against the Browns, while teammate Marvin Harrison (hamstring) has been ruled out.",WR
 4372716,Nikko Remigio,Houston Texans,Active,2026-11-13T22:17Z,,,,,,The Texans claimed Remigio off waivers from the Chiefs on Thursday.,WR
@@ -649,17 +649,18 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-10-31T00:19Z,,,,,,Smith (concussion) does not carry an injury designation into Sunday's game against the Commanders.,LB
 4362116,Moro Ojomo,Philadelphia Eagles,Active,2026-10-30T20:03Z,,,,,,,DT
 3139368,Marcus Epps,Philadelphia Eagles,Active,2026-10-30T19:58Z,,,,,,,S
+5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-11-16T00:02Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,RB
+4429955,Will Howard,Pittsburgh Steelers,Out,2026-11-16T00:02Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,QB
+3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Out,2026-11-16T00:02Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
+4682980,Derrick Harmon,Pittsburgh Steelers,Active,2026-11-16T00:02Z,,,,,,,DT
+4714771,Drew Allar,Pittsburgh Steelers,Out,2026-11-16T00:02Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,QB
+4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-11-16T00:02Z,,,,,,"Freiermuth (illness) is active for Sunday's game at Cincinnati, Teresa Varley of the Steelers' official site reports.",TE
 3929846,DeShon Elliott,Pittsburgh Steelers,Out,2026-11-15T23:46Z,Knee,Not Specified,Not Specified,2026-11-22,INACTIVE,Elliott suffered a pregame knee injury and has been ruled out for Sunday's Week 10 matchup against the Bengals.,S
-4682980,Derrick Harmon,Pittsburgh Steelers,Questionable,2026-11-14T20:05Z,,,,,,"The Steelers activated Harmon (foot) from injured reserve Saturday, Mike DeFabo of The Athletic reports.",DT
-4361411,Pat Freiermuth,Pittsburgh Steelers,Questionable,2026-11-14T17:39Z,Illness,Not Specified,Not Specified,2026-11-15,QUESTIONABLE,Freiermuth (illness) was added to Saturday's injury report and is listed as questionable for Sunday's game against Cincinnati.,TE
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-12T18:08Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR,"Pittman (foot) is warmed up with his teammates Thursday, though he remains on IR and wasn't wearing a helmet, Nick Farabaugh of PennLive.com reports.",WR
 4567979,Brandin Echols,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Echols (hamstring) was a full participant at practice Wednesday, Teresa Varley of the Steelers' official site reports.",CB
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Slaughter (hamstring) was a full participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Active,2026-11-12T00:36Z,,,,,,"Skowronek (calf) was a full participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",WR
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-03T02:06Z,,,,,,Boswell made two of his three field-goal attempts and all three PATs in the Steelers' 27-6 win over the Browns on Sunday.,PK
-4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-02T19:20Z,,,,,,,QB
-4714771,Drew Allar,Pittsburgh Steelers,Active,2026-11-02T19:20Z,,,,,,,QB
-5081508,Eli Heidenreich,Pittsburgh Steelers,Active,2026-11-02T19:20Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,,RB
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-02T05:26Z,,,,,,Bernard caught all five of his targets for 30 yards during Sunday's 27-6 win against Cleveland.,WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-02T03:38Z,,,,,,Washington caught three of five targets for 94 yards during Sunday's 27-6 win over the Browns.,TE
 4038815,Rico Dowdle,Pittsburgh Steelers,Active,2026-11-02T02:55Z,,,,,,Dowdle rushed 15 times for 56 yards and a touchdown in the Steelers' 27-6 win over the Browns on Sunday.,RB
@@ -673,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242207,Patrick Queen,Pittsburgh Steelers,Active,2026-10-28T01:33Z,,,,,,"Queen compiled 10 tackles (seven solo), including 1.0 sacks, during Pittsburgh's win over the Saints on Sunday.",LB
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-10-25T12:26Z,,,,,,"Rudolph is active for Sunday's game against the Saints in Paris, Teresa Varley of the Steelers' official site reports.",QB
 3045282,T.J. Watt,Pittsburgh Steelers,Active,2026-10-23T15:41Z,,,,,,Watt (calf) practiced fully Friday and doesn't carry an injury designation into Sunday's game against the Saints.,LB
-3047495,Sebastian Joseph-Day,Pittsburgh Steelers,Injured Reserve,2026-10-23T00:28Z,Triceps,Not Specified,Not Specified,2026-11-27,IR,"Joseph-Day (triceps) was placed on injured reserve by the Steelers on Thursday, Teresa Varley of the team's official website reports.",DT
 13241,Trent Williams,San Francisco 49ers,Active,2026-11-15T20:32Z,,,,,,Williams (shoulder) is active for Sunday's game against the Cowboys.,OT
 4242488,Deommodore Lenoir,San Francisco 49ers,Active,2026-11-15T20:24Z,,,,,,Lenoir (foot) is active for Sunday's game against Dallas.,CB
 4427325,Renardo Green,San Francisco 49ers,Active,2026-11-15T20:21Z,,,,,,Green (back) is active for Sunday's game against the Cowboys.,CB

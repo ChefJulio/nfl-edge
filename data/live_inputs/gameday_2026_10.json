@@ -618,5 +618,45 @@
 "at": "2026-11-15T20:00:00+00:00",
 "post": 0.974,
 "status": "Active (LLL)"
+},
+"00-0035685": {
+"name": "David Montgomery",
+"team": "HOU",
+"pos": "RB",
+"pre": 0.803,
+"ruling": "INA",
+"at": "2026-11-16T00:12:00+00:00",
+"post": 0.0,
+"status": "Inactive (DLF)"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0966,
+"ruling": "INA",
+"at": "2026-11-16T00:02:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.1789,
+"ruling": "INA",
+"at": "2026-11-16T00:02:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0867,
+"ruling": "INA",
+"at": "2026-11-16T00:02:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
