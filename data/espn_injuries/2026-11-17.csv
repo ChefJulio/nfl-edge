@@ -49,6 +49,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4243220,Andrew Vorhees,Atlanta Falcons,Active,2026-11-11T00:29Z,,,,,,"The Ravens traded Vorhees and a conditional 2028 sixth-round pick to the Falcons on Tuesday in exchange for Ryan Neuzil, Jamison Hensley of ESPN.com reports.",G
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
 4360807,Yasir Abdullah,Atlanta Falcons,Active,2026-11-08T13:13Z,,,,,,"Abdullah (hamstring) is active for Sunday's game versus the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",LB
+4702918,Chandler Rivers,Baltimore Ravens,Active,2026-11-17T12:17Z,,,,,,,CB
+4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-17T12:17Z,,,,,,,DT
+4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-11-17T12:17Z,,,,,,,OT
+4428512,Kedon Slovis,Baltimore Ravens,Active,2026-11-17T12:17Z,,,,,,,QB
+5088338,Elijah Sarratt,Baltimore Ravens,Active,2026-11-17T12:17Z,,,,,,,WR
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-17T06:09Z,,,,,,Bateman brought in three of five targets for 42 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,WR
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-17T06:03Z,,,,,,Lane brought in three of 11 targets for 61 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,WR
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-11-17T05:48Z,,,,,,Andrews brought in all eight targets for 82 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,TE
@@ -57,12 +62,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043078,Derrick Henry,Baltimore Ravens,Active,2026-11-17T05:01Z,,,,,,Henry rushed 10 times for 10 yards and two touchdowns and brought in all five targets for 10 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,RB
 4035245,Nnamdi Madubuike,Baltimore Ravens,Questionable,2026-11-17T03:49Z,Hamstring,,,2026-11-22,QUESTIONABLE,Madubuike (hamstring) has been ruled out for the remainder of Monday night's contest against the Chargers.,DT
 4832793,Olaivavega Ioane,Baltimore Ravens,Questionable,2026-11-17T03:27Z,Shoulder,,,2026-11-16,QUESTIONABLE,Ioane (shoulder) is questionable to return to Monday night's contest against the Chargers.,G
-4428512,Kedon Slovis,Baltimore Ravens,Out,2026-11-17T00:09Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,Slovis (coach's decision) is inactive but serving as the Ravens' emergency No. 3 quarterback Monday night versus the Chargers.,QB
-4565311,Aeneas Peebles,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,DT
-4702918,Chandler Rivers,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
-5088338,Elijah Sarratt,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,WR
 3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-16T23:47Z,Knee,Not Specified,Left,2026-11-22,INACTIVE,inactive,S
-4685736,Emery Jones Jr.,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,OT
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-11-16T23:22Z,Neck,Not Specified,Not Specified,2026-11-22,IR-R,"Randall (neck/hamstring) wasn't activated from injured reserve and will remain out for Monday's game against the Chargers, Brian Wacker of The Baltimore Sun reports.",RB
 2576399,Nick Vannett,Baltimore Ravens,Active,2026-11-16T23:01Z,,,,,,The Ravens elevated Vannett from the practice squad ahead of Monday's game against the Chargers.,TE
 2576581,Chris Moore,Baltimore Ravens,Active,2026-11-16T22:57Z,,,,,,The Ravens elevated Moore from the practice squad ahead of Monday's game against the Chargers.,WR
@@ -430,7 +430,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-17T05:07Z,,,,,,Hampton rushed 22 times for 105 yards and a touchdown and brought in one of two targets for no gain in the Chargers' 23-20 win over the Ravens on Monday night. He also fumbled once but recovered.,RB
 4838693,Rodney Shelley,Los Angeles Chargers,Questionable,2026-11-17T03:17Z,Ankle,,,2026-11-16,QUESTIONABLE,"Shelley (ankle) is questionable to return to Monday night's contest against the Ravens, Noah Furtado of The Athletic reports.",CB
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-17T02:15Z,,,,,,"Gadsden (eye) returned to Monday night's game against the Ravens, Noah Furtado of The Athletic reports.",TE
-4685553,Brenen Thompson,Los Angeles Chargers,Out,2026-11-17T00:13Z,Hamstring,Not Specified,Not Specified,2026-11-22,INACTIVE,Thompson (hamstring) is inactive for Monday night's game against the Ravens.,WR
+4685553,Brenen Thompson,Los Angeles Chargers,Out,2026-11-17T00:13Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Thompson (hamstring) is inactive for Monday night's game against the Ravens.,WR
 4040842,Kayode Awosika,Los Angeles Chargers,Active,2026-11-17T00:03Z,,,,,,Awosika (fibula) is active for Monday's game against the Ravens.,G
 4567138,Justin Eboigbe,Los Angeles Chargers,Out,2026-11-17T00:02Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,"Eboigbe (ankle) is inactive for Monday's game against the Ravens, Omar Navarro of the Chargers' official site reports.",DT
 4574105,Isas Waxter,Los Angeles Chargers,Out,2026-11-16T23:52Z,Ankle,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
