@@ -4,7 +4,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3886633,Hjalte Froholdt,Arizona Cardinals,Questionable,2026-11-17T12:19Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,questionable,C
 4367199,Jon Gaines II,Arizona Cardinals,Questionable,2026-11-17T12:19Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,G
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-17T03:45Z,,,,,,Ryland went 2-for-2 on field-goal tries during Sunday's 34-6 loss to the Rams.,PK
-4428996,Jordan Burch,Arizona Cardinals,Out,2026-11-17T00:45Z,Knee - MCL,Not Specified,Left,2027-02-15,OUT,"Head coach Mike LaFleur said Monday that Burch (knee) will be sidelined for the rest of the 2026 season, Dani Sureck of the Cardinals' official site reports.",LB
+4428996,Jordan Burch,Arizona Cardinals,Injured Reserve,2026-11-17T00:45Z,Knee - MCL,Not Specified,Left,2027-02-15,IR,"Head coach Mike LaFleur said Monday that Burch (knee) will be sidelined for the rest of the 2026 season, Dani Sureck of the Cardinals' official site reports.",LB
 3918331,Andrew Wingard,Arizona Cardinals,Out,2026-11-17T00:06Z,Wrist,Not Specified,Not Specified,2026-12-20,OUT,"Head coach Mike LaFleur said Monday that Wingard (wrist/hand) will be ""out for an extended period of time,"" Dani Sureck of the Cardinals' official site reports.",S
 4361272,Eku Leota,Arizona Cardinals,Active,2026-11-16T17:37Z,,,,,,,LB
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-16T17:37Z,,,,,,,CB
@@ -299,6 +299,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-15T17:08Z,,,,,,McKinney (foot) is active for Sunday's game against the Vikings.,S
+4432708,Marvin Harrison Jr.,Houston Texans,Questionable,2026-11-17T22:01Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Harrison (hamstring) was a non-participant in Tuesday's practice.,WR
+4429059,Woody Marks,Houston Texans,Doubtful,2026-11-17T21:59Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,Marks (concussion) didn't practice Tuesday.,RB
 4602699,Kamari Lassiter,Houston Texans,Questionable,2026-11-17T21:53Z,Wrist,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,CB
 4035538,David Montgomery,Houston Texans,Active,2026-11-17T19:47Z,,,,,,"Texans head coach DeMeco Ryans confirmed that Montgomery (groin) is trending toward playing in Thursday's game against the Colts, Jonathan M. Alexander of the Houston Chronicle reports.",RB
 3919117,Azeez Al-Shaair,Houston Texans,Injured Reserve,2026-11-17T16:40Z,Groin,Surgery,Not Specified,2026-12-20,IR,The Texans placed Al-Shaair (groin) on injured reserve Tuesday.,LB
@@ -310,8 +312,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4839498,Keylan Rutledge,Houston Texans,Active,2026-11-17T01:12Z,,,,,,Rutledge (neck) was a full participant in Monday's walkthrough practice.,G
 3045474,Wyatt Teller,Houston Texans,Active,2026-11-17T01:10Z,,,,,,Teller (illness) was a full participant in Monday's walkthrough practice.,G
 4241250,Jake Hummel,Houston Texans,Questionable,2026-11-17T00:53Z,Groin,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,LB
-4429059,Woody Marks,Houston Texans,Doubtful,2026-11-17T00:49Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,Marks (concussion) missed Monday's walkthrough.,RB
-4432708,Marvin Harrison Jr.,Houston Texans,Questionable,2026-11-17T00:44Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Harrison (hamstring) was estimated as a non-participant on Monday's practice report.,WR
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-16T05:08Z,,,,,,Schultz caught one pass for an 11-yard touchdown on two targets in Sunday's 27-24 loss to the Browns.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-16T01:23Z,,,,,,Demercado rushed seven times for 16 yards and brought in one of two targets for minus-1 yard in the Texans' 27-24 loss to the Browns on Sunday.,RB
 4366031,Tank Dell,Houston Texans,Active,2026-11-16T01:16Z,,,,,,Dell brought in three of four targets for 21 yards and rushed once for no gain in the Texans' 27-24 loss to the Browns on Sunday.,WR
