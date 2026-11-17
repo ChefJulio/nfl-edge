@@ -49,10 +49,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
 4360807,Yasir Abdullah,Atlanta Falcons,Active,2026-11-08T13:13Z,,,,,,"Abdullah (hamstring) is active for Sunday's game versus the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",LB
 4431210,Beaux Collins,Atlanta Falcons,Active,2026-11-08T13:09Z,,,,,,"Collins (hip) is listed as active Sunday against the Bengals in Madrid, Will McFadden of the Falcons' official site reports.",WR
+4565311,Aeneas Peebles,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,,,,INACTIVE,inactive,DT
+4702918,Chandler Rivers,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,CB
+5088338,Elijah Sarratt,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-22,INACTIVE,inactive,WR
+4428512,Kedon Slovis,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,,,,INACTIVE,inactive,QB
+3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-16T23:47Z,Knee,Not Specified,Left,2026-11-22,INACTIVE,inactive,S
+4685736,Emery Jones Jr.,Baltimore Ravens,Out,2026-11-16T23:47Z,Coach's Decision,,,,INACTIVE,inactive,OT
 4685526,Adam Randall,Baltimore Ravens,Injured Reserve,2026-11-16T23:22Z,Neck,Not Specified,Not Specified,2026-11-22,IR-R,"Randall (neck) was not activated from injured reserve ahead of Monday's game against the Chargers, Brian Wacker of The Baltimore Sun reports.",RB
 2576399,Nick Vannett,Baltimore Ravens,Active,2026-11-16T23:01Z,,,,,,The Ravens elevated Vannett from the practice squad ahead of Monday's game against the Chargers.,TE
 2576581,Chris Moore,Baltimore Ravens,Active,2026-11-16T22:57Z,,,,,,The Ravens elevated Moore from the practice squad ahead of Monday's game against the Chargers.,WR
-3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-14T19:16Z,Knee,Not Specified,Left,2026-11-22,INACTIVE,Hawkins (knee) has been ruled out for Monday's game against the Chargers.,S
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-13T23:22Z,,,,,,Bateman (calf) was listed as a full participant on Friday's practice estimation.,WR
 4832793,Olaivavega Ioane,Baltimore Ravens,Active,2026-11-13T23:13Z,,,,,,,G
 3916387,Lamar Jackson,Baltimore Ravens,Injured Reserve,2026-11-13T14:48Z,Thumb,Surgery,Right,2026-12-27,IR,"Jackson (thumb) is ""doing well"" and is expected to be out for ""6-to-10 weeks,"" per head coach Jesse Minter.",QB
@@ -60,10 +65,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-13T00:53Z,,,,,,Wiggins (illness) was a full participant in Thursday's practice.,CB
 4243371,Riley Patterson,Baltimore Ravens,Active,2026-11-12T17:15Z,,,,,,"Patterson will be the Ravens' kicker for Monday night's game against the Chargers, Jamison Hensley of ESPN.com reports.",PK
 4036444,Ryan Neuzil,Baltimore Ravens,Active,2026-11-11T00:36Z,,,,,,"The Ravens acquired Neuzil from the Falcons on Tuesday in exchange for guard Andrew Vorhees and a conditional 2028 sixth-round pick, Jamison Hensley of ESPN.com reports.",C
-4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-09T20:55Z,Coach's Decision,,,,INACTIVE,,DT
-4685736,Emery Jones Jr.,Baltimore Ravens,Active,2026-11-09T20:55Z,Coach's Decision,,,,INACTIVE,,OT
-4428512,Kedon Slovis,Baltimore Ravens,Active,2026-11-09T20:55Z,Coach's Decision,,,,INACTIVE,,QB
-5088338,Elijah Sarratt,Baltimore Ravens,Active,2026-11-09T20:55Z,Coach's Decision,,,,INACTIVE,,WR
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-09T20:30Z,,,,,,"Ahead of Week 10, Ravens head coach Jesse Minter noted ""I expect (Brissett) to be our starter"" next Monday against the Chargers, Jeff Zrebiec of The Athletic reports.",QB
 4685530,Malaki Starks,Baltimore Ravens,Active,2026-11-08T04:47Z,,,,,,Starks finished Baltimore's Week 9 loss to the Jaguars on Thursday with four tackles (three solo) and a forced fumble.,S
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-11-08T04:40Z,,,,,,Smith finished with eight tackles (two solo) in Thursday's Week 9 loss to Jacksonville.,LB
@@ -73,7 +74,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4876132,Josh Cuevas,Baltimore Ravens,Active,2026-11-06T18:55Z,,,,,,Cuevas didn't garner a target in Thursday night's 33-10 loss to the Jaguars.,TE
 4696882,Devontez Walker,Baltimore Ravens,Active,2026-11-06T18:44Z,,,,,,Walker didn't garner a target in Thursday night's 33-10 loss to the Jaguars.,WR
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-06T05:39Z,,,,,,Hill rushed nine times for 85 yards and a touchdown and brought in all three targets for seven yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,RB
-3116365,Mark Andrews,Baltimore Ravens,Active,2026-11-06T05:28Z,,,,,,Andrews secured both targets for 19 yards in the Ravens' 33-10 loss to the Jaguars on Thursday night.,TE
 4606712,Ar'maj Reed-Adams,Buffalo Bills,Active,2026-11-16T18:06Z,,,,,,,G
 3915487,Mike Danna,Buffalo Bills,Active,2026-11-16T18:06Z,,,,,,,DE
 3127294,Greg Gaines,Buffalo Bills,Active,2026-11-16T18:06Z,,,,,,,DT
