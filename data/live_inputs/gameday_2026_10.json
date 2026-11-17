@@ -658,5 +658,25 @@
 "at": "2026-11-16T00:02:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0039915": {
+"name": "Ladd McConkey",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.0912,
+"ruling": "INA",
+"at": "2026-11-16T23:52:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0033885": {
+"name": "David Njoku",
+"team": "LAC",
+"pos": "TE",
+"pre": 0.7595,
+"ruling": "ACT",
+"at": "2026-11-16T21:57:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
 }
 }
