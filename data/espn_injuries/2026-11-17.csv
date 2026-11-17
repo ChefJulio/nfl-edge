@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3051324,Dion Dawkins,Buffalo Bills,Active,2026-11-14T02:36Z,,,,,,Dawkins (ribs) does not have any injury designation ahead of Sunday's game against the Jets.,OT
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-13T23:11Z,,,,,,"Head coach Joe Brady confirmed Friday that Hooker will play Sunday against the Jets, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",S
 4033748,Connor McGovern,Buffalo Bills,Active,2026-11-13T22:39Z,,,,,,,C
+4372780,Tommy Tremble,Carolina Panthers,Active,2026-11-17T05:16Z,,,,,,Tremble caught four of five targets for 48 yards in Sunday's 20-17 win over the Saints.,TE
 4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-11-17T03:15Z,,,,,,Fitzgerald made two of his three field-goal attempts and both PATs in the Panthers' 20-17 win over the Saints on Sunday.,PK
 4240595,Marco Wilson,Carolina Panthers,Active,2026-11-17T00:31Z,,,,,,"The Panthers signed Wilson from the practice squad to the active roster Monday, Darin Gantt of the team's official site reports.",CB
 3117253,Bobby Okereke,Carolina Panthers,Out,2026-11-16T19:05Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,out,LB
@@ -123,7 +124,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567096,John Metchie III,Carolina Panthers,Active,2026-11-11T02:51Z,,,,,,Metchie caught both of his targets for 40 yards Sunday in a loss to the Broncos.,WR
 4683243,Mitchell Evans,Carolina Panthers,Active,2026-11-11T02:50Z,,,,,,Evans caught both of his two targets for 20 yards during Sunday's 26-21 loss versus the Broncos.,TE
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-11-11T02:45Z,,,,,,Etienne carried the ball two times for seven yards and returned one punt for nine yards during Carolina'a loss Sunday to the Broncos.,RB
-4362847,Jaycee Horn,Carolina Panthers,Injured Reserve,2026-11-09T23:18Z,Quadriceps,Strain,Not Specified,2026-11-22,IR,"Head coach Dave Canales plans to take ""the next two days"" to discuss Horn (quadriceps), Mike Kaye of ESPN.com reports.",CB
 4685278,Luther Burden III,Chicago Bears,Questionable,2026-11-16T20:25Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,"Burden (concussion) was spotted participating in the Bears' unofficial practice session Monday, AllCHGO.com reports.",WR
 4608686,Kyle Monangai,Chicago Bears,Out,2026-11-16T19:57Z,Toe,Sprain,Not Specified,2026-11-22,QUESTIONABLE,"Monangai (toe/thumb) was spotted working out during Monday's unofficial practice and is eyeing a return to action Sunday against the Saints, Chris Emma of 104.3 The Score Chicago reports.",RB
 4243253,Jaylon Johnson,Chicago Bears,Active,2026-11-12T03:48Z,,,,,,Johnson recorded three tackles (one solo) and a pick-six during the Bears' 27-24 win over the Buccaneers in Week 9.,CB
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-09T03:35Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Winfield (ankle) has been ruled out for the rest of Sunday night's contest against the Bears.,S
 4240589,Tristan Wirfs,Tampa Bay Buccaneers,Active,2026-11-07T03:18Z,,,,,,Wirfs (toe) does not have any injury designation ahead of Sunday's game against the Bears.,OT
 4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-06T03:08Z,,,,,,"Parrish registered seven total tackles (four solo) and two passes defensed, including an interception, during Sunday's 16-0 win over Atlanta.",CB
+4361516,Daniel Bellinger,Tennessee Titans,Active,2026-11-17T05:09Z,,,,,,Bellinger caught two of three targets for six yards and a touchdown in Sunday's 40-23 loss to the Jaguars.,TE
 3124084,Joey Slye,Tennessee Titans,Active,2026-11-17T02:44Z,,,,,,Slye made all three of his field-goal attempts and both of his extra-point tries during the Titans' 40-23 loss to the Jaguars on Sunday. He also logged a tackle and forced a fumble.,PK
 4431353,Xavier Restrepo,Tennessee Titans,Active,2026-11-17T02:29Z,,,,,,"Restrepo reverted to the Titans' practice squad Monday, per the NFL's transaction log.",WR
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-17T01:37Z,,,,,,Ridley played four offensive snaps and didn't show up on the box score otherwise during the Titans' 40-23 loss to the Jaguars on Sunday.,WR
@@ -773,7 +774,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429100,Peter Skoronski,Tennessee Titans,Injured Reserve,2026-11-14T21:52Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"The Titans placed Skoronski (hamstring) on injured reserve Saturday, Jim Wyatt of the team's official site reports.",G
 4431268,Chimere Dike,Tennessee Titans,Active,2026-11-13T21:27Z,,,,,,Dike may have a significant role on offense with Carnell Tate (shoulder) ruled out for Sunday's game against Jacksonville.,WR
 4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-13T20:48Z,,,,,,,S
-4431437,JC Latham,Tennessee Titans,Active,2026-11-12T01:30Z,,,,,,"Latham (finger) practiced in full Wednesday, Jim Wyatt of the Titans' official site reports.",OT
 3051890,Laremy Tunsil,Washington Commanders,Injured Reserve,2026-11-17T00:42Z,Triceps,Surgery,Right,2026-12-20,IR,"Commanders head coach Dan Quinn said Monday that Tunsil (triceps) is progressing as anticipated and is ready to begin the strength portion of his recovery program, John Keim of ESPN.com reports.",OT
 4575131,Jacory Croskey-Merritt,Washington Commanders,Injured Reserve,2026-11-16T20:18Z,Groin,Not Specified,Not Specified,2026-11-23,IR,"head coach Dan Quinn said Monday that while the 21-day practice window for Croskey-Merritt (groin) hasn't been opened yet, he notes that the running back is ""trending in the right direction,"" Nicki Jhabvala of The Athletic reports.",RB
 4361088,Colson Yankoff,Washington Commanders,Out,2026-11-16T20:11Z,Knee,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,out,TE
