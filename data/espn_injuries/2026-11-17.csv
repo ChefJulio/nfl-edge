@@ -303,7 +303,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429059,Woody Marks,Houston Texans,Doubtful,2026-11-17T21:59Z,Concussion,Concussion,Not Specified,2026-11-19,DOUBTFUL,Marks (concussion) didn't practice Tuesday.,RB
 4602699,Kamari Lassiter,Houston Texans,Questionable,2026-11-17T21:53Z,Wrist,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,CB
 4035538,David Montgomery,Houston Texans,Active,2026-11-17T19:47Z,,,,,,"Texans head coach DeMeco Ryans confirmed that Montgomery (groin) is trending toward playing in Thursday's game against the Colts, Jonathan M. Alexander of the Houston Chronicle reports.",RB
-3919117,Azeez Al-Shaair,Houston Texans,Injured Reserve,2026-11-17T16:40Z,Groin,Surgery,Not Specified,2026-12-20,IR,The Texans placed Al-Shaair (groin) on injured reserve Tuesday.,LB
 2976560,Danielle Hunter,Houston Texans,Questionable,2026-11-17T12:19Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,DE
 4362504,Brevin Jordan,Houston Texans,Questionable,2026-11-17T12:19Z,Foot,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,TE
 4429022,Kayshon Boutte,Houston Texans,Active,2026-11-17T05:25Z,,,,,,Boutte failed to catch his lone target in Sunday's 27-24 loss to the Browns.,WR
@@ -311,6 +310,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-17T01:41Z,,,,,,"Ogunbowale reverted to the Texans' practice squad Monday, per the NFL's official transaction log.",RB
 4839498,Keylan Rutledge,Houston Texans,Active,2026-11-17T01:12Z,,,,,,Rutledge (neck) was a full participant in Monday's walkthrough practice.,G
 3045474,Wyatt Teller,Houston Texans,Active,2026-11-17T01:10Z,,,,,,Teller (illness) was a full participant in Monday's walkthrough practice.,G
+3919117,Azeez Al-Shaair,Houston Texans,Injured Reserve,2026-11-17T01:03Z,Groin,Surgery,Not Specified,2026-12-20,IR,Al-Shaair (groin) did not participate in Monday's walkthrough practice.,LB
 4241250,Jake Hummel,Houston Texans,Questionable,2026-11-17T00:53Z,Groin,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,LB
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-16T05:08Z,,,,,,Schultz caught one pass for an 11-yard touchdown on two targets in Sunday's 27-24 loss to the Browns.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-16T01:23Z,,,,,,Demercado rushed seven times for 16 yards and brought in one of two targets for minus-1 yard in the Texans' 27-24 loss to the Browns on Sunday.,RB
@@ -332,9 +332,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-17T02:03Z,,,,,,Treadwell caught three passes on as many targets for 24 yards and a touchdown during Indianapolis' 24-22 win over Miami on Sunday.,WR
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-17T01:49Z,,,,,,Giddens played two offensive snaps and didn't show up on the box score otherwise during the Colts' 24-22 win over the Dolphins on Sunday.,RB
+4427250,Sauce Gardner,Indianapolis Colts,Questionable,2026-11-17T00:28Z,Calf,Not Specified,Left,2026-11-19,QUESTIONABLE,Gardner (calf) was listed as a DNP for Monday's walkthrough practice.,CB
 4362523,Will Mallory,Indianapolis Colts,Questionable,2026-11-17T00:24Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Mallory (hamstring) did not participate in Monday's walkthrough practice.,TE
 4037361,Charvarius Ward,Indianapolis Colts,Questionable,2026-11-16T22:38Z,Knee,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,"Colts head coach Shane Steichen said that Ward (shin) is uncertain to be available for Thursday's game against the Texans after exiting Sunday's 24-22 win over the Dolphins, James Boyd of The Athletic reports.",CB
-4427250,Sauce Gardner,Indianapolis Colts,Questionable,2026-11-16T22:31Z,Calf,Not Specified,Left,2026-11-19,QUESTIONABLE,"Colts head coach Shane Steichen reported Gardner suffered a left calf injury during Sunday's 24-22 win over the Dolphins and may not play Thursday versus Houston, James Boyd of The Athletic reports.",CB
 4683423,Riley Leonard,Indianapolis Colts,Active,2026-11-16T19:19Z,,,,,,,QB
 4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-16T02:23Z,,,,,,McGowan rushed 12 times for 77 yards and a touchdown and returned two kickoffs for 61 yards in the Colts' 24-22 win over the Dolphins on Sunday.,RB
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-16T01:39Z,,,,,,Jones completed 11 of 22 passes for 108 yards with one touchdown and two interceptions while adding five carries for nine yards in the Colts' 24-22 win over the Dolphins on Sunday. He also fumbled once but recovered.,QB
@@ -458,8 +458,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-17T03:25Z,,,,,,McManus made both of his field-goal attempts and all four PATs in the Rams' 34-6 win over the Cardinals on Sunday.,PK
 2573401,Tyler Higbee,Los Angeles Rams,Active,2026-11-17T02:38Z,,,,,,Higbee caught three of four targets for 17 yards and a touchdown during the Rams' 34-6 win over the Cardinals on Sunday.,TE
 4242557,Colby Parkinson,Los Angeles Rams,Active,2026-11-17T02:29Z,,,,,,Parkinson caught both of his targets for 11 yards during the Rams' 34-6 win over the Cardinals on Sunday.,TE
-4430155,Dylan McMahon,Los Angeles Rams,Injured Reserve,2026-11-17T02:23Z,Knee,Not Specified,Not Specified,2026-12-25,IR,"The Rams placed McMahon on injured reserve Monday after he sustained a partially torn patella tear during Sunday's 34-6 win over the Cardinals, Gary Klein of the Los Angeles Times reports.",C
 3052180,Coleman Shelton,Los Angeles Rams,Doubtful,2026-11-17T01:07Z,Hamstring,Not Specified,Not Specified,2026-11-25,DOUBTFUL,"Shelton (hamstring) is set to miss several weeks due to injury, Greg Beacham of the Associated Press reports.",C
+4430155,Dylan McMahon,Los Angeles Rams,Injured Reserve,2026-11-17T00:48Z,Knee,Not Specified,Not Specified,2026-12-25,IR,"The Rams placed McMahon (knee) on injured reserve Monday, Aaron Wilson of KPRC 2 Houston reports.",C
 5082391,Maximus Pulley,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,S
 4598574,Darryl Peterson III,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,LB
 4362294,Desjuan Johnson,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,DE
