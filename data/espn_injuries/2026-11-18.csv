@@ -1,4 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4699354,Harrison Wallace III,Arizona Cardinals,Active,2026-11-18T14:52Z,,,,,,Wallace recorded a nine-yard reception on his lone target in Sunday's 34-6 loss to the Rams.,WR
 4038524,Gardner Minshew II,Arizona Cardinals,Injured Reserve,2026-11-18T04:40Z,Elbow,Surgery,Right,2027-02-15,IR,"Minshew (elbow) underwent UCL reconstructive surgery Monday, Jeremy Fowler of ESPN.com reports.",QB
 4428996,Jordan Burch,Arizona Cardinals,Injured Reserve,2026-11-18T01:52Z,Knee - MCL,Not Specified,Left,2027-02-15,IR,The Cardinals placed Burch (knee) on injured reserve Tuesday.,LB
 4426844,Elijah Higgins,Arizona Cardinals,Active,2026-11-18T01:38Z,,,,,,Higgins played 24 of 35 offensive snaps (68.6 percent) but didn't show up on the box score otherwise during the Cardinals' 34-6 loss to the Rams on Sunday.,TE
@@ -23,7 +24,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569480,Darius Robinson,Arizona Cardinals,Active,2026-11-15T19:38Z,,,,,,,DE
 4698113,Max Melton,Arizona Cardinals,Active,2026-11-15T19:38Z,,,,,,,CB
 4240619,Zachary Carter,Arizona Cardinals,Injured Reserve,2026-11-14T02:22Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,"Carter (knee) has been ruled out ahead of Sunday's game against the Rams, Zach Gershman of the Cardinals' official site reports.",DT
-4362225,Dante Stills,Arizona Cardinals,Active,2026-11-13T22:33Z,,,,,,,DT
 3917914,Olamide Zaccheaus,Atlanta Falcons,Active,2026-11-18T02:27Z,,,,,,Zaccheaus caught two of his four targets for 17 yards and returned five punts for 81 yards during Atlanta's loss Sunday versus the Chiefs.,WR
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-18T02:23Z,,,,,,Herbert caught two of his three targets for seven yards during Sunday's 35-13 loss versus the Chiefs. He also returned six kickoffs for 168 yards.,RB
 4037626,Divine Deablo,Atlanta Falcons,Out,2026-11-17T12:21Z,Forearm,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,out,LB
@@ -174,7 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4646773,Dylan Fairchild,Cincinnati Bengals,Active,2026-11-12T21:31Z,,,,,,,G
 3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-12T21:30Z,Hamstring,Not Specified,Left,2026-11-23,IR-R,The Bengals designated Davis (hamstring) to return from injured reserve Thursday.,CB
 4247726,Bryan Cook,Cincinnati Bengals,Active,2026-11-12T03:04Z,,,,,,Cook registered 10 tackles (five solo) during the Bengals' win over the Falcons on Sunday.,S
-4613104,Malachi Corley,Cleveland Browns,Active,2026-11-18T02:17Z,,,,,,Corley caught all three of his targets for 37 yards in addition to returning to kicks for 51 yards during Cleveland's win over the Texans on Sunday.,WR
+4613104,Malachi Corley,Cleveland Browns,Active,2026-11-18T02:17Z,,,,,,Corley caught all three of his targets for 37 yards in addition to returning two kicks for 51 yards during Cleveland's win over the Texans on Sunday.,WR
 4241424,Tylan Wallace,Cleveland Browns,Active,2026-11-18T02:15Z,,,,,,Wallace caught both of his two targets for nine yards during Sunday's 27-24 win versus the Texans. He also recorded one tackle in kick coverage.,WR
 4569620,Ronnie Hickman,Cleveland Browns,Out,2026-11-17T12:20Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,out,S
 4258620,Andre Szmyt,Cleveland Browns,Active,2026-11-17T03:35Z,,,,,,Szmyt made two of his three field-goal attempts and all three of his PATs in the Browns' 27-24 win over the Texans on Sunday.,PK
@@ -349,6 +349,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
 2998565,Mo Alie-Cox,Indianapolis Colts,Injured Reserve,2026-11-14T17:24Z,Groin,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Alie-Cox (groin) on injured reserve Saturday.,TE
 4905664,A.J. Haulcy,Indianapolis Colts,Active,2026-11-12T20:57Z,,,,,,Haulcy (ankle) was a full participant at Thursday's practice.,S
+4242391,Robert Hainsey,Jacksonville Jaguars,Doubtful,2026-11-18T14:54Z,Knee,Sprain,Not Specified,2026-11-22,DOUBTFUL,doubtful,C
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-18T02:55Z,,,,,,Oluokun finished Sunday's 40-23 win over the Titans with 10 tackles (nine solo).,LB
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-17T02:34Z,,,,,,Little went 4-for-4 on field-goal attempts and made all four of his PATs during Sunday's 40-23 win over the Titans.,PK
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-11-17T01:33Z,,,,,,"Hunter caught both of his targets for 16 yards, recorded a three-yard carry and contributed five tackles (three solo) and an interception during the Jaguars' 40-23 win over the Titans on Sunday.",WR
@@ -366,7 +367,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Active,2026-11-16T01:29Z,,,,,,Tuten carried the ball 26 times for 88 yards and a touchdown and caught three of four targets for 25 yards in Sunday's 40-23 win over Tennessee.,RB
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-16T01:25Z,,,,,,Lawrence completed 25 of 35 passes for 352 yards and three touchdowns with one interception in Sunday's 40-23 win over the Titans. He added 27 yards on four carries.,QB
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-16T01:10Z,,,,,,Strange caught two of three targets for nine yards and a touchdown in Sunday's 40-23 win over the Titans.,TE
-4242391,Robert Hainsey,Jacksonville Jaguars,Questionable,2026-11-15T20:19Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hainsey (knee) is questionable to return to Sunday's game against the Titans.,C
 4573319,Danny Striggow,Jacksonville Jaguars,Questionable,2026-11-15T19:14Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Striggow is being evaluated for a possible concussion and is questionable to return to Sunday's game against the Titans.,DE
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-14T02:12Z,Forearm,Not Specified,Not Specified,2026-11-22,IR-R,"Green (forearm) has been ruled out ahead of Sunday's game against the Titans, Michael DiRocco of ESPN.com reports.",DE
 4426349,Travon Walker,Jacksonville Jaguars,Active,2026-11-14T00:09Z,,,,,,"Walker (ribs) does not have any injury designation ahead of Sunday's game against the Titans, Michael DiRocco of ESPN.com reports.",DE
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-02T19:19Z,,,,,,,C
+4368304,Mason McCormick,Pittsburgh Steelers,Out,2026-11-18T15:03Z,Ankle,Dislocated,Not Specified,2027-01-03,OUT,out,G
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-11-18T05:57Z,,,,,,Brisker notched 10 tackles (two solo) Sunday in a Week 10 loss to the Bengals.,S
 4242207,Patrick Queen,Pittsburgh Steelers,Active,2026-11-18T05:46Z,,,,,,"Queen posted 14 tackles (five solo), including 1.0 sacks, in Sunday's loss to the Bengals.",LB
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-18T05:39Z,,,,,,Wilson recorded 19 tackles (nine solo) Sunday in a loss to the Bengals.,LB
@@ -657,7 +658,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-17T03:59Z,,,,,,Boswell made his sole field-goal attempt and sole PAT in the Steelers' 38-18 loss to the Bengals on Sunday.,PK
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-17T01:36Z,,,,,,Bernard failed to reel in any of his three targets while notching a 10-yard rush during Sunday night's 38-18 loss to the Bengals.,WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-17T00:47Z,,,,,,Washington caught one pass for five yards on two targets in Sunday night's loss to the Bengals.,TE
-4368304,Mason McCormick,Pittsburgh Steelers,Doubtful,2026-11-17T00:45Z,Ankle,Not Specified,Not Specified,2026-11-22,DOUBTFUL,"McCormick (ankle) suffered a significant injury during the Steelers' Week 10 loss to the Bengals, Brian Batko of the Pittsburgh Post-Gazette reports.",G
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-16T20:39Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR,"Coach Mike McCarthy said Monday that the Steelers are ""hopeful"" they can get Pittman -- who last played in Week 4 -- back from his foot injury this week, Nick Farabaugh of PennLive.com reports.",WR
 4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-11-16T20:37Z,Finger,Not Specified,Left,2026-11-22,IR,"Steelers head coach Mike McCarthy said that he's ""hopeful"" Wilson (finger) will be able to return from injured reserve for Sunday's game against the Eagles, Nick Farabaugh of PennLive.com reports.",WR
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Active,2026-11-16T19:36Z,,,,,,,CB
@@ -674,7 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567979,Brandin Echols,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Echols (hamstring) was a full participant at practice Wednesday, Teresa Varley of the Steelers' official site reports.",CB
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Slaughter (hamstring) was a full participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",CB
 4035656,Ben Skowronek,Pittsburgh Steelers,Active,2026-11-12T00:36Z,,,,,,"Skowronek (calf) was a full participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",WR
-3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-11-18T03:05Z,,,,,,"Greenlaw logged eight tackles (four solo), including 05 sacks, during San Francisco's win over the Cowboys on Sunday.",LB
+3916903,Dre Greenlaw,San Francisco 49ers,Active,2026-11-18T03:05Z,,,,,,"Greenlaw logged eight tackles (four solo), including 0.5 sacks, during San Francisco's win over the Cowboys on Sunday.",LB
 3138826,Fred Warner,San Francisco 49ers,Active,2026-11-18T02:55Z,,,,,,Warner tallied 11 tackles (two solo) during San Francisco's win over the Cowboys on Sunday.,LB
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-11-18T02:48Z,,,,,,Cowing did not draw any targets during Sunday's 46-40 win at Dallas.,WR
 3043116,Demarcus Robinson,San Francisco 49ers,Active,2026-11-18T02:45Z,,,,,,Robinson played 21 of 65 offensive snaps (32.3 percent) but didn't show up on the box score otherwise during the 49ers' 46-40 win over the Cowboys on Sunday.,WR
