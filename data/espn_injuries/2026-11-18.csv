@@ -449,6 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427404,Cam Hart,Los Angeles Chargers,Active,2026-11-14T01:12Z,,,,,,Hart (ankle) practiced in full Friday.,CB
 5082660,Alex Harkey,Los Angeles Chargers,Active,2026-11-13T23:08Z,,,,,,,G
 4241597,Daiyan Henley,Los Angeles Chargers,Active,2026-11-12T15:16Z,,,,,,"Henley remains with the Chargers, as the Broncos have backed out of trading for the linebacker, Jeff Legwold of ESPN.com reports.",LB
+4833029,Max Klare,Los Angeles Rams,Active,2026-11-18T17:23Z,,,,,,Klare went without a target while playing four of the Rams' 76 offensive snaps in Sunday's 34-6 win over the Cardinals.,TE
 2575907,Joe Cardona,Los Angeles Rams,Out,2026-11-17T12:22Z,Ankle,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,out,LS
 4362474,Steve Avila,Los Angeles Rams,Out,2026-11-17T12:22Z,Hamstring,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,out,G
 4605951,CJ Daniels,Los Angeles Rams,Active,2026-11-17T04:58Z,,,,,,Daniels caught one of two targets for 22 yards in Sunday's 34-6 win over the Cardinals.,WR
@@ -473,7 +474,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242154,Kam Curl,Los Angeles Rams,Active,2026-11-15T20:11Z,,,,,,Curl (toe) is active for Sunday's game against the Cardinals.,S
 4685522,Ty Simpson,Los Angeles Rams,Active,2026-11-15T20:04Z,,,,,,Simpson (coach's decision) is inactive but will serve as the Rams' emergency third quarterback in Sunday's game against the Cardinals.,QB
 3122132,Myles Garrett,Los Angeles Rams,Active,2026-11-15T19:42Z,,,,,,"Garrett (knee) is listed as active Sunday at Arizona, Adam Grosbard of The Orange County Register reports.",DE
-16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-15T16:06Z,Hamstring,Surgery,Left,2026-11-25,IR,"According to Ian Rapoport of NFL Network and ESPN,  Adams (hamstring) is believed to be targeting a return to action Nov. 25 against the Packers.",WR
 4869961,Chris Bell,Miami Dolphins,Questionable,2026-11-18T16:58Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bell (knee) is viewed as day-to-day ahead of Sunday's game against the Bills, Marcel Louis-Jacques of ESPN.com reports.",WR
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-18T03:49Z,,,,,,"Brooks produced nine total tackles (six solo), a pass defensed and a forced fumble during Sunday's 24-22 loss to the Colts.",LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-18T03:43Z,,,,,,Rodriguez recorded one solo tackle during Sunday's 24-22 loss to the Colts.,LB
@@ -749,9 +749,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-09T05:20Z,,,,,,Egbuka (foot) caught three of five targets for 38 yards and added a one-yard run in Sunday's 27-24 loss to the Bears.,WR
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-09T03:35Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Winfield (ankle) has been ruled out for the rest of Sunday night's contest against the Bears.,S
 4240589,Tristan Wirfs,Tampa Bay Buccaneers,Active,2026-11-07T03:18Z,,,,,,Wirfs (toe) does not have any injury designation ahead of Sunday's game against the Bears.,OT
+4569587,Wan'Dale Robinson,Tennessee Titans,Injured Reserve,2026-11-18T17:29Z,Ankle,Not Specified,Not Specified,2027-02-15,IR,"Coach Robert Saleh said Wednesday that Robinson (ankle) -- who was placed on IR on Tuesady -- is out for the rest of the season, Terry McCormick of TitanInsider.com reports.",WR
+4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-18T17:25Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Titans head coach Robert Saleh said that Tate (shoulder) will practice Wednesday, Turron Davenport of ESPN.com reports.",WR
 4367567,Julius Chestnut,Tennessee Titans,Active,2026-11-18T15:41Z,,,,,,Chestnut played all 25 of his snaps on special teams in Sunday's 40-23 win over the Jaguars.,RB
 4431353,Xavier Restrepo,Tennessee Titans,Active,2026-11-18T15:25Z,,,,,,"Restrepo, whom the Titans signed off their practice squad Tuesday, could be in store for more playing time out of the slot moving forward after Tennessee placed Wan'Dale Robinson (ankle) on injured reserve, Mark Mihalko of USA Today reports.",WR
-4569587,Wan'Dale Robinson,Tennessee Titans,Injured Reserve,2026-11-17T21:26Z,Ankle,Not Specified,Not Specified,2027-02-15,IR,"The Titans placed Robinson (ankle) on injured reserve Tuesday, Jim Wyatt of the team's official site reports.",WR
 4870805,Anthony Hill Jr.,Tennessee Titans,Questionable,2026-11-17T12:19Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
 3926229,Cody Barton,Tennessee Titans,Questionable,2026-11-17T12:19Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
 4431268,Chimere Dike,Tennessee Titans,Active,2026-11-17T05:13Z,,,,,,Dike caught two passes for 16 yards on three targets in Sunday's 40-23 loss to the Jaguars. He added five rushing yards on one attempt.,WR
@@ -762,7 +763,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685145,Jaylon Jones,Tennessee Titans,Active,2026-11-16T20:09Z,,,,,,,CB
 5081785,Jackie Marshall,Tennessee Titans,Active,2026-11-16T20:09Z,,,,,,,DT
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-11-16T20:09Z,,,,,,,RB
-4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-16T14:23Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Titans head coach Robert Saleh said Monday that he's hopeful that Tate (shoulder) will return to action in Week 11 versus the Cowboys, Jim Wyatt of the team's official site reports.",WR
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-16T05:11Z,,,,,,Helm caught all four of his targets for 23 yards in Sunday's 40-23 loss to the Jaguars.,TE
 4428557,Tyjae Spears,Tennessee Titans,Active,2026-11-16T05:04Z,,,,,,Spears rushed four times for 28 yards in Sunday's 40-23 loss to the Jaguars. He turned one catch into zero yards on one target.,RB
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-11-16T02:17Z,,,,,,Ayomanor caught five of 10 targets for 79 yards in Sunday's 40-23 loss to the Jaguars.,WR
