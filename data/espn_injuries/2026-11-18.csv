@@ -400,9 +400,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242459,Trey Smith,Kansas City Chiefs,Questionable,2026-11-15T19:05Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Smith (concussion) has been ruled out for the remainder of Sunday's game against the Falcons.,G
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-11-15T16:52Z,,,,,,"Delane (shoulder) is active for Sunday's game against the Falcons, Matt McMullen of the Chiefs' official site reports.",CB
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-18T23:15Z,,,,,,,DT
-4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-18T23:14Z,Upper Body,,,2026-11-22,QUESTIONABLE,questionable,DT
+4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-18T23:14Z,Upper Body,Stinger,Not Specified,2026-11-22,QUESTIONABLE,questionable,DT
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Questionable,2026-11-18T23:14Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DT
-4249087,Matt Gay,Las Vegas Raiders,Questionable,2026-11-18T23:13Z,Hip,,,2026-11-22,QUESTIONABLE,questionable,PK
+4249087,Matt Gay,Las Vegas Raiders,Questionable,2026-11-18T23:13Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,PK
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Active,2026-11-18T23:12Z,,,,,,,WR
 4258194,Kwity Paye,Las Vegas Raiders,Active,2026-11-18T23:12Z,,,,,,,DE
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-18T22:01Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Coach Klint Kubiak noted Wednesday that Bowers (ankle) doesn't need to practice this week in order to play Sunday Sunday against the Broncos, Sam Warren of The Athletic reports.",TE
@@ -602,13 +602,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 15864,Geno Smith,New York Jets,Questionable,2026-11-18T22:52Z,Ankle,Not Specified,Left,2026-11-22,QUESTIONABLE,"Smith (ankle), who was a limited participant in Wednesday's walkthrough practice, said afterward that he intends to play in Sunday's game against the Chargers, Rich Cimini of ESPN.com reports.",QB
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-11-18T22:05Z,,,,,,,CB
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-18T22:04Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DE
-4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-18T19:38Z,Groin,Surgery,Not Specified,2026-11-22,IR-R,"The Jets designated Onyemata (groin) to return from the injured reserve list Wednesday, Eric Allen of the Jets' official site reports.",DT
+4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-18T19:38Z,Abdomen,Surgery,Not Specified,2026-11-22,IR-R,"The Jets designated Onyemata (groin) to return from the injured reserve list Wednesday, Eric Allen of the Jets' official site reports.",DT
 4569371,Isaiah Williams,New York Jets,Questionable,2026-11-18T17:07Z,Ribs,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Jets head coach Aaron Glenn said that Williams won't practice Wednesday due to a rib injury, Eric Allen of the Jets' official site reports.",WR
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-18T17:06Z,Ankle,Not Specified,Right,2026-11-22,QUESTIONABLE,"Cooper (ankle) isn't practicing Wednesday, Brian Costello of the New York Post reports.",WR
 4426686,Dane Belton,New York Jets,Active,2026-11-18T05:03Z,,,,,,Belton finished Sunday's loss to the Bills with six tackles (one solo) and one defensed pass.,S
 14958,Demario Davis,New York Jets,Active,2026-11-18T04:59Z,,,,,,Davis posted six tackles (three solo) Sunday in a loss to Buffalo.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-18T04:52Z,,,,,,Sherwood secured nine tackles (four solo) in Sunday's Week 10 loss to the Bills.,LB
-3117255,Harrison Phillips,New York Jets,Questionable,2026-11-18T04:49Z,Ankle,,,2026-11-22,QUESTIONABLE,Phillips posted 10 tackles (four solo) Sunday in a Week 10 loss to Buffalo.,DT
+3117255,Harrison Phillips,New York Jets,Questionable,2026-11-18T04:49Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Phillips posted 10 tackles (four solo) Sunday in a Week 10 loss to Buffalo.,DT
 4683815,Trevin Wallace,New York Jets,Questionable,2026-11-17T12:19Z,Groin,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
 3124679,Jason Sanders,New York Jets,Active,2026-11-17T02:54Z,,,,,,Sanders made all four of his field-goal attempts in the Jets' 31-12 loss to the Bills on Sunday.,PK
 4808766,Mason Taylor,New York Jets,Active,2026-11-17T00:57Z,,,,,,Taylor caught all four of his targets for 20 yards during the Jets' 31-12 loss to the Bills on Sunday.,TE
@@ -674,10 +674,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-16T00:20Z,,,,,,Howard (coach's decision) is inactive and serving as Pittsburgh's emergency third quarterback Sunday night versus Cincinnati.,QB
 4682980,Derrick Harmon,Pittsburgh Steelers,Active,2026-11-16T00:15Z,,,,,,Harmon (foot) is active for Sunday's Week 10 clash against Cincinnati.,DT
 4567979,Brandin Echols,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Echols (hamstring) was a full participant at practice Wednesday, Teresa Varley of the Steelers' official site reports.",CB
+4565200,Upton Stout,San Francisco 49ers,Questionable,2026-11-18T23:27Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
+3057524,Siran Neal,San Francisco 49ers,Questionable,2026-11-18T23:27Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,S
+4241464,Mac Jones,San Francisco 49ers,Questionable,2026-11-18T23:26Z,Illness,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,QB
+4039029,Khalid Kareem,San Francisco 49ers,Questionable,2026-11-18T23:26Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DE
 4693644,Ji'Ayir Brown,San Francisco 49ers,Questionable,2026-11-18T23:25Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,S
 3116097,Luke Gifford,San Francisco 49ers,Questionable,2026-11-18T23:25Z,Chest,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
-3916903,Dre Greenlaw,San Francisco 49ers,Questionable,2026-11-18T23:25Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
 4427325,Renardo Green,San Francisco 49ers,Questionable,2026-11-18T20:37Z,Back,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Green (back) was a limited participant in Wednesday's practice, Nick Wagoner of ESPN.com reports.",CB
+3916903,Dre Greenlaw,San Francisco 49ers,Questionable,2026-11-18T20:26Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Greenlaw (neck) did not participate in practice Wednesday, Nick Wagoner of ESPN.com reports.",LB
 4710714,De'Zhaun Stribling,San Francisco 49ers,Injured Reserve,2026-11-18T20:26Z,Ankle,Surgery,Left,2026-12-06,IR,"Stribling (ankle) was doing some work on the side at Wednesday's practice, Nick Wagoner of ESPN.com reports.",WR
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-18T18:52Z,Achilles,Tendinitis,Right,2026-11-22,QUESTIONABLE,"Head coach Kyle Shanahan said Evans (Achilles) won't practice Wednesday but hopes the wide receiver will return to drills Thursday, Nick Wagoner of ESPN.com reports.",WR
 4360438,Brandon Aiyuk,San Francisco 49ers,Out,2026-11-18T17:55Z,Personal,Not Specified,Not Specified,2026-11-29,RESERVE-EX,"Aiyuk's agent, Drew Rosenhaus, said Tuesday that the receiver is ""100 percent healthy"" and fully recovered from his November 2024 right knee surgery and plans to work out for interested teams once he's released by the 49ers, Dianna Russini of BetUS TV reports.",WR
@@ -695,10 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Active,2026-11-16T04:14Z,,,,,,Samuel rushed three times for 78 yards and a touchdown and brought in all three targets for 31 yards and another score in the 49ers' 46-40 win over the Cowboys on Sunday.,WR
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-11-16T03:50Z,,,,,,Purdy completed 22 of 28 passes for 389 yards with three touchdowns and no interceptions and added two carries for 21 yards in the 49ers' 46-40 win over the Cowboys on Sunday. He also threw a two-point conversion pass.,QB
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-16T03:03Z,,,,,,McCaffrey rushed 13 times for 62 yards and a touchdown and brought in all four targets for 161 yards and two more scores in the 49ers' 46-40 win over the Cowboys on Sunday. He also caught a two-point conversion pass.,RB
-4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-16T02:23Z,,,,,,Black rushed 11 times for 53 yards and a touchdown in Sunday's 46-40 win over the Cowboys. He added two catches for 13 yards on two targets.,RB
-13241,Trent Williams,San Francisco 49ers,Active,2026-11-15T20:32Z,,,,,,Williams (shoulder) is active for Sunday's game against the Cowboys.,OT
-4242488,Deommodore Lenoir,San Francisco 49ers,Active,2026-11-15T20:24Z,,,,,,Lenoir (foot) is active for Sunday's game against Dallas.,CB
-16731,Brandin Cooks,San Francisco 49ers,Active,2026-11-15T20:14Z,,,,,,Cooks (coach's decision) is inactive for Sunday's game against the Cowboys.,WR
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-17T12:23Z,Shoulder,Stinger,Not Specified,2026-11-29,QUESTIONABLE,out,DT
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-17T12:23Z,Knee,Surgery,Not Specified,2026-11-29,DOUBTFUL,out,G
 4426376,Charles Cross,Seattle Seahawks,Out,2026-11-17T12:23Z,Ankle,Sprain,Not Specified,2026-11-29,QUESTIONABLE,out,OT
