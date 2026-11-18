@@ -124,8 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-16T02:42Z,,,,,,Hubbard carried the ball 27 times for 92 yards and two touchdowns and caught all five of his targets for 80 yards in Sunday's 20-17 win over the Saints.,RB
 4242975,Jaelan Phillips,Carolina Panthers,Active,2026-11-15T17:24Z,,,,,,"Phillips (hamstring) is active against the Saints on Sunday, Darin Gantt of the Panthers' official site reports.",LB
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-14T19:38Z,Hamstring,Not Specified,Not Specified,2026-11-22,IR-R,"Christensen (hamstring) has been downgraded to out for Sunday's game against the Saints, Joe Person of The Athletic reports.",G
+4608686,Kyle Monangai,Chicago Bears,Active,2026-11-18T21:07Z,,,,,,Monangai (toe) was listed as a full participant on Wednesday's practice estimate.,RB
 4361093,Kyler Gordon,Chicago Bears,Questionable,2026-11-18T00:10Z,Shoulder,Not Specified,Left,2026-11-22,QUESTIONABLE,"Bears coach Ben Johnson said Monday that Gordon has a shoulder injury and is day-to-day, Courtney Cronin of ESPN.com reports.",CB
-4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-17T21:01Z,,,,,,"Monangai (toe/thumb) was seen wearing full pads for the Bears' unofficial practice Tuesday, Adam Jahns of AllCHGO.com reports.",RB
 4685278,Luther Burden III,Chicago Bears,Active,2026-11-17T18:22Z,,,,,,"Bears head coach Ben Johnson confirmed Tuesday that Burden has cleared concussion protocol, Patrick Finley of the Chicago Sun-Times reports.",WR
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-11-17T12:19Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
 4243253,Jaylon Johnson,Chicago Bears,Active,2026-11-12T03:48Z,,,,,,Johnson recorded three tackles (one solo) and a pick-six during the Bears' 27-24 win over the Buccaneers in Week 9.,CB
@@ -324,14 +324,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-15T23:56Z,,,,,,Stroud completed 20 of 38 passes for 211 yards with three touchdowns and one interception while adding three rushes for 20 yards in the Texans' 27-24 loss to the Browns on Sunday.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-11-15T22:17Z,,,,,,Collins secured nine of 16 targets for 94 yards and a touchdown in the Texans' 27-24 loss to the Browns on Sunday.,WR
 3121595,Braden Smith,Houston Texans,Active,2026-11-15T17:28Z,,,,,,Smith (illness) is active for Sunday's game against the Browns.,OT
+4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-18T20:58Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,The Colts have ruled Ward (knee) out for Thursday night's game against the Texans.,CB
+4362523,Will Mallory,Indianapolis Colts,Out,2026-11-18T20:51Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,The Colts ruled Mallory (hamstring) out for Thursday night's games against the Texans.,TE
 4429684,Anthony Gould,Indianapolis Colts,Questionable,2026-11-18T19:00Z,Toe,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,"Gould (toe) is listed as questionable for Thursday night's game against the Texans, Abby Halpin of the Colts' official site reports.",WR
 4362580,Bernhard Raimann,Indianapolis Colts,Out,2026-11-18T18:42Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,out,OT
 3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-18T18:42Z,Calf,Not Specified,Not Specified,2026-11-29,OUT,out,DT
 4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-18T18:42Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,out,OT
-4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-18T18:42Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,out,CB
 4682909,Justin Walley,Indianapolis Colts,Active,2026-11-18T17:53Z,,,,,,"Walley registered five tackles, a sack, a forced fumble and two pass breakups in Sunday's 24-22 win over the Dolphins.",CB
 4870598,CJ Allen,Indianapolis Colts,Active,2026-11-18T02:15Z,,,,,,"Allen posted nine tackles (three solo), including 1.0 sacks, and one pass defense during the Colts' 24-22 win over the Dolphins on Sunday.",LB
-4362523,Will Mallory,Indianapolis Colts,Out,2026-11-18T01:04Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,Mallory (hamstring) was estimated as a non-participant for Tuesday's practice walkthrough.,TE
 4061956,Ashton Dulin,Indianapolis Colts,Active,2026-11-18T00:51Z,,,,,,Dulin caught one of two targets for 30 yards and returned three kickoffs for 77 yards during the Colts' 24-22 win over the Dolphins on Sunday. He also recorded two tackles on special teams.,WR
 4683151,Deion Burks,Indianapolis Colts,Active,2026-11-18T00:44Z,,,,,,Burks failed to haul in either of his two targets during the Colts' 24-22 win over the Dolphins on Sunday. He also recorded one tackle on special teams.,WR
 4601021,Jaylon Carlies,Indianapolis Colts,Injured Reserve,2026-11-18T00:24Z,Neck,Not Specified,Not Specified,2026-12-27,IR,Indianapolis placed Carlies (neck) on injured reserve Tuesday.,LB
@@ -749,8 +749,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-09T05:23Z,,,,,,Gainwell rushed five times for 16 yards and caught all three of his targets for 60 yards in Sunday's 27-24 loss to the Bears.,RB
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-09T05:20Z,,,,,,Egbuka (foot) caught three of five targets for 38 yards and added a one-yard run in Sunday's 27-24 loss to the Bears.,WR
 4240589,Tristan Wirfs,Tampa Bay Buccaneers,Active,2026-11-07T03:18Z,,,,,,Wirfs (toe) does not have any injury designation ahead of Sunday's game against the Bears.,OT
+4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-18T21:07Z,Knee,,,2026-11-22,QUESTIONABLE,questionable,RB
+3120464,John Franklin-Myers,Tennessee Titans,Questionable,2026-11-18T21:07Z,Back,,,2026-11-22,QUESTIONABLE,questionable,DE
+4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-18T21:00Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Tate (shoulder) was a limited participant in Wednesday's practice.,WR
 4569587,Wan'Dale Robinson,Tennessee Titans,Injured Reserve,2026-11-18T17:29Z,Ankle,Not Specified,Not Specified,2027-02-15,IR,"Coach Robert Saleh said Wednesday that Robinson (ankle) -- who was placed on IR on Tuesady -- is out for the rest of the season, Terry McCormick of TitanInsider.com reports.",WR
-4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-18T17:25Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Titans head coach Robert Saleh said that Tate (shoulder) will practice Wednesday, Turron Davenport of ESPN.com reports.",WR
 4367567,Julius Chestnut,Tennessee Titans,Active,2026-11-18T15:41Z,,,,,,Chestnut played all 25 of his snaps on special teams in Sunday's 40-23 win over the Jaguars.,RB
 4431353,Xavier Restrepo,Tennessee Titans,Active,2026-11-18T15:25Z,,,,,,"Restrepo, whom the Titans signed off their practice squad Tuesday, could be in store for more playing time out of the slot moving forward after Tennessee placed Wan'Dale Robinson (ankle) on injured reserve, Mark Mihalko of USA Today reports.",WR
 4870805,Anthony Hill Jr.,Tennessee Titans,Questionable,2026-11-17T12:19Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
@@ -764,7 +766,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5081785,Jackie Marshall,Tennessee Titans,Active,2026-11-16T20:09Z,,,,,,,DT
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-11-16T20:09Z,,,,,,,RB
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-16T05:11Z,,,,,,Helm caught all four of his targets for 23 yards in Sunday's 40-23 loss to the Jaguars.,TE
-4428557,Tyjae Spears,Tennessee Titans,Active,2026-11-16T05:04Z,,,,,,Spears rushed four times for 28 yards in Sunday's 40-23 loss to the Jaguars. He turned one catch into zero yards on one target.,RB
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-11-16T02:17Z,,,,,,Ayomanor caught five of 10 targets for 79 yards in Sunday's 40-23 loss to the Jaguars.,WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-11-16T02:13Z,,,,,,Pollard carried the ball nine times for 33 yards and caught eight of nine targets for 66 yards and a touchdown in Sunday's 40-23 loss to the Jaguars.,RB
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-16T02:09Z,,,,,,Ward completed 28 of 39 passes for 231 yards and two touchdowns with one interception in Sunday's 40-23 loss to the Jaguars.,QB
@@ -773,7 +774,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710661,Chandler Zavala,Tennessee Titans,Active,2026-11-15T00:50Z,,,,,,"Tennessee signed Zavala from the practice squad to the active roster Saturday, Jim Wyatt of the Titans' official site reports.",G
 12701,Thomas Morstead,Tennessee Titans,Active,2026-11-15T00:47Z,,,,,,"The Titans signed Morstead from their practice squad to their active roster Saturday, Jim Wyatt of the Titans' official site reports.",P
 3915398,Tommy Townsend,Tennessee Titans,Injured Reserve,2026-11-15T00:43Z,Knee,Not Specified,Right,2026-12-13,IR,"The Titans placed Townsend (knee/Achilles) on IR on Saturday, Jim Wyatt of the Titans' official site reports.",P
-4429100,Peter Skoronski,Tennessee Titans,Injured Reserve,2026-11-14T21:52Z,Hamstring,Not Specified,Not Specified,2026-12-13,IR,"The Titans placed Skoronski (hamstring) on injured reserve Saturday, Jim Wyatt of the team's official site reports.",G
 4426948,Luke McCaffrey,Washington Commanders,Active,2026-11-18T16:20Z,,,,,,McCaffrey returned two punts for 13 yards and three kickoffs for 58 yards in Thursday's 24-21 win over the Giants.,WR
 4575131,Jacory Croskey-Merritt,Washington Commanders,Injured Reserve,2026-11-17T19:02Z,Groin,Not Specified,Not Specified,2026-11-23,IR-R,The Commanders designated Croskey-Merritt (groin) for return from injured reserve Tuesday.,RB
 4361088,Colson Yankoff,Washington Commanders,Questionable,2026-11-17T12:19Z,Knee,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,questionable,TE
