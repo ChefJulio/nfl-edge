@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4367203,Alec Anderson,Buffalo Bills,Active,2026-11-14T02:42Z,,,,,,Anderson (ankle) does not have any injury designation ahead of Sunday's game against the Jets.,OT
 3051324,Dion Dawkins,Buffalo Bills,Active,2026-11-14T02:36Z,,,,,,Dawkins (ribs) does not have any injury designation ahead of Sunday's game against the Jets.,OT
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-13T23:11Z,,,,,,"Head coach Joe Brady confirmed Friday that Hooker will play Sunday against the Jets, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",S
+4256224,Claudin Cherelus,Carolina Panthers,Out,2026-11-18T20:52Z,Undisclosed,Not Specified,Not Specified,2026-12-20,OUT,out,LB
 4035462,Isaiah Simmons,Carolina Panthers,Questionable,2026-11-18T20:16Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,S
 5151083,Will Lee III,Carolina Panthers,Active,2026-11-18T20:16Z,,,,,,,CB
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-18T20:11Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,TE
@@ -123,9 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-16T02:42Z,,,,,,Hubbard carried the ball 27 times for 92 yards and two touchdowns and caught all five of his targets for 80 yards in Sunday's 20-17 win over the Saints.,RB
 4242975,Jaelan Phillips,Carolina Panthers,Active,2026-11-15T17:24Z,,,,,,"Phillips (hamstring) is active against the Saints on Sunday, Darin Gantt of the Panthers' official site reports.",LB
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-14T19:38Z,Hamstring,Not Specified,Not Specified,2026-11-22,IR-R,"Christensen (hamstring) has been downgraded to out for Sunday's game against the Saints, Joe Person of The Athletic reports.",G
-3917853,Mike Jackson,Carolina Panthers,Injured Reserve,2026-11-14T19:23Z,Groin,Surgery,Not Specified,2026-11-22,IR-R,"Jackson (groin) has been downgraded from doubtful to out for Sunday's game against the Saints, Joe Person of The Athletic reports.",CB
 4361093,Kyler Gordon,Chicago Bears,Questionable,2026-11-18T00:10Z,Shoulder,Not Specified,Left,2026-11-22,QUESTIONABLE,"Bears coach Ben Johnson said Monday that Gordon has a shoulder injury and is day-to-day, Courtney Cronin of ESPN.com reports.",CB
-4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-17T21:01Z,Toe,Sprain,Not Specified,2026-11-22,QUESTIONABLE,"Monangai (toe/thumb) was seen wearing full pads for the Bears' unofficial practice Tuesday, Adam Jahns of AllCHGO.com reports.",RB
+4608686,Kyle Monangai,Chicago Bears,Questionable,2026-11-17T21:01Z,,,,,,"Monangai (toe/thumb) was seen wearing full pads for the Bears' unofficial practice Tuesday, Adam Jahns of AllCHGO.com reports.",RB
 4685278,Luther Burden III,Chicago Bears,Active,2026-11-17T18:22Z,,,,,,"Bears head coach Ben Johnson confirmed Tuesday that Burden has cleared concussion protocol, Patrick Finley of the Chicago Sun-Times reports.",WR
 4870953,Malik Muhammad II,Chicago Bears,Questionable,2026-11-17T12:19Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
 4243253,Jaylon Johnson,Chicago Bears,Active,2026-11-12T03:48Z,,,,,,Johnson recorded three tackles (one solo) and a pick-six during the Bears' 27-24 win over the Buccaneers in Week 9.,CB
@@ -299,24 +299,24 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-15T17:08Z,,,,,,McKinney (foot) is active for Sunday's game against the Vikings.,S
+4429059,Woody Marks,Houston Texans,Out,2026-11-18T20:51Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,"Marks (concussion) remains in concussion protocol ahead of Thursday's game against the Colts, Aaron Wilson of KPRC 2 Houston reports.",RB
 4035538,David Montgomery,Houston Texans,Active,2026-11-18T19:56Z,,,,,,"Montgomery (groin) is expected to play in Thursday's game against the Colts, Aaron Wilson of KPRC 2 Houston reports.",RB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-11-18T02:37Z,,,,,,To'oTo'o finished Sunday's 27-24 loss to the Browns with seven tackles (two solo).,LB
 4685724,Will Anderson Jr.,Houston Texans,Active,2026-11-18T02:35Z,,,,,,"Anderson posted four tackles (two solo), including 1.0 sacks, and one forced fumble during the Texans' 27-24 loss to the Browns on Sunday.",DE
 4033812,Jake Hansen,Houston Texans,Active,2026-11-18T02:26Z,,,,,,Hansen posted 12 tackles (four solo) during Houston's 27-24 loss to Cleveland on Sunday.,LB
 3116679,M.J. Stewart,Houston Texans,Active,2026-11-18T02:20Z,,,,,,Stewart recorded 14 tackles (four solo) during the Texans' 27-24 loss to the Browns on Sunday.,S
 4594277,Jaylin Smith,Houston Texans,Injured Reserve,2026-11-18T01:24Z,Hamstring,Strain,Not Specified,2026-11-19,IR-R,Smith (hamstring) was a full participant at practice Tuesday.,CB
-4362504,Brevin Jordan,Houston Texans,Questionable,2026-11-18T01:20Z,Foot,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Jordan (foot/illness) did not participate at practice Tuesday.,TE
-2976560,Danielle Hunter,Houston Texans,Questionable,2026-11-18T01:15Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Hunter (hamstring) did not participate at practice Tuesday.,DE
-4602699,Kamari Lassiter,Houston Texans,Questionable,2026-11-18T01:10Z,Wrist,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Lassiter (wrist) did not participate at practice Tuesday.,CB
+4362504,Brevin Jordan,Houston Texans,Out,2026-11-18T01:20Z,Foot,Not Specified,Not Specified,2026-11-29,OUT,Jordan (foot/illness) did not participate at practice Tuesday.,TE
+2976560,Danielle Hunter,Houston Texans,Out,2026-11-18T01:15Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,Hunter (hamstring) did not participate at practice Tuesday.,DE
+4602699,Kamari Lassiter,Houston Texans,Active,2026-11-18T01:10Z,,,,,,Lassiter (wrist) did not participate at practice Tuesday.,CB
 4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-17T22:01Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,Harrison (hamstring) was a non-participant in Tuesday's practice.,WR
-4429059,Woody Marks,Houston Texans,Out,2026-11-17T21:59Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,Marks (concussion) didn't practice Tuesday.,RB
 4429022,Kayshon Boutte,Houston Texans,Active,2026-11-17T05:25Z,,,,,,Boutte failed to catch his lone target in Sunday's 27-24 loss to the Browns.,WR
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-11-17T03:47Z,,,,,,Fairbairn converted his sole field-goal attempt and made all three PATs in the Texans' 27-24 loss to the Browns on Sunday.,PK
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-17T01:41Z,,,,,,"Ogunbowale reverted to the Texans' practice squad Monday, per the NFL's official transaction log.",RB
 4839498,Keylan Rutledge,Houston Texans,Active,2026-11-17T01:12Z,,,,,,Rutledge (neck) was a full participant in Monday's walkthrough practice.,G
 3045474,Wyatt Teller,Houston Texans,Active,2026-11-17T01:10Z,,,,,,Teller (illness) was a full participant in Monday's walkthrough practice.,G
 3919117,Azeez Al-Shaair,Houston Texans,Injured Reserve,2026-11-17T01:03Z,Groin,Surgery,Not Specified,2026-12-20,IR,Al-Shaair (groin) did not participate in Monday's walkthrough practice.,LB
-4241250,Jake Hummel,Houston Texans,Questionable,2026-11-17T00:53Z,Groin,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,LB
+4241250,Jake Hummel,Houston Texans,Questionable,2026-11-17T00:53Z,Groin,,,2026-11-19,QUESTIONABLE,questionable,LB
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-16T05:08Z,,,,,,Schultz caught one pass for an 11-yard touchdown on two targets in Sunday's 27-24 loss to the Browns.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-16T01:23Z,,,,,,Demercado rushed seven times for 16 yards and brought in one of two targets for minus-1 yard in the Texans' 27-24 loss to the Browns on Sunday.,RB
 4366031,Tank Dell,Houston Texans,Active,2026-11-16T01:16Z,,,,,,Dell brought in three of four targets for 21 yards and rushed once for no gain in the Texans' 27-24 loss to the Browns on Sunday.,WR
