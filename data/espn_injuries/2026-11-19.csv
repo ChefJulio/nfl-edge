@@ -1,4 +1,5 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4430841,Carson Beck,Arizona Cardinals,Questionable,2026-11-19T22:31Z,Back,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Beck was listed as limited on Thursday's injury report due to a back issue, Dani Sureck of the Cardinals' official site reports.",QB
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-19T02:53Z,,,,,,Baker posted six tackles (two solo) during the Cardinals' 34-6 loss to the Rams in Week 10.,S
 4040983,Mack Wilson Sr.,Arizona Cardinals,Active,2026-11-19T02:46Z,,,,,,Wilson registered 10 tackles (six solo) during the Cardinals' 34-6 loss to the Rams in Week 10.,LB
 4429071,Cody Simon,Arizona Cardinals,Active,2026-11-19T02:40Z,,,,,,Simon recorded six tackles (four solo) and an interception during the Cardinals' 34-6 loss to the Rams in Week 10.,LB
@@ -21,7 +22,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4363538,Chad Ryland,Arizona Cardinals,Active,2026-11-17T03:45Z,,,,,,Ryland went 2-for-2 on field-goal tries during Sunday's 34-6 loss to the Rams.,PK
 4361272,Eku Leota,Arizona Cardinals,Active,2026-11-16T17:37Z,,,,,,,LB
 4363408,Starling Thomas V,Arizona Cardinals,Active,2026-11-16T17:37Z,,,,,,,CB
-4430841,Carson Beck,Arizona Cardinals,Active,2026-11-16T02:46Z,,,,,,"Beck was 11-for-18 passing for 108 yards, no touchdowns and two interceptions and had one rush for one yard during Sunday's 34-6 loss to the Rams.",QB
 4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-16T02:27Z,,,,,,Allgeier mustered five carries for 14 yards and didn't gather in his only target during Sunday's 34-6 defeat to the Rams.,RB
 4361307,Trey McBride,Arizona Cardinals,Active,2026-11-16T01:41Z,,,,,,McBride tallied five catches on as many targets for 37 yards during Sunday's 34-6 loss to the Rams.,TE
 4567111,DeMarcco Hellams,Atlanta Falcons,Active,2026-11-19T03:10Z,,,,,,Hellams logged 11 tackles (seven solo) in the Falcons' 35-13 loss to the Chiefs on Sunday.,S
@@ -224,12 +224,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-11-15T20:26Z,,,,,,"Porter (ankle) is active for Sunday's game against the 49ers, Todd Archer of ESPN.com reports.",CB
 4595352,Alijah Clark,Dallas Cowboys,Active,2026-11-15T20:04Z,,,,,,,S
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-14T19:17Z,,,,,,"The Cowboys signed Mitchell from the practice squad to the active roster Saturday, Tommy Yarrish of the team's official site reports.",TE
+4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-11-19T22:28Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Waddle (concussion) was a full practice participant Thursday.,WR
 4429193,Kris Abrams-Draine,Denver Broncos,Active,2026-11-19T22:23Z,,,,,,,CB
 4382401,Riley Moss,Denver Broncos,Questionable,2026-11-19T20:06Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,"Moss (concussion) signed a four-year contract extension with the Broncos on Thursday, Aric DiLalla of the team's official site reports.",CB
 4039059,Brandon Jones,Denver Broncos,Questionable,2026-11-19T01:28Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Jones (hamstring) was a limited participant in Wednesday's practice.,S
 3929914,Adam Prentice,Denver Broncos,Active,2026-11-19T01:27Z,,,,,,Prentice (concussion) was a full participant in Wednesday's practice.,FB
 4360853,Talanoa Hufanga,Denver Broncos,Active,2026-11-19T01:27Z,,,,,,"Hufanga (ankle) was a full participant at practice Wednesday, Aric DiLalla of the Broncos' official site reports.",S
-4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-11-18T23:05Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Waddle (concussion) was a full participant in Wednesday's practice.,WR
 4432208,Caleb Lohner,Denver Broncos,Injured Reserve,2026-11-18T20:08Z,Foot,Surgery,Not Specified,2026-11-22,IR-R,"The Broncos opened Lohner's (lower body) 21-day practice window Wednesday, Parker Gabriel of The Denver Post reports.",TE
 2612151,Alex Singleton,Denver Broncos,Active,2026-11-12T03:09Z,,,,,,Singleton recorded six tackles (two solo) during the Broncos' 26-21 win over the Panthers in Week 9.,LB
 3911853,Adam Trautman,Denver Broncos,Active,2026-11-11T02:55Z,,,,,,Trautman caught two of three passes for 15 yards during the Broncos' 26-21 win over the Panthers on Sunday.,TE
@@ -399,7 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-15T22:31Z,,,,,,Rice brought in five of six targets for 82 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,WR
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T22:08Z,,,,,,Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,QB
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-11-15T16:52Z,,,,,,"Delane (shoulder) is active for Sunday's game against the Falcons, Matt McMullen of the Chiefs' official site reports.",CB
-4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-19T19:18Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle) was on the field for the start of Thursday's practice, Ryan McFadden of ESPN.com reports.",TE
+4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-19T22:38Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle/quadriceps) was listed as a limited participant in Thursday's practice, Ryan McFadden of ESPN.com reports.",TE
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-19T02:15Z,,,,,,"Booker (ankle) was a full participant in Wednesday's practice, Sam Warren of The Athletic reports.",DT
 4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-19T01:42Z,Upper Body,Stinger,Not Specified,2026-11-22,QUESTIONABLE,"Hemingway (upper body) didn't participate in Las Vegas' practice Wednesday, Sam Warren of The Athletic reports.",DT
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Questionable,2026-11-19T01:39Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Fatukasi (toe) was a limited participant at practice Wednesday, Sam Warren of The Athletic reports.",DT
@@ -624,8 +624,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427366,Breece Hall,New York Jets,Active,2026-11-15T22:06Z,,,,,,Hall rushed 11 times for 41 yards and caught all four of his targets for 67 yards in Sunday's 31-12 loss to the Bills.,RB
 4569618,Garrett Wilson,New York Jets,Active,2026-11-15T22:05Z,,,,,,Wilson (concussion) caught seven of 14 targets for 106 yards and lost a fumble in Sunday's 31-12 loss to the Bills.,WR
 4837388,VJ Payne,New York Jets,Active,2026-11-15T17:39Z,,,,,,Payne (knee) is active for Sunday's game against Buffalo.,S
+4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-19T22:36Z,,,,,,,WR
 4428850,Dontayvion Wicks,Philadelphia Eagles,Questionable,2026-11-19T19:45Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Wicks (ankle) is participating in practice Thursday, Andrew DiCecco of InsideTheBirds.com reports.",WR
-4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-19T19:41Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Smith (hamstring) is taking part in Thursday's practice, Andrew DiCecco of InsideTheBirds.com reports.",WR
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Questionable,2026-11-19T01:40Z,Illness,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Smith (illness) was limited in Wednesday's practice.,LB
 4685287,Jihaad Campbell,Philadelphia Eagles,Active,2026-11-19T01:38Z,,,,,,Campbell (hamstring/quadriceps) was a full participant in Wednesday's practice.,LB
 3917657,Zack Baun,Philadelphia Eagles,Questionable,2026-11-19T01:34Z,Back,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Baun (back) didn't practice Wednesday.,LB
