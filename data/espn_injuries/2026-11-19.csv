@@ -149,6 +149,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,LB
 4257364,Zavier Scott,Chicago Bears,Injured Reserve,2026-11-05T21:19Z,Wrist,Not Specified,Not Specified,2026-12-13,IR,The Bears placed Scott (wrist) on injured reserve Thursday.,RB
 3116726,Kentavius Street,Chicago Bears,Injured Reserve,2026-11-05T04:55Z,Knee,Not Specified,Left,2027-02-15,IR,"The Bears placed Street (knee) on injured reserve Wednesday, Adam Jahns of AllCHGO.com reports.",DT
+4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-19T21:37Z,Thumb,Surgery,Left,2026-11-23,IR-R,"Iosivas (thumb) practiced fully Thursday, Paul Dehner Jr. of The Athletic reports.",WR
 4239993,Tee Higgins,Cincinnati Bengals,Active,2026-11-19T21:34Z,,,,,,"Higgins (knee) was a full participant in Thursday's practice, Paul Dehner Jr. of The Athletic reports.",WR
 4429000,Myles Hinton,Cincinnati Bengals,Active,2026-11-19T21:31Z,,,,,,,OT
 4426422,Dax Hill,Cincinnati Bengals,Questionable,2026-11-19T21:30Z,Illness,,,2026-11-23,QUESTIONABLE,questionable,CB
@@ -171,7 +172,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362628,Ja'Marr Chase,Cincinnati Bengals,Active,2026-11-16T04:47Z,,,,,,Chase brought in 11 of 14 targets for 231 yards in the Bengals' 38-18 win over the Steelers on Sunday night. He also committed a fumble that stayed with Cincinnati.,WR
 3051746,Oren Burks,Cincinnati Bengals,Questionable,2026-11-16T04:15Z,Groin,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,"Burks (groin) will not return to Sunday night's game against the Steelers, Jay Morrison of SI.com reports.",LB
 3125082,Dalton Risner,Cincinnati Bengals,Questionable,2026-11-16T03:38Z,Knee,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Risner (knee) will not return to Sunday night's game against the Steelers.,G
-4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-14T20:08Z,Thumb,Surgery,Left,2026-11-23,IR-R,Iosivas (thumb) has been downgraded from doubtful to out for Sunday's game against the Steelers.,WR
 4572036,DJ Turner II,Cincinnati Bengals,Active,2026-11-13T00:49Z,,,,,,Turner (ankle) was a full participant at practice Thursday.,CB
 4689117,Brian Parker II,Cincinnati Bengals,Injured Reserve,2026-11-12T22:57Z,Knee,Not Specified,Not Specified,2026-11-23,IR-R,The Bengals opened Parker's (undisclosed) 21-day practice window Thursday.,OT
 4379397,Tyson Campbell,Cleveland Browns,Active,2026-11-19T02:56Z,,,,,,"Campbell logged five tackles (one solo) and three passes defensed, including one interception, in the Browns' 27-24 win over the Texans on Sunday.",CB
@@ -499,6 +499,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426446,Caedan Wallace,Miami Dolphins,Active,2026-11-16T19:26Z,,,,,,,OT
 4912052,Justin Joly,Miami Dolphins,Active,2026-11-16T19:26Z,,,,,,,TE
 4242512,Malik Willis,Miami Dolphins,Injured Reserve,2026-11-16T17:27Z,Abdomen,Not Specified,Not Specified,2026-12-13,IR,"Head coach Jeff Hafley said Monday that Willis (groin/core) has not undergone surgery and that the Dolphins are still determining if a procedure is needed, David Furones of the South Florida Sun Sentinel reports.",QB
+4036133,T.J. Hockenson,Minnesota Vikings,Questionable,2026-11-19T21:45Z,Wrist,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hockenson (wrist) practiced on a limited basis Thursday.,TE
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-19T02:30Z,,,,,,"Wilson recorded seven tackles (six solo), including 1.0 sacks, during the Vikings' 30-10 win over the Packers in Week 10.",LB
 4875564,Bo Richter,Minnesota Vikings,Injured Reserve,2026-11-19T01:59Z,Foot,Not Specified,Not Specified,2026-12-20,IR,The Vikings placed Richter (foot) on injured reserve Wednesday.,LB
 3133487,Andrew Van Ginkel,Minnesota Vikings,Questionable,2026-11-19T01:11Z,Quadriceps,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Van Ginkel (quadriceps) was a limited participant in Wednesday's practice.,LB
@@ -508,7 +509,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4568007,Jay Ward,Minnesota Vikings,Questionable,2026-11-18T22:23Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,S
 4629149,Tyrion Ingram-Dawkins,Minnesota Vikings,Active,2026-11-18T22:23Z,,,,,,,DE
 16772,Kyle Van Noy,Minnesota Vikings,Questionable,2026-11-18T22:21Z,Calf,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
-4036133,T.J. Hockenson,Minnesota Vikings,Questionable,2026-11-18T22:10Z,Wrist,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hockenson (wrist) practiced in a limited capacity Wednesday.,TE
 3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-18T19:40Z,Hamstring,Strain,Not Specified,2026-11-29,OUT,"Murray (hamstring) will miss Wednesday's practice, Kevin Seifert of ESPN reports.",QB
 4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-18T19:25Z,Thumb,Surgery,Not Specified,2026-11-29,OUT,"Head coach Kevin O'Connell said Wednesday that Addison underwent thumb surgery earlier this week and won't be placed on injured reserve, Alec Lewis of The Athletic reports.",WR
 4567104,Will Reichard,Minnesota Vikings,Active,2026-11-17T03:05Z,,,,,,Reichard made all three of his field-goal attempts and all three PATs in the Vikings' 30-10 win over the Packers on Sunday.,PK
@@ -649,13 +649,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-08T22:02Z,,,,,,Barkley rushed 13 times for 22 yards and a touchdown while failing to catch his only target in Sunday's 19-11 loss to the Giants.,RB
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
 3916409,Jonathan Greenard,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
+4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-11-19T21:46Z,Finger,Not Specified,Left,2026-11-22,IR-R,Wilson (finger) was a full participant in Thursday's practice.,WR
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-19T21:05Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR-R,"Pittman (foot) was listed as a full participant in Thursday's practice, Alan Saunders of SteelersNow.com reports.",WR
 4429164,Nick Herbig,Pittsburgh Steelers,Questionable,2026-11-19T02:13Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Herbig (hip) did not participate in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",LB
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-19T02:00Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,"The Steelers designated Dunker (knee) for return to practice from injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4368304,Mason McCormick,Pittsburgh Steelers,Injured Reserve,2026-11-19T01:44Z,Ankle,Dislocated,Not Specified,2027-01-03,IR,"The Steelers placed McCormick (ankle) on injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4242207,Patrick Queen,Pittsburgh Steelers,Questionable,2026-11-19T01:23Z,Hand,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,"Queen (hand) was a limited practice participant Wednesday, Teresa Varley of the Steelers' official site reports.",LB
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-19T01:19Z,,,,,,"Elliott (knee) was a limited participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",S
-4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-11-18T22:57Z,Finger,Not Specified,Left,2026-11-22,IR-R,"Wilson (finger), who was designated for return from injured reserve earlier Wednesday, was a full participant in his return to practice.",WR
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-11-18T05:57Z,,,,,,Brisker notched 10 tackles (two solo) Sunday in a Week 10 loss to the Bengals.,S
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-18T05:39Z,,,,,,Wilson recorded 19 tackles (nine solo) in Sunday's 38-18 loss to the Bengals.,LB
 4240577,Brandon Smith,Pittsburgh Steelers,Active,2026-11-18T02:17Z,,,,,,Smith caught two of three targets for 15 yards during Sunday night's 38-18 loss to the Bengals.,WR
@@ -724,7 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-14T00:44Z,,,,,,"Nwosu (ankle) does not have an injury designation against the Raiders on Sunday, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
-3052587,Baker Mayfield,Tampa Bay Buccaneers,Questionable,2026-11-19T18:37Z,Foot,Strain,Not Specified,2026-11-22,QUESTIONABLE,"Mayfield (foot/right thumb) said that he felt good but was ""limited"" at Thursday's practice, and he's hopeful to do more at Friday's session, Scott Smith of the Buccaneers' official site reports.",QB
+3052587,Baker Mayfield,Tampa Bay Buccaneers,Questionable,2026-11-19T21:53Z,Foot,Strain,Not Specified,2026-11-22,QUESTIONABLE,Mayfield (foot/right thumb) officially was limited at Thursday's practice.,QB
 4248533,Josh Hayes,Tampa Bay Buccaneers,Injured Reserve,2026-11-19T01:49Z,Knee,Surgery,Not Specified,2026-11-22,IR-R,"The Buccaneers designated Hayes (knee) to return from injured reserve Sunday, Greg Auman of Fox Sports reports.",CB
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-18T19:52Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Winfield (ankle) didn't participate in Wednesday's practice.,S
 4686334,Yaya Diaby,Tampa Bay Buccaneers,Questionable,2026-11-18T18:29Z,Knee - MCL,Sprain,Not Specified,2026-11-22,QUESTIONABLE,questionable,LB
