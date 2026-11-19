@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3129446,Robert Spillane,New England Patriots,Questionable,2026-11-15T17:18Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Spillane (illness) is questionable to return to Sunday's game against the Lions in Munich.,LB
 16771,Morgan Moses,New England Patriots,Active,2026-11-15T15:32Z,,,,,,"Moses (knee) has returned to Sunday's game against the Lions in Munich, Mike Reiss of ESPN.com reports.",OT
 15718,Greg Van Roten,New England Patriots,Active,2026-11-15T13:23Z,,,,,,Van Roten (hamstring) is active for Sunday's game against the Lions in Munich.,G
+4360689,Tyler Shough,New Orleans Saints,Active,2026-11-19T22:42Z,,,,,,"Shough is no longer wearing a protect glove on his left (non-throwing) hand at Thursday's practice, Nick Underhill of NewOrleans.Football reports.",QB
 4880281,Jordyn Tyson,New Orleans Saints,Questionable,2026-11-19T21:26Z,Chest,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Tyson (chest) practiced in a limited capacity Thursday.,WR
 4429568,Martin Emerson Jr.,New Orleans Saints,Questionable,2026-11-19T01:02Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Emerson (concussion) didn't practice Wednesday.,CB
 4241993,Pete Werner,New Orleans Saints,Questionable,2026-11-19T00:59Z,Hamstring,Not Specified,Left,2026-11-22,QUESTIONABLE,Werner (hamstring) did not participate in Wednesday's practice.,LB
@@ -568,7 +569,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929645,Juwan Johnson,New Orleans Saints,Active,2026-11-16T04:32Z,,,,,,Johnson caught two passes for 28 yards on three targets in Sunday's 20-17 loss to the Panthers.,TE
 4569682,Audric Estime,New Orleans Saints,Active,2026-11-16T03:27Z,,,,,,Estime carried the ball seven times for six yards and caught his only target for five yards in Sunday's 20-17 loss to Carolina.,RB
 4239996,Travis Etienne Jr.,New Orleans Saints,Active,2026-11-16T03:17Z,,,,,,Etienne carried the ball eight times for 14 yards and caught three of five targets for 20 yards in Sunday's 20-17 loss to the Panthers.,RB
-4360689,Tyler Shough,New Orleans Saints,Active,2026-11-16T03:11Z,,,,,,Shough completed 25 of 35 targets for 187 yards and one touchdown with one interception in Sunday's 20-17 loss to the Panthers. He added 25 rushing yards on six carries and was charged with a lost fumble.,QB
 4361370,Chris Olave,New Orleans Saints,Active,2026-11-16T03:04Z,,,,,,Olave caught three of four targets for 30 yards in Sunday's 20-17 loss to the Panthers.,WR
 3054850,Alvin Kamara,New Orleans Saints,Active,2026-11-16T01:43Z,,,,,,Kamra rushed two times for four yards and a touchdown in Sunday's 20-17 loss to the Panthers. He added three catches for 10 yards and an additional touchdown on four targets.,RB
 4685479,Christen Miller,New Orleans Saints,Injured Reserve,2026-11-15T01:04Z,Knee,Not Specified,Not Specified,2026-12-13,IR,The Saints placed Miller (knee) on injured reserve Saturday.,DT
@@ -599,10 +599,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595348,Malik Nabers,New York Giants,Active,2026-11-13T04:48Z,,,,,,Nabers secured five of seven targets for 44 yards and lost a fumble in the Giants' 24-21 loss to the Commanders on Thursday.,WR
 4361050,Isaiah Likely,New York Giants,Active,2026-11-13T04:43Z,,,,,,Likely brought in nine of 11 targets for 127 yards and a touchdown and fumbled once but recovered in the Giants' 24-21 loss to the Commanders on Thursday.,TE
 4696981,Cam Skattebo,New York Giants,Active,2026-11-13T04:38Z,,,,,,Skattebo rushed 18 times for 78 yards and two touchdowns and brought in three of four targets for 44 yards in the Giants' 24-21 loss to the Commanders on Thursday.,RB
+15864,Geno Smith,New York Jets,Questionable,2026-11-19T22:48Z,Ankle,Not Specified,Left,2026-11-22,QUESTIONABLE,Smith (ankle) was a limited participant in Thursday's practice.,QB
 4569371,Isaiah Williams,New York Jets,Questionable,2026-11-19T22:43Z,Ribs,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Williams (ribs) was a non-participant in Thursday's practice.,WR
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-19T22:37Z,Ankle,Not Specified,Right,2026-11-22,QUESTIONABLE,Cooper didn't practice Thursday due to ankle and hip injuries.,WR
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-11-19T02:05Z,,,,,,"Brownlee (illness) was a full participant in Wednesday's walkthrough practice, Rich Cimini of ESPN.com reports.",CB
-15864,Geno Smith,New York Jets,Questionable,2026-11-18T22:52Z,Ankle,Not Specified,Left,2026-11-22,QUESTIONABLE,"Smith (ankle), who was a limited participant in Wednesday's walkthrough practice, said afterward that he intends to play in Sunday's game against the Chargers, Rich Cimini of ESPN.com reports.",QB
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-18T22:04Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DE
 4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-18T19:38Z,Abdomen,Surgery,Not Specified,2026-11-22,IR-R,"The Jets designated Onyemata (groin) to return from the injured reserve list Wednesday, Eric Allen of the Jets' official site reports.",DT
 4426686,Dane Belton,New York Jets,Active,2026-11-18T05:03Z,,,,,,Belton finished Sunday's loss to the Bills with six tackles (one solo) and one defensed pass.,S
