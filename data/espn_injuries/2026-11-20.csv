@@ -224,13 +224,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2980097,Jonathan Bullard,Dallas Cowboys,Active,2026-11-15T20:36Z,,,,,,"Bullard (calf) is active for Sunday's game against the 49ers, Todd Archer of ESPN.com reports.",DT
 4426506,Joey Porter Jr.,Dallas Cowboys,Active,2026-11-15T20:26Z,,,,,,"Porter (ankle) is active for Sunday's game against the 49ers, Todd Archer of ESPN.com reports.",CB
 4595352,Alijah Clark,Dallas Cowboys,Active,2026-11-15T20:04Z,,,,,,,S
+4382401,Riley Moss,Denver Broncos,Active,2026-11-20T21:49Z,,,,,,,CB
+4372016,Jaylen Waddle,Denver Broncos,Active,2026-11-20T21:48Z,,,,,,,WR
 4429193,Kris Abrams-Draine,Denver Broncos,Active,2026-11-20T02:45Z,,,,,,Abrams-Draine (ankle) practiced in full Thursday.,CB
-4372016,Jaylen Waddle,Denver Broncos,Questionable,2026-11-19T22:28Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Waddle (concussion) was a full practice participant Thursday.,WR
-4382401,Riley Moss,Denver Broncos,Questionable,2026-11-19T20:06Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,"Moss (concussion) signed a four-year contract extension with the Broncos on Thursday, Aric DiLalla of the team's official site reports.",CB
 4039059,Brandon Jones,Denver Broncos,Questionable,2026-11-19T01:28Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Jones (hamstring) was a limited participant in Wednesday's practice.,S
 3929914,Adam Prentice,Denver Broncos,Active,2026-11-19T01:27Z,,,,,,Prentice (concussion) was a full participant in Wednesday's practice.,FB
 4360853,Talanoa Hufanga,Denver Broncos,Active,2026-11-19T01:27Z,,,,,,"Hufanga (ankle) was a full participant at practice Wednesday, Aric DiLalla of the Broncos' official site reports.",S
-4432208,Caleb Lohner,Denver Broncos,Injured Reserve,2026-11-18T20:08Z,Foot,Surgery,Not Specified,2026-11-22,IR-R,"The Broncos opened Lohner's (lower body) 21-day practice window Wednesday, Parker Gabriel of The Denver Post reports.",TE
+4432208,Caleb Lohner,Denver Broncos,Injured Reserve,2026-11-18T20:08Z,Foot,Surgery,Not Specified,2026-11-27,IR-R,"The Broncos opened Lohner's (lower body) 21-day practice window Wednesday, Parker Gabriel of The Denver Post reports.",TE
 2612151,Alex Singleton,Denver Broncos,Active,2026-11-12T03:09Z,,,,,,Singleton recorded six tackles (two solo) during the Broncos' 26-21 win over the Panthers in Week 9.,LB
 3911853,Adam Trautman,Denver Broncos,Active,2026-11-11T02:55Z,,,,,,Trautman caught two of three passes for 15 yards during the Broncos' 26-21 win over the Panthers on Sunday.,TE
 4686472,Marvin Mims Jr.,Denver Broncos,Active,2026-11-11T02:45Z,,,,,,"Mims caught one of two targets for zero yards, added a five-yard carry and returned three punts for 22 yards during the Broncos' 26-21 win over the Panthers on Sunday.",WR
@@ -399,12 +399,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-15T22:31Z,,,,,,Rice brought in five of six targets for 82 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,WR
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T22:08Z,,,,,,Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,QB
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-11-15T16:52Z,,,,,,"Delane (shoulder) is active for Sunday's game against the Falcons, Matt McMullen of the Chiefs' official site reports.",CB
+4045305,Ian Thomas,Las Vegas Raiders,Active,2026-11-20T22:00Z,,,,,,,TE
+4431623,Trey Zuhn III,Las Vegas Raiders,Active,2026-11-20T22:00Z,,,,,,,C
+4429109,Tonka Hemingway,Las Vegas Raiders,Out,2026-11-20T21:59Z,Upper Body,Stinger,Not Specified,2026-11-29,OUT,out,DT
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-20T21:14Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle) said Friday that his availability for Sunday's game against the Broncos remains up in the air, Sam Warren of The Athletic reports.",TE
 4249087,Matt Gay,Las Vegas Raiders,Questionable,2026-11-20T18:53Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Gay (hip) was spotted at practice Friday, Sam Warren of The Athletic reports.",PK
-4431623,Trey Zuhn III,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Illness,,,2026-11-22,QUESTIONABLE,questionable,C
-4045305,Ian Thomas,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Calf,,,2026-11-22,QUESTIONABLE,questionable,TE
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-19T02:15Z,,,,,,"Booker (ankle) was a full participant in Wednesday's practice, Sam Warren of The Athletic reports.",DT
-4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-19T01:42Z,Upper Body,Stinger,Not Specified,2026-11-22,QUESTIONABLE,"Hemingway (upper body) didn't participate in Las Vegas' practice Wednesday, Sam Warren of The Athletic reports.",DT
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Questionable,2026-11-19T01:39Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Fatukasi (toe) was a limited participant at practice Wednesday, Sam Warren of The Athletic reports.",DT
 4258194,Kwity Paye,Las Vegas Raiders,Active,2026-11-19T01:37Z,,,,,,"Paye (neck) was not listed on the Raiders' injury report Wednesday, Sam Warren of The Athletic reports.",DE
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Active,2026-11-19T01:35Z,,,,,,"Thornton (back) was a full participant in Las Vegas' practice Wednesday, Sam Warren of The Athletic reports.",WR
@@ -577,7 +577,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361050,Isaiah Likely,New York Giants,Active,2026-11-20T21:15Z,,,,,,"Likely didn't practice Friday due to a strained groin, but he doesn't have a designation for Sunday's game versus the Jaguars, Patricia Traina of SI.com reports.",TE
 4040615,Malik Harrison,New York Giants,Active,2026-11-20T02:31Z,,,,,,Harrison (groin) was a full participant at practice Thursday.,LB
 4240706,Jason Pinnock,New York Giants,Active,2026-11-20T02:26Z,,,,,,Pinnock (back) was a full participant at practice Thursday.,S
-4427636,Nic Jones,New York Giants,Questionable,2026-11-18T21:47Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
+4427636,Nic Jones,New York Giants,Questionable,2026-11-18T21:47Z,,,,,,questionable,CB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-11-18T20:16Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"Tracy (hamstring) could be reinstated from injured reserve when first eligible ahead of the Giants' Week 13 game against the 49ers, Dan Duggan of The Athletic reports.",RB
 2969939,Jameis Winston,New York Giants,Active,2026-11-18T16:31Z,,,,,,Winston carried twice for one yard in Thursday's 24-21 loss to the Commanders.,QB
 4427278,Xavier Gipson,New York Giants,Active,2026-11-17T00:21Z,,,,,,"Gipson was signed by the Giants off of Philadelphia's practice squad Monday, Pat Leonard of the New York Daily News reports.",WR
@@ -630,7 +630,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428850,Dontayvion Wicks,Philadelphia Eagles,Out,2026-11-20T20:58Z,Ankle,Not Specified,Not Specified,2026-11-26,OUT,Wicks (ankle/foot) is listed as out for Sunday's game against the Steelers.,WR
 4431545,Will Shipley,Philadelphia Eagles,Injured Reserve,2026-11-19T22:51Z,Foot,Plantar Fasciitis,Not Specified,2026-11-22,IR-R,Shipley (foot) remained limited in practice Thursday.,RB
 4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-19T22:40Z,,,,,,Smith (hamstring) practiced fully Thursday.,WR
-4426331,Nolan Smith Jr.,Philadelphia Eagles,Questionable,2026-11-19T01:40Z,Illness,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Smith (illness) was limited in Wednesday's practice.,LB
+4426331,Nolan Smith Jr.,Philadelphia Eagles,Questionable,2026-11-19T01:40Z,,,,,,Smith (illness) was limited in Wednesday's practice.,LB
 4685287,Jihaad Campbell,Philadelphia Eagles,Active,2026-11-19T01:38Z,,,,,,Campbell (hamstring/quadriceps) was a full participant in Wednesday's practice.,LB
 4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-18T20:12Z,,,,,,"McKee will remain in a backup role for Sunday's game against the Steelers after head coach Nick Sirianni announced Wednesday that Joe Milton will serve as the Eagles' starting quarterback for a second straight game, Jeff McLane of The Philadelphia Inquirer reports.",QB
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-18T17:33Z,,,,,,"Head coach Nick Sirianni confirmed that Milton will remain the Eagles' starting quarterback for Sunday's game against the Steelers, according to NFL reporter Andrew Siciliano.",QB
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3916148,Tony Pollard,Tennessee Titans,Active,2026-11-16T02:13Z,,,,,,Pollard carried the ball nine times for 33 yards and caught eight of nine targets for 66 yards and a touchdown in Sunday's 40-23 loss to the Jaguars.,RB
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-16T02:09Z,,,,,,Ward completed 28 of 39 passes for 231 yards and two touchdowns with one interception in Sunday's 40-23 loss to the Jaguars.,QB
 3915437,Isaiah Oliver,Tennessee Titans,Active,2026-11-15T00:53Z,,,,,,"The Titans signed Oliver from their practice squad to their active roster Saturday, Jim Wyatt of the Titans' official site reports.",S
-4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-20T21:26Z,Foot,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,questionable,WR
+4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-20T21:50Z,Foot,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Burks (foot) did not practice Friday.,WR
 4697815,Rachaad White,Washington Commanders,Questionable,2026-11-20T21:09Z,Heel,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,White was limited at Friday's practice due to a heel injury.,RB
 4575131,Jacory Croskey-Merritt,Washington Commanders,Injured Reserve,2026-11-20T19:55Z,Groin,Not Specified,Not Specified,2026-11-23,IR-R,"Croskey-Merritt (groin) said Friday he's taking things ""day by day,"" but his goal is to play Monday against the Bengals, John Keim of ESPN.com reports.",RB
 2576736,Lucas Patrick,Washington Commanders,Active,2026-11-20T02:13Z,,,,,,Patrick (concussion) was a full participant in Thursday's practice.,G
