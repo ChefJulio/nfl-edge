@@ -1,1 +1,52 @@
-{}
+{
+"00-0038394": {
+"name": "Will Mallory",
+"team": "IND",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-19T23:48:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039816": {
+"name": "Anthony Gould",
+"team": "IND",
+"pos": "WR",
+"pre": 0.9664,
+"ruling": "ACT",
+"at": "2026-11-19T23:51:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0039849": {
+"name": "Marvin Harrison Jr.",
+"team": "HOU",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-19T23:50:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040206": {
+"name": "Riley Leonard",
+"team": "IND",
+"pos": "QB",
+"pre": 0.0933,
+"ruling": "INA",
+"at": "2026-11-19T23:48:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040583": {
+"name": "Woody Marks",
+"team": "HOU",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-19T23:50:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+}
+}

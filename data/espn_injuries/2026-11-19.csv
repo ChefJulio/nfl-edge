@@ -299,18 +299,20 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Active,2026-11-15T17:29Z,,,,,,"Glover (knee) is active for Sunday's game against the Vikings, Mike Spofford of the Packers' official site reports.",OT
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
+3045474,Wyatt Teller,Houston Texans,Out,2026-11-19T23:50Z,Back,Not Specified,Not Specified,2026-11-19,INACTIVE,inactive,G
+4428656,Nate Thomas,Houston Texans,Out,2026-11-19T23:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,OT
+4429059,Woody Marks,Houston Texans,Out,2026-11-19T23:50Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,RB
+4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-19T23:50Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,WR
+4362732,Jake Andrews,Houston Texans,Out,2026-11-19T23:50Z,Coach's Decision,,,,INACTIVE,inactive,C
 3116679,M.J. Stewart,Houston Texans,Active,2026-11-19T20:44Z,,,,,,"Stewart is expected to move into a reserve safety role for Thursday night's game against the Colts, Aaron Wilson of KPRC 2 Houston reports.",S
 4243956,Reed Blankenship,Houston Texans,Active,2026-11-19T20:42Z,,,,,,"Blankenship is expected to move back into the defensive starting lineup Thursday night against the Colts, Aaron Wilson of KPRC 2 Houston reports.",S
 4686422,Xavier Hutchinson,Houston Texans,Active,2026-11-19T15:50Z,,,,,,"Hutchinson is expected to continue to benefit from elevated playing time Thursday against the Colts while Marvin Harrison (hamstring) is sidelined for a second straight game, Jared Koch of SI.com reports.",WR
-4241250,Jake Hummel,Houston Texans,Questionable,2026-11-19T02:19Z,Groin,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,Hummel (groin) is questionable for Houston's matchup against Indianapolis on Thursday.,LB
-4594277,Jaylin Smith,Houston Texans,Questionable,2026-11-19T02:10Z,Hamstring,Strain,Not Specified,2026-11-19,QUESTIONABLE,Smith (hamstring) is listed questionable for Thursday's game versus the Colts.,CB
+4241250,Jake Hummel,Houston Texans,Active,2026-11-19T02:19Z,,,,,,Hummel (groin) is questionable for Houston's matchup against Indianapolis on Thursday.,LB
+4594277,Jaylin Smith,Houston Texans,Active,2026-11-19T02:10Z,,,,,,Smith (hamstring) is listed questionable for Thursday's game versus the Colts.,CB
 4602699,Kamari Lassiter,Houston Texans,Active,2026-11-19T00:31Z,,,,,,Lassiter (wrist) does not have any injury designation ahead of Thursday night's game against the Colts.,CB
-2976560,Danielle Hunter,Houston Texans,Out,2026-11-19T00:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,Hunter (hamstring) has been ruled out ahead of Thursday night's game against the Colts.,DE
-4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,OUT,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
+2976560,Danielle Hunter,Houston Texans,Out,2026-11-19T00:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Hunter (hamstring) has been ruled out ahead of Thursday night's game against the Colts.,DE
+4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,INACTIVE,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-18T21:32Z,,,,,,"Demercado is expected to serve as the top complement to David Montgomery in Thursday's game against the Colts, with Woody Marks (concussion) ruled out for the contest.",RB
-3045474,Wyatt Teller,Houston Texans,Questionable,2026-11-18T21:19Z,Back,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,G
-4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-18T21:03Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,Harrison (hamstring) has been ruled out for Thursday night's game against the Colts.,WR
-4429059,Woody Marks,Houston Texans,Out,2026-11-18T20:51Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,Marks (concussion) has been ruled out for Thursday's game against the Colts.,RB
 4035538,David Montgomery,Houston Texans,Active,2026-11-18T19:56Z,,,,,,"Montgomery (groin) doesn't have an injury designation and is expected to play in Thursday's game against the Colts, Aaron Wilson of KPRC 2 Houston reports.",RB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-11-18T02:37Z,,,,,,To'oTo'o finished Sunday's 27-24 loss to the Browns with seven tackles (two solo).,LB
 4685724,Will Anderson Jr.,Houston Texans,Active,2026-11-18T02:35Z,,,,,,"Anderson posted four tackles (two solo), including 1.0 sacks, and one forced fumble during the Texans' 27-24 loss to the Browns on Sunday.",DE
@@ -322,27 +324,25 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3919117,Azeez Al-Shaair,Houston Texans,Injured Reserve,2026-11-17T01:03Z,Groin,Surgery,Not Specified,2026-12-20,IR,Al-Shaair (groin) did not participate in Monday's walkthrough practice.,LB
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-16T05:08Z,,,,,,Schultz caught one pass for an 11-yard touchdown on two targets in Sunday's 27-24 loss to the Browns.,TE
 4366031,Tank Dell,Houston Texans,Active,2026-11-16T01:16Z,,,,,,Dell brought in three of four targets for 21 yards and rushed once for no gain in the Texans' 27-24 loss to the Browns on Sunday.,WR
-4432577,C.J. Stroud,Houston Texans,Active,2026-11-15T23:56Z,,,,,,Stroud completed 20 of 38 passes for 211 yards with three touchdowns and one interception while adding three rushes for 20 yards in the Texans' 27-24 loss to the Browns on Sunday.,QB
-4258173,Nico Collins,Houston Texans,Active,2026-11-15T22:17Z,,,,,,Collins secured nine of 16 targets for 94 yards and a touchdown in the Texans' 27-24 loss to the Browns on Sunday.,WR
+4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-19T23:51Z,,,,,,Gould (toe) is active for Thursday night's game against the Texans.,WR
+4362580,Bernhard Raimann,Indianapolis Colts,Out,2026-11-19T23:48Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,OT
+3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-19T23:48Z,Calf,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,DT
+4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,OT
+4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
+4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-19T23:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,QB
+4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
+2566045,Luke Rhodes,Indianapolis Colts,Active,2026-11-19T23:48Z,,,,,,,LS
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
-4427250,Sauce Gardner,Indianapolis Colts,Questionable,2026-11-19T17:03Z,Calf,Not Specified,Left,2026-11-19,QUESTIONABLE,"According to Jane Slater of NFL Network, Gardner (calf) is not in line to play Thursday night against the Texans.",CB
-4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-19T01:57Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,Travis (knee) has been ruled out for Thursday's game against the Texans.,OT
-3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-19T01:55Z,Calf,Not Specified,Not Specified,2026-11-29,OUT,Tillery (calf) is officially listed as out for Thursday's game at Houston.,DT
-4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-18T20:58Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,The Colts have ruled out Ward (knee) for Thursday night's game against the Texans.,CB
-4362523,Will Mallory,Indianapolis Colts,Out,2026-11-18T20:51Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,The Colts ruled out Mallory (hamstring) for Thursday night's games against the Texans.,TE
-4429684,Anthony Gould,Indianapolis Colts,Questionable,2026-11-18T19:00Z,Toe,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,"Gould (toe) is listed as questionable for Thursday night's game against the Texans, Abby Halpin of the Colts' official site reports.",WR
-4362580,Bernhard Raimann,Indianapolis Colts,Out,2026-11-18T18:42Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,out,OT
+4427250,Sauce Gardner,Indianapolis Colts,Out,2026-11-19T17:03Z,Calf,Not Specified,Left,2026-11-29,INACTIVE,"According to Jane Slater of NFL Network, Gardner (calf) is not in line to play Thursday night against the Texans.",CB
 4682909,Justin Walley,Indianapolis Colts,Active,2026-11-18T17:53Z,,,,,,"Walley registered five tackles, a sack, a forced fumble and two pass breakups in Sunday's 24-22 win over the Dolphins.",CB
 4870598,CJ Allen,Indianapolis Colts,Active,2026-11-18T02:15Z,,,,,,"Allen posted nine tackles (three solo), including 1.0 sacks, and one pass defense during the Colts' 24-22 win over the Dolphins on Sunday.",LB
 4061956,Ashton Dulin,Indianapolis Colts,Active,2026-11-18T00:51Z,,,,,,Dulin caught one of two targets for 30 yards and returned three kickoffs for 77 yards during the Colts' 24-22 win over the Dolphins on Sunday. He also recorded two tackles on special teams.,WR
 4683151,Deion Burks,Indianapolis Colts,Active,2026-11-18T00:44Z,,,,,,Burks failed to haul in either of his two targets during the Colts' 24-22 win over the Dolphins on Sunday. He also recorded one tackle on special teams.,WR
 4601021,Jaylon Carlies,Indianapolis Colts,Injured Reserve,2026-11-18T00:24Z,Neck,Not Specified,Not Specified,2026-12-27,IR,Indianapolis placed Carlies (neck) on injured reserve Tuesday.,LB
 4050373,Quez Watkins,Indianapolis Colts,Active,2026-11-18T00:20Z,,,,,,The Colts signed Watkins from their practice squad to their 53-man roster Tuesday.,WR
-2566045,Luke Rhodes,Indianapolis Colts,Questionable,2026-11-17T12:19Z,Hamstring,Not Specified,Not Specified,2026-11-19,QUESTIONABLE,questionable,LS
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-17T02:03Z,,,,,,Treadwell caught three passes on as many targets for 24 yards and a touchdown during Indianapolis' 24-22 win over Miami on Sunday.,WR
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-17T01:49Z,,,,,,Giddens played two offensive snaps and didn't show up on the box score otherwise during the Colts' 24-22 win over the Dolphins on Sunday.,RB
-4683423,Riley Leonard,Indianapolis Colts,Active,2026-11-16T19:19Z,,,,,,,QB
 4686468,Seth McGowan,Indianapolis Colts,Active,2026-11-16T02:23Z,,,,,,McGowan rushed 12 times for 77 yards and a touchdown and returned two kickoffs for 61 yards in the Colts' 24-22 win over the Dolphins on Sunday.,RB
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-16T01:39Z,,,,,,Jones completed 11 of 22 passes for 108 yards with one touchdown and two interceptions while adding five carries for nine yards in the Colts' 24-22 win over the Dolphins on Sunday. He also fumbled once but recovered.,QB
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-16T01:30Z,,,,,,Warren rushed once for three yards and brought in two of three targets for one yard in the Colts' 24-22 win over the Dolphins on Sunday.,TE
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-09T05:30Z,,,,,,Godwin caught two of three targets for 16 yards and added a 12-yard rush during Sunday night's 27-24 loss to the Bears.,WR
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-09T05:23Z,,,,,,Gainwell rushed five times for 16 yards and caught all three of his targets for 60 yards in Sunday's 27-24 loss to the Bears.,RB
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-09T05:20Z,,,,,,Egbuka (foot) caught three of five targets for 38 yards and added a one-yard run in Sunday's 27-24 loss to the Bears.,WR
+4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-19T23:40Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Spears (knee) was limited in practice Thursday.,RB
 4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-19T21:13Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Tate (shoulder) was a limited participant in Thursday's practice.,WR
 4685617,Kevin Winston Jr.,Tennessee Titans,Questionable,2026-11-19T21:13Z,Shoulder,,,2026-11-22,QUESTIONABLE,questionable,S
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-19T02:26Z,,,,,,Gray posted nine tackles (eight solo) and two pass defenses (including an interception) during the Titans' 40-23 loss to the Jaguars in Week 10.,LB
@@ -757,7 +758,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-19T00:25Z,,,,,,"Franklin-Myers (back) was limited in Wednesday's practice, Paul Kuharsky of PaulKuharsky.com reports.",DE
 4240532,Tony Adams,Tennessee Titans,Questionable,2026-11-19T00:19Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,"Adams (concussion) did not participate in Wednesday's practice, Paul Kuharsky of PaulKuharsky.com reports.",S
 4710000,Fernando Carmona,Tennessee Titans,Injured Reserve,2026-11-18T21:49Z,Ankle,Sprain,Not Specified,2026-11-22,IR-R,"The Titans designated Carmona (ankle) for return from injured reserve Wednesday, Jim Wyatt of the team's official site reports.",G
-4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-18T21:45Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Spears (knee) didn't practice Wednesday.,RB
 4569587,Wan'Dale Robinson,Tennessee Titans,Injured Reserve,2026-11-18T17:29Z,Ankle,Not Specified,Not Specified,2027-02-15,IR,"Coach Robert Saleh said Wednesday that Robinson (ankle) -- who was placed on IR on Tuesady -- is out for the rest of the season, Terry McCormick of TitanInsider.com reports.",WR
 4367567,Julius Chestnut,Tennessee Titans,Active,2026-11-18T15:41Z,,,,,,Chestnut played all 25 of his snaps on special teams in Sunday's 40-23 win over the Jaguars.,RB
 4431353,Xavier Restrepo,Tennessee Titans,Active,2026-11-18T15:25Z,,,,,,"Restrepo, whom the Titans signed off their practice squad Tuesday, could be in store for more playing time out of the slot moving forward after Tennessee placed Wan'Dale Robinson (ankle) on injured reserve, Mark Mihalko of USA Today reports.",WR
