@@ -99,9 +99,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915416,DJ Moore,Buffalo Bills,Active,2026-11-16T00:30Z,,,,,,Moore caught four of six targets for 90 yards and a touchdown while rushing once for four yards in Sunday's 31-12 win over the Jets.,WR
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-15T22:00Z,,,,,,"Allen completed 11 of 21 passes for 196 yards, one touchdown and one interception while rushing five times for five yards and two touchdowns in Sunday's 31-12 win over the Jets.",QB
 4379399,James Cook III,Buffalo Bills,Active,2026-11-15T21:58Z,,,,,,Cook rushed 18 times for 157 yards and a touchdown and didn't catch his only target in Sunday's 31-12 win over the Jets.,RB
+2576925,Darren Waller,Carolina Panthers,Questionable,2026-11-20T16:38Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Waller (knee) is practicing again Friday, Joseph Person of The Athletic reports.",TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-19T20:25Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tremble (knee) was limited in Thursday's practice, Mike Kaye of ESPN.com reports.",TE
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-19T20:22Z,Groin,Surgery,Not Specified,2026-11-22,IR-R,"Brooks (groin) remained a full participant in Thursday's practice, Mike Kaye of ESPN.com reports.",RB
-2576925,Darren Waller,Carolina Panthers,Questionable,2026-11-19T20:08Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Waller (knee) was a limited participant in Thursday's practice, Mike Kaye of ESPN reports.",TE
 5151083,Will Lee III,Carolina Panthers,Active,2026-11-19T00:17Z,,,,,,Lee (hamstring) was a full participant in Wednesday's practice.,CB
 3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-19T00:16Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Okereke (foot) did not participate in Wednesday's practice.,LB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-18T21:09Z,,,,,,Young was listed with a sore foot on Wednesday's injury report but was a full participant in the Panthers' first Week 11 practice.,QB
@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4602699,Kamari Lassiter,Houston Texans,Active,2026-11-19T00:31Z,,,,,,Lassiter (wrist) does not have any injury designation ahead of Thursday night's game against the Colts.,CB
 2976560,Danielle Hunter,Houston Texans,Out,2026-11-19T00:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Hunter (hamstring) has been ruled out ahead of Thursday night's game against the Colts.,DE
 4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,INACTIVE,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
+4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-20T16:36Z,,,,,,Giddens rushed one time for five yards and caught his lone target for 11 yards in Thursday night's 26-3 loss to the Texans.,RB
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-20T16:07Z,,,,,,Treadwell failed to catch his lone target in Thursday night's 26-3 loss to the Texans.,WR
 4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-20T05:16Z,,,,,,Gould secured two of three targets for 48 yards in the Colts' 26-3 loss to the Texans on Thursday.,WR
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-20T05:05Z,,,,,,Warren brought in one of five targets for 22 yards in the Colts' 26-3 loss to the Texans on Thursday.,TE
@@ -346,7 +347,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4601021,Jaylon Carlies,Indianapolis Colts,Injured Reserve,2026-11-18T00:24Z,Neck,Not Specified,Not Specified,2026-12-27,IR,Indianapolis placed Carlies (neck) on injured reserve Tuesday.,LB
 4050373,Quez Watkins,Indianapolis Colts,Active,2026-11-18T00:20Z,,,,,,The Colts signed Watkins from their practice squad to their 53-man roster Tuesday.,WR
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
-4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-17T01:49Z,,,,,,Giddens played two offensive snaps and didn't show up on the box score otherwise during the Colts' 24-22 win over the Dolphins on Sunday.,RB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Injured Reserve,2026-11-14T17:34Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Davis-Gaither (knee) on injured reserve Saturday.,LB
 3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-20T15:46Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tuten (ankle/foot), per head coach Liam Coen, ""will maybe run around a little bit"" at Friday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
@@ -399,6 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-15T22:31Z,,,,,,Rice brought in five of six targets for 82 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,WR
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T22:08Z,,,,,,Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,QB
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-11-15T16:52Z,,,,,,"Delane (shoulder) is active for Sunday's game against the Falcons, Matt McMullen of the Chiefs' official site reports.",CB
+4249087,Matt Gay,Las Vegas Raiders,Questionable,2026-11-20T16:46Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Gay (hip) didn't practice Thursday.,PK
 4431623,Trey Zuhn III,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Illness,,,2026-11-22,QUESTIONABLE,questionable,C
 4045305,Ian Thomas,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Calf,,,2026-11-22,QUESTIONABLE,questionable,TE
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-19T22:38Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle/quadriceps) was listed as a limited participant in Thursday's practice, Ryan McFadden of ESPN.com reports.",TE
@@ -407,7 +408,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Questionable,2026-11-19T01:39Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Fatukasi (toe) was a limited participant at practice Wednesday, Sam Warren of The Athletic reports.",DT
 4258194,Kwity Paye,Las Vegas Raiders,Active,2026-11-19T01:37Z,,,,,,"Paye (neck) was not listed on the Raiders' injury report Wednesday, Sam Warren of The Athletic reports.",DE
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Active,2026-11-19T01:35Z,,,,,,"Thornton (back) was a full participant in Las Vegas' practice Wednesday, Sam Warren of The Athletic reports.",WR
-4249087,Matt Gay,Las Vegas Raiders,Questionable,2026-11-19T00:07Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Gay (hip) was a limited participant at practice Wednesday, Sam Warren of The Athletic reports.",PK
 4043169,Jeremy Chinn,Las Vegas Raiders,Active,2026-11-18T03:34Z,,,,,,Chinn tallied seven tackles (three solo) in a loss to Seattle on Sunday.,S
 4379416,Quay Walker,Las Vegas Raiders,Active,2026-11-18T03:27Z,,,,,,Walker posted eight tackles (four solo) and recovered a fumble against Seattle in Sunday's Week 10 loss.,LB
 4426340,Nakobe Dean,Las Vegas Raiders,Active,2026-11-18T03:16Z,,,,,,Dean registered eight tackles (five solo) and recovered a fumble Sunday in a Week 10 loss to the Seahawks.,LB
