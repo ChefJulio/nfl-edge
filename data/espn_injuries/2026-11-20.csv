@@ -299,6 +299,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Active,2026-11-15T17:29Z,,,,,,"Glover (knee) is active for Sunday's game against the Vikings, Mike Spofford of the Packers' official site reports.",OT
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
+3117256,Dalton Schultz,Houston Texans,Active,2026-11-20T05:13Z,,,,,,Schultz brought in his only target for 11 yards in the Texans' 26-3 win over the Colts on Thursday.,TE
+4366031,Tank Dell,Houston Texans,Active,2026-11-20T05:09Z,,,,,,Dell secured three of four targets for 27 yards in the Texans' 26-3 win over the Colts on Thursday.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-20T04:52Z,,,,,,Stroud completed 21 of 26 passes for 194 yards with three touchdowns and one interception and rushed six times for 27 yards in the Texans' 26-3 win over the Colts on Thursday.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-11-20T04:41Z,,,,,,Collins secured three of five targets for 58 yards and a touchdown in the Texans' 26-3 win over the Colts on Thursday.,WR
 4035538,David Montgomery,Houston Texans,Active,2026-11-20T04:36Z,,,,,,Montgomery rushed 26 times for 107 yards and brought in three of four targets for 17 yards in the Texans' 26-3 win over the Colts on Thursday.,RB
@@ -322,15 +324,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,INACTIVE,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-18T21:32Z,,,,,,"Demercado is expected to serve as the top complement to David Montgomery in Thursday's game against the Colts, with Woody Marks (concussion) ruled out for the contest.",RB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-11-18T02:37Z,,,,,,To'oTo'o finished Sunday's 27-24 loss to the Browns with seven tackles (two solo).,LB
-4685724,Will Anderson Jr.,Houston Texans,Active,2026-11-18T02:35Z,,,,,,"Anderson posted four tackles (two solo), including 1.0 sacks, and one forced fumble during the Texans' 27-24 loss to the Browns on Sunday.",DE
-4033812,Jake Hansen,Houston Texans,Active,2026-11-18T02:26Z,,,,,,Hansen posted 12 tackles (four solo) during Houston's 27-24 loss to Cleveland on Sunday.,LB
+4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-20T05:16Z,,,,,,Gould secured two of three targets for 48 yards in the Colts' 26-3 loss to the Texans on Thursday.,WR
+4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-20T05:05Z,,,,,,Warren brought in one of five targets for 22 yards in the Colts' 26-3 loss to the Texans on Thursday.,TE
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-20T05:01Z,,,,,,Jones completed 12 of 27 passes for 144 yards with no touchdowns and one interception and rushed once for three yards in the Colts' 26-3 loss to the Texans on Thursday before being replaced by Anthony Richardson with 7:51 remaining.,QB
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-20T04:46Z,,,,,,Taylor rushed 11 times for 21 yards and brought in four of five targets for six yards in the Colts' 26-3 loss to the Texans on Thursday.,RB
 4686468,Seth McGowan,Indianapolis Colts,Questionable,2026-11-20T03:28Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"McGowan (hamstring) has been ruled out for the rest of Thursday's game against the Texans, Jane Slater of NFL Network reports.",RB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-20T00:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Leonard (coach's decision) is inactive but will serve as the Colts' emergency third quarterback for Thursday's game at Houston.,QB
 2566045,Luke Rhodes,Indianapolis Colts,Active,2026-11-20T00:09Z,,,,,,Rhodes (hamstring) is active for Thursday night's game against the Texans.,LS
 4427250,Sauce Gardner,Indianapolis Colts,Out,2026-11-20T00:04Z,Calf,Not Specified,Left,2026-11-29,INACTIVE,Gardner (calf) is inactive for Thursday night's game against the Texans.,CB
-4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-19T23:51Z,,,,,,Gould (toe) is active for Thursday night's game against the Texans.,WR
 4362580,Bernhard Raimann,Indianapolis Colts,Out,2026-11-19T23:48Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,OT
 3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-19T23:48Z,Calf,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,DT
 4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,OT
@@ -346,7 +347,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-17T02:03Z,,,,,,Treadwell caught three passes on as many targets for 24 yards and a touchdown during Indianapolis' 24-22 win over Miami on Sunday.,WR
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-17T01:49Z,,,,,,Giddens played two offensive snaps and didn't show up on the box score otherwise during the Colts' 24-22 win over the Dolphins on Sunday.,RB
-4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-16T01:30Z,,,,,,Warren rushed once for three yards and brought in two of three targets for one yard in the Colts' 24-22 win over the Dolphins on Sunday.,TE
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Injured Reserve,2026-11-14T17:34Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Davis-Gaither (knee) on injured reserve Saturday.,LB
 3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
 4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Questionable,2026-11-19T21:26Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Allen (hamstring) was a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
