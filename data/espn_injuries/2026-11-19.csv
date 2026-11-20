@@ -299,9 +299,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361904,Travis Glover,Green Bay Packers,Active,2026-11-15T17:29Z,,,,,,"Glover (knee) is active for Sunday's game against the Vikings, Mike Spofford of the Packers' official site reports.",OT
 4686906,Lukas Van Ness,Green Bay Packers,Active,2026-11-15T17:18Z,,,,,,Van Ness (back) is active for Sunday's game against the Vikings.,DE
 4688930,Javon Bullard,Green Bay Packers,Active,2026-11-15T17:12Z,,,,,,Bullard (ankle) is active for Sunday's game against the Vikings.,S
+4035538,David Montgomery,Houston Texans,Active,2026-11-20T04:36Z,,,,,,Montgomery rushed 26 times for 107 yards and brought in three of four targets for 17 yards in the Texans' 26-3 win over the Colts on Thursday.,RB
+4839498,Keylan Rutledge,Houston Texans,Questionable,2026-11-20T04:23Z,Undisclosed,Stinger,,2026-11-29,QUESTIONABLE,Rutledge (stinger) was deemed questionable to return near the end of Thursday's 26-3 win against Indianapolis and didn't end up re-entering the game.,G
+4429022,Kayshon Boutte,Houston Texans,Questionable,2026-11-20T04:14Z,Hip,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Boutte (hip) was deemed questionable to return to Thursday's Week 11 win over Indianapolis and didn't return to the game.,WR
 3043109,Trent Brown,Houston Texans,Active,2026-11-20T02:55Z,,,,,,"Brown (back) has returned to Thursday's game versus the Colts, Aaron Wilson of KPRC 2 Houston reports.",OT
-2970204,Sheldon Rankins,Houston Texans,Questionable,2026-11-20T02:50Z,Ankle,,,2026-11-19,QUESTIONABLE,Rankins (ankle) is questionable to return to Thursday's game versus the Colts.,DT
-4428989,Chris Braswell,Houston Texans,Out,2026-11-20T01:51Z,Knee,,,2026-11-29,OUT,Braswell has been ruled out for the remainder of Thursday's game versus the Colts with a knee injury.,DE
+2970204,Sheldon Rankins,Houston Texans,Questionable,2026-11-20T02:50Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Rankins (ankle) is questionable to return to Thursday's game versus the Colts.,DT
+4428989,Chris Braswell,Houston Texans,Doubtful,2026-11-20T01:51Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,Braswell has been ruled out for the remainder of Thursday's game versus the Colts with a knee injury.,DE
 3045474,Wyatt Teller,Houston Texans,Out,2026-11-20T00:20Z,Back,Not Specified,Not Specified,2026-11-29,INACTIVE,Teller (back) is inactive for Thursday's game versus the Colts.,G
 4241250,Jake Hummel,Houston Texans,Active,2026-11-20T00:16Z,,,,,,Hummel (groin) is active for Thursday Night Football against the Colts.,LB
 4594277,Jaylin Smith,Houston Texans,Active,2026-11-20T00:06Z,,,,,,Smith (hamstring) is active for Thursday night's game against the Colts.,CB
@@ -316,15 +319,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2976560,Danielle Hunter,Houston Texans,Out,2026-11-19T00:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Hunter (hamstring) has been ruled out ahead of Thursday night's game against the Colts.,DE
 4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,INACTIVE,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
 4362478,Emari Demercado,Houston Texans,Active,2026-11-18T21:32Z,,,,,,"Demercado is expected to serve as the top complement to David Montgomery in Thursday's game against the Colts, with Woody Marks (concussion) ruled out for the contest.",RB
-4035538,David Montgomery,Houston Texans,Active,2026-11-18T19:56Z,,,,,,"Montgomery (groin) doesn't have an injury designation and is expected to play in Thursday's game against the Colts, Aaron Wilson of KPRC 2 Houston reports.",RB
 4426350,Henry To'oTo'o,Houston Texans,Active,2026-11-18T02:37Z,,,,,,To'oTo'o finished Sunday's 27-24 loss to the Browns with seven tackles (two solo).,LB
 4685724,Will Anderson Jr.,Houston Texans,Active,2026-11-18T02:35Z,,,,,,"Anderson posted four tackles (two solo), including 1.0 sacks, and one forced fumble during the Texans' 27-24 loss to the Browns on Sunday.",DE
 4033812,Jake Hansen,Houston Texans,Active,2026-11-18T02:26Z,,,,,,Hansen posted 12 tackles (four solo) during Houston's 27-24 loss to Cleveland on Sunday.,LB
-4429022,Kayshon Boutte,Houston Texans,Active,2026-11-17T05:25Z,,,,,,Boutte failed to catch his lone target in Sunday's 27-24 loss to the Browns.,WR
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-11-17T03:47Z,,,,,,Fairbairn converted his sole field-goal attempt and made all three PATs in the Texans' 27-24 loss to the Browns on Sunday.,PK
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-17T01:41Z,,,,,,"Ogunbowale reverted to the Texans' practice squad Monday, per the NFL's official transaction log.",RB
-4839498,Keylan Rutledge,Houston Texans,Active,2026-11-17T01:12Z,,,,,,Rutledge (neck) was a full participant in Monday's walkthrough practice.,G
-4686468,Seth McGowan,Indianapolis Colts,Out,2026-11-20T03:28Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,"McGowan (hamstring) has been ruled out for the rest of Thursday's game against the Texans, Jane Slater of NFL Network reports.",RB
+4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-20T04:46Z,,,,,,Taylor rushed 11 times for 21 yards and brought in four of five targets for six yards in the Colts' 26-3 loss to the Texans on Thursday.,RB
+4686468,Seth McGowan,Indianapolis Colts,Questionable,2026-11-20T03:28Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"McGowan (hamstring) has been ruled out for the rest of Thursday's game against the Texans, Jane Slater of NFL Network reports.",RB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-20T00:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Leonard (coach's decision) is inactive but will serve as the Colts' emergency third quarterback for Thursday's game at Houston.,QB
 2566045,Luke Rhodes,Indianapolis Colts,Active,2026-11-20T00:09Z,,,,,,Rhodes (hamstring) is active for Thursday night's game against the Texans.,LS
 4427250,Sauce Gardner,Indianapolis Colts,Out,2026-11-20T00:04Z,Calf,Not Specified,Left,2026-11-29,INACTIVE,Gardner (calf) is inactive for Thursday night's game against the Texans.,CB
@@ -346,7 +347,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-17T01:49Z,,,,,,Giddens played two offensive snaps and didn't show up on the box score otherwise during the Colts' 24-22 win over the Dolphins on Sunday.,RB
 3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-16T01:39Z,,,,,,Jones completed 11 of 22 passes for 108 yards with one touchdown and two interceptions while adding five carries for nine yards in the Colts' 24-22 win over the Dolphins on Sunday. He also fumbled once but recovered.,QB
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-16T01:30Z,,,,,,Warren rushed once for three yards and brought in two of three targets for one yard in the Colts' 24-22 win over the Dolphins on Sunday.,TE
-4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-15T22:23Z,,,,,,Taylor rushed 16 times for 83 yards and brought in two of four targets for 20 yards in the Colts' 24-22 win over the Dolphins on Sunday. He also committed a fumble that stayed with Indianapolis.,RB
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Injured Reserve,2026-11-14T17:34Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Davis-Gaither (knee) on injured reserve Saturday.,LB
 3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
 4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Questionable,2026-11-19T21:26Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Allen (hamstring) was a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
