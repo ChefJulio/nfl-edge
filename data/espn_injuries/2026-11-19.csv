@@ -324,7 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2971573,Ka'imi Fairbairn,Houston Texans,Active,2026-11-17T03:47Z,,,,,,Fairbairn converted his sole field-goal attempt and made all three PATs in the Texans' 27-24 loss to the Browns on Sunday.,PK
 2983509,Dare Ogunbowale,Houston Texans,Active,2026-11-17T01:41Z,,,,,,"Ogunbowale reverted to the Texans' practice squad Monday, per the NFL's official transaction log.",RB
 4839498,Keylan Rutledge,Houston Texans,Active,2026-11-17T01:12Z,,,,,,Rutledge (neck) was a full participant in Monday's walkthrough practice.,G
-4686468,Seth McGowan,Indianapolis Colts,Questionable,2026-11-20T03:06Z,Hamstring,,,2026-11-19,QUESTIONABLE,questionable,RB
+4686468,Seth McGowan,Indianapolis Colts,Out,2026-11-20T03:28Z,Hamstring,Not Specified,Not Specified,2026-11-29,OUT,"McGowan (hamstring) has been ruled out for the rest of Thursday's game against the Texans, Jane Slater of NFL Network reports.",RB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-20T00:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Leonard (coach's decision) is inactive but will serve as the Colts' emergency third quarterback for Thursday's game at Houston.,QB
 2566045,Luke Rhodes,Indianapolis Colts,Active,2026-11-20T00:09Z,,,,,,Rhodes (hamstring) is active for Thursday night's game against the Texans.,LS
 4427250,Sauce Gardner,Indianapolis Colts,Out,2026-11-20T00:04Z,Calf,Not Specified,Left,2026-11-29,INACTIVE,Gardner (calf) is inactive for Thursday night's game against the Texans.,CB
@@ -651,7 +651,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-20T00:32Z,,,,,,"Elliott (knee) was a full participant in practice Thursday, Mike DeFabo of The Athletic reports.",S
 4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-11-19T21:46Z,Finger,Not Specified,Left,2026-11-22,IR-R,Wilson (finger) was a full participant in Thursday's practice.,WR
-4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-19T21:05Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR-R,"Pittman (foot) was listed as a full participant in Thursday's practice, Alan Saunders of SteelersNow.com reports.",WR
+4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-19T18:28Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR-R,"Pittman (foot) participated in practice Thursday, Nick Farabaugh of PennLive.com reports.",WR
 4429164,Nick Herbig,Pittsburgh Steelers,Questionable,2026-11-19T02:13Z,Hip,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Herbig (hip) did not participate in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",LB
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-19T02:00Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,"The Steelers designated Dunker (knee) for return to practice from injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4368304,Mason McCormick,Pittsburgh Steelers,Injured Reserve,2026-11-19T01:44Z,Ankle,Dislocated,Not Specified,2027-01-03,IR,"The Steelers placed McCormick (ankle) on injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
