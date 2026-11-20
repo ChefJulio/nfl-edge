@@ -399,6 +399,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-15T22:31Z,,,,,,Rice brought in five of six targets for 82 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,WR
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-15T22:08Z,,,,,,Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,QB
 4880124,Mansoor Delane,Kansas City Chiefs,Active,2026-11-15T16:52Z,,,,,,"Delane (shoulder) is active for Sunday's game against the Falcons, Matt McMullen of the Chiefs' official site reports.",CB
+4431623,Trey Zuhn III,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Illness,,,2026-11-22,QUESTIONABLE,questionable,C
+4045305,Ian Thomas,Las Vegas Raiders,Questionable,2026-11-20T12:40Z,Calf,,,2026-11-22,QUESTIONABLE,questionable,TE
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-19T22:38Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Bowers (ankle/quadriceps) was listed as a limited participant in Thursday's practice, Ryan McFadden of ESPN.com reports.",TE
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-19T02:15Z,,,,,,"Booker (ankle) was a full participant in Wednesday's practice, Sam Warren of The Athletic reports.",DT
 4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-19T01:42Z,Upper Body,Stinger,Not Specified,2026-11-22,QUESTIONABLE,"Hemingway (upper body) didn't participate in Las Vegas' practice Wednesday, Sam Warren of The Athletic reports.",DT
@@ -422,8 +424,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-16T02:35Z,,,,,,"Mendoza completed 17 of 29 passes for 143 yards, no touchdowns and no interceptions and rushed six times for 22 yards and one TD during Sunday's 21-13 loss to the Seahawks.",QB
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-16T02:19Z,,,,,,Washington compiled eight rushes for 23 yards and secured his only target for four yards during Sunday's 21-13 defeat to the Seahawks.,RB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-16T02:10Z,,,,,,Jeanty turned his nine carries into just 18 yards and caught all four of his targets for 46 yards during Sunday's 21-13 loss to the Seahawks.,RB
-5150247,Malik Benson,Las Vegas Raiders,Active,2026-11-15T19:59Z,,,,,,Benson (coach's decision) is inactive for Sunday's game against the Seahawks.,WR
-4431623,Trey Zuhn III,Las Vegas Raiders,Active,2026-11-14T02:14Z,,,,,,"Zuhn (concussion) does not have any injury designation ahead of Sunday's game against the Seahawks, Ryan McFadden of ESPN.com reports.",C
 4241263,Charlie Kolar,Los Angeles Chargers,Questionable,2026-11-19T23:20Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Kolar (concussion) remained sidelined for Thursday's practice.,TE
 4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-19T23:15Z,Back,Spasms,Not Specified,2026-11-22,QUESTIONABLE,McConkey (back) was a limited participant in Thursday's practice.,WR
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-11-19T02:47Z,,,,,,Tomlinson recorded five tackles (three solo) including 2.0 sacks during Monday's 23-20 win at Baltimore.,DT
@@ -602,7 +602,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3117255,Harrison Phillips,New York Jets,Questionable,2026-11-20T01:53Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Phillips (ankle) was a limited participant in practice Thursday.,DT
 15864,Geno Smith,New York Jets,Questionable,2026-11-19T22:48Z,Ankle,Not Specified,Left,2026-11-22,QUESTIONABLE,Smith (ankle) was a limited participant in Thursday's practice.,QB
 4569371,Isaiah Williams,New York Jets,Questionable,2026-11-19T22:43Z,Ribs,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Williams (ribs) was a non-participant in Thursday's practice.,WR
-4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-19T22:37Z,Ankle,Not Specified,Right,2026-11-22,QUESTIONABLE,Cooper didn't practice Thursday due to ankle and hip injuries.,WR
+4723820,Omar Cooper Jr.,New York Jets,Out,2026-11-19T22:37Z,Ankle,Not Specified,Right,2026-11-29,OUT,Cooper didn't practice Thursday due to ankle and hip injuries.,WR
 4426817,Jarvis Brownlee Jr.,New York Jets,Active,2026-11-19T02:05Z,,,,,,"Brownlee (illness) was a full participant in Wednesday's walkthrough practice, Rich Cimini of ESPN.com reports.",CB
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-18T22:04Z,Foot,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DE
 4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-18T19:38Z,Abdomen,Surgery,Not Specified,2026-11-22,IR-R,"The Jets designated Onyemata (groin) to return from the injured reserve list Wednesday, Eric Allen of the Jets' official site reports.",DT
