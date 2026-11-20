@@ -74,14 +74,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3043078,Derrick Henry,Baltimore Ravens,Active,2026-11-17T05:01Z,,,,,,Henry rushed 10 times for 10 yards and two touchdowns and brought in all five targets for 10 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,RB
 4428512,Kedon Slovis,Baltimore Ravens,Active,2026-11-17T00:09Z,,,,,,Slovis (coach's decision) is inactive but serving as the Ravens' emergency No. 3 quarterback Monday night versus the Chargers.,QB
 4601278,Nate Wiggins,Baltimore Ravens,Active,2026-11-13T00:53Z,,,,,,Wiggins (illness) was a full participant in Thursday's practice.,CB
-4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-20T17:23Z,Thumb,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Kincaid (thumb) wasn't spotted at Friday's practice, Joe Buscaglia of The Athletic reports.",TE
-4379778,Christian Benford,Buffalo Bills,Questionable,2026-11-20T01:08Z,Groin,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Benford (groin) did not participate at practice Thursday.,CB
+4385690,Dalton Kincaid,Buffalo Bills,Doubtful,2026-11-20T18:16Z,Thumb,Not Specified,Not Specified,2026-11-22,DOUBTFUL,"Kincaid (thumb/ankle) is listed as doubtful for Sunday's game against the Dolphins, Matt Parrino reports.",TE
+4379778,Christian Benford,Buffalo Bills,Out,2026-11-20T01:08Z,Groin,Not Specified,Not Specified,2026-11-26,OUT,Benford (groin) did not participate at practice Thursday.,CB
 4676004,Cole Bishop,Buffalo Bills,Active,2026-11-20T01:06Z,,,,,,"Bishop (knee) was a full participant in practice Thursday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",S
 4401823,Dee Alford,Buffalo Bills,Questionable,2026-11-20T01:04Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Alford (concussion) was a limited participant at practice Thursday.,CB
 4429501,Ray Davis,Buffalo Bills,Questionable,2026-11-19T23:31Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Davis (hamstring) remained limited in Thursday's practice.,RB
 4684527,T.J. Sanders,Buffalo Bills,Questionable,2026-11-19T21:35Z,Shoulder,,,2026-11-22,QUESTIONABLE,questionable,DT
 4870886,TJ Parker,Buffalo Bills,Active,2026-11-19T02:39Z,,,,,,"Parker accumulated five tackles (three solo), including 2.0 sacks, in the Bills' 31-12 win over the Jets on Sunday.",LB
-4568624,Dorian Williams,Buffalo Bills,Questionable,2026-11-19T01:29Z,Calf,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Williams (calf) didn't participate in Buffalo's walkthrough Wednesday.,LB
+4568624,Dorian Williams,Buffalo Bills,Questionable,2026-11-19T01:29Z,Calf,Not Specified,Not Specified,2026-11-26,OUT,Williams (calf) didn't participate in Buffalo's walkthrough Wednesday.,LB
 4573699,Jackson Hawes,Buffalo Bills,Questionable,2026-11-19T01:14Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Hawes (shoulder) was a late addition to Wednesday's injury report, Katherine Fitzgerald of The Buffalo News.",TE
 4036134,Amani Hooker,Buffalo Bills,Questionable,2026-11-19T00:54Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hooker (knee) was a limited participant in Wednesday's walkthrough.,S
 4036060,Damar Hamlin,Buffalo Bills,Questionable,2026-11-19T00:13Z,Toe,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hamlin (toe) was estimated to be a limited participant in Wednesday's walkthrough.,S
@@ -324,11 +324,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4602699,Kamari Lassiter,Houston Texans,Active,2026-11-19T00:31Z,,,,,,Lassiter (wrist) does not have any injury designation ahead of Thursday night's game against the Colts.,CB
 2976560,Danielle Hunter,Houston Texans,Out,2026-11-19T00:23Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,Hunter (hamstring) has been ruled out ahead of Thursday night's game against the Colts.,DE
 4362504,Brevin Jordan,Houston Texans,Out,2026-11-19T00:19Z,Foot,Not Specified,Not Specified,2026-11-29,INACTIVE,Jordan (foot/illness) has been ruled out ahead of Thursday night's game against the Colts.,TE
+4429084,Anthony Richardson Sr.,Indianapolis Colts,Active,2026-11-20T18:16Z,,,,,,Head coach Shane Steichen announced Friday that Richardson will be the Colts' starting quarterback moving forward after the team waived Daniel Jones.,QB
+3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-20T18:11Z,,,,,,"Jones will be waived by the Colts, Adam Schefter of ESPN reports.",QB
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-20T16:36Z,,,,,,Giddens rushed one time for five yards and caught his lone target for 11 yards in Thursday night's 26-3 loss to the Texans.,RB
 3051889,Laquon Treadwell,Indianapolis Colts,Active,2026-11-20T16:07Z,,,,,,Treadwell failed to catch his lone target in Thursday night's 26-3 loss to the Texans.,WR
 4429684,Anthony Gould,Indianapolis Colts,Active,2026-11-20T05:16Z,,,,,,Gould secured two of three targets for 48 yards in the Colts' 26-3 loss to the Texans on Thursday.,WR
 4431459,Tyler Warren,Indianapolis Colts,Active,2026-11-20T05:05Z,,,,,,Warren brought in one of five targets for 22 yards in the Colts' 26-3 loss to the Texans on Thursday.,TE
-3917792,Daniel Jones,Indianapolis Colts,Active,2026-11-20T05:01Z,,,,,,Jones completed 12 of 27 passes for 144 yards with no touchdowns and one interception and rushed once for three yards in the Colts' 26-3 loss to the Texans on Thursday before being replaced by Anthony Richardson with 7:51 remaining.,QB
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-20T04:46Z,,,,,,Taylor rushed 11 times for 21 yards and brought in four of five targets for six yards in the Colts' 26-3 loss to the Texans on Thursday.,RB
 4686468,Seth McGowan,Indianapolis Colts,Questionable,2026-11-20T03:28Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"McGowan (hamstring) has been ruled out for the rest of Thursday's game against the Texans, Jane Slater of NFL Network reports.",RB
 4683423,Riley Leonard,Indianapolis Colts,Out,2026-11-20T00:10Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Leonard (coach's decision) is inactive but will serve as the Colts' emergency third quarterback for Thursday's game at Houston.,QB
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4050373,Quez Watkins,Indianapolis Colts,Active,2026-11-18T00:20Z,,,,,,The Colts signed Watkins from their practice squad to their 53-man roster Tuesday.,WR
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Injured Reserve,2026-11-14T17:34Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Davis-Gaither (knee) on injured reserve Saturday.,LB
-3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-20T17:28Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tuten (ankle/foot) was present for the stretching portion of Friday's practice before moving to a side field, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Questionable,2026-11-19T21:26Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Allen (hamstring) was a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Questionable,2026-11-19T21:24Z,Hand,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Rodriguez (hand) was listed as a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
@@ -574,7 +574,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685479,Christen Miller,New Orleans Saints,Injured Reserve,2026-11-15T01:04Z,Knee,Not Specified,Not Specified,2026-12-13,IR,The Saints placed Miller (knee) on injured reserve Saturday.,DT
 3917660,David Edwards,New Orleans Saints,Active,2026-11-14T01:59Z,,,,,,"Edwards (knee) does not have an injury designation against the Panthers on Sunday, Ross Jackson of WWL-TV reports.",G
 4685260,Kelvin Banks Jr.,New Orleans Saints,Active,2026-11-14T01:57Z,,,,,,"Banks (ankle) does not have an injury designation for Sunday's game against the Panthers, Ross Jackson of WWL-TV reports.",OT
-4361050,Isaiah Likely,New York Giants,Active,2026-11-20T17:17Z,,,,,,"Likely (undisclosed) wasn't spotted at Friday's practice, Dan Duggan of The Athletic reports.",TE
+4361050,Isaiah Likely,New York Giants,Questionable,2026-11-20T18:28Z,Undisclosed,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,TE
 4040615,Malik Harrison,New York Giants,Active,2026-11-20T02:31Z,,,,,,Harrison (groin) was a full participant at practice Thursday.,LB
 4240706,Jason Pinnock,New York Giants,Active,2026-11-20T02:26Z,,,,,,Pinnock (back) was a full participant at practice Thursday.,S
 4427636,Nic Jones,New York Giants,Questionable,2026-11-18T21:47Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
