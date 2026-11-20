@@ -124,6 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-16T02:42Z,,,,,,Hubbard carried the ball 27 times for 92 yards and two touchdowns and caught all five of his targets for 80 yards in Sunday's 20-17 win over the Saints.,RB
 4242975,Jaelan Phillips,Carolina Panthers,Active,2026-11-15T17:24Z,,,,,,"Phillips (hamstring) is active against the Saints on Sunday, Darin Gantt of the Panthers' official site reports.",LB
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-14T19:38Z,Hamstring,Not Specified,Not Specified,2026-11-22,IR-R,"Christensen (hamstring) has been downgraded to out for Sunday's game against the Saints, Joe Person of The Athletic reports.",G
+4259545,D'Andre Swift,Chicago Bears,Active,2026-11-20T23:13Z,,,,,,"Swift will be rejoined in the Bears backfield by Kyle Monangai (toe) on Sunday against the Saints, Larry Mayer of the team's official site reports.",RB
 4361093,Kyler Gordon,Chicago Bears,Out,2026-11-20T21:00Z,Shoulder,Not Specified,Left,2026-11-26,OUT,Gordon (shoulder) has been ruled out for Sunday's game against the Saints.,CB
 4035369,Jeffery Simmons,Chicago Bears,Active,2026-11-20T20:54Z,,,,,,Simmons has no injury designation ahead of Sunday's matchup against the Saints.,DT
 4869748,Zavion Thomas,Chicago Bears,Questionable,2026-11-20T20:43Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Thomas (ankle) is listed as questionable for Sunday's matchup against the Saints.,WR
@@ -141,7 +142,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4911952,Keyshaun Elliott,Chicago Bears,Active,2026-11-09T20:57Z,,,,,,,LB
 4723086,Colston Loveland,Chicago Bears,Active,2026-11-09T05:19Z,,,,,,Loveland caught four of six targets for 54 yards in Sunday's 27-24 win over the Buccaneers.,TE
 4431299,Rome Odunze,Chicago Bears,Active,2026-11-09T05:19Z,,,,,,Odunze caught four of seven targets for 60 yards and a touchdown in Sunday's 27-24 win over the Buccaneers.,WR
-4259545,D'Andre Swift,Chicago Bears,Active,2026-11-09T05:17Z,,,,,,Swift rushed 12 times for 31 yards and didn't catch his lone target in Sunday's 27-24 win over the Buccaneers.,RB
 4431611,Caleb Williams,Chicago Bears,Active,2026-11-09T05:17Z,,,,,,"Williams completed 22 of 37 passes for 279 yards, two touchdowns and four interceptions in Sunday's 27-24 win over the Buccaneers. He also rushed five times for 16 yards.",QB
 15168,Case Keenum,Chicago Bears,Active,2026-11-09T00:04Z,,,,,,Keenum (coach's decision) is inactive but serving as the Bears' emergency No. 3 quarterback for Sunday Night Football versus the Buccaneers.,QB
 2576492,Grady Jarrett,Chicago Bears,Active,2026-11-07T00:17Z,,,,,,Jarrett (groin) does not carry an official injury designation ahead of Sunday's game versus the Buccaneers.,DE
@@ -424,6 +424,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-16T02:35Z,,,,,,"Mendoza completed 17 of 29 passes for 143 yards, no touchdowns and no interceptions and rushed six times for 22 yards and one TD during Sunday's 21-13 loss to the Seahawks.",QB
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-16T02:19Z,,,,,,Washington compiled eight rushes for 23 yards and secured his only target for four yards during Sunday's 21-13 defeat to the Seahawks.,RB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-16T02:10Z,,,,,,Jeanty turned his nine carries into just 18 yards and caught all four of his targets for 46 yards during Sunday's 21-13 loss to the Seahawks.,RB
+4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-20T23:06Z,,,,,,"Offensive coordinator Mike McDaniel told reporters Friday that his ""expectation"" is that Hampton is the lead back for the Chargers, Omar Navarro of the team's official site reports.",RB
 4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-20T22:05Z,Ankle,,,2026-11-22,QUESTIONABLE,questionable,CB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-20T22:05Z,,,,,,,CB
 4567138,Justin Eboigbe,Los Angeles Chargers,Active,2026-11-20T22:05Z,,,,,,,DT
@@ -445,11 +446,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-11-17T05:58Z,,,,,,Johnston brought in his sole target for six yards in the Chargers' 23-20 win over the Ravens on Monday night.,WR
 4686612,Tre' Harris,Los Angeles Chargers,Active,2026-11-17T05:53Z,,,,,,Harris secured all five targets for 86 yards in the Chargers' 23-20 win over the Ravens on Monday night.,WR
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-11-17T05:43Z,,,,,,Herbert completed 12 of 18 passes for 129 yards with no touchdowns or interceptions and rushed seven times for 51 yards and a touchdown in the Chargers' 23-20 win over the Ravens on Monday night.,QB
-4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-17T05:07Z,,,,,,Hampton rushed 22 times for 105 yards and a touchdown and brought in one of two targets for no gain in the Chargers' 23-20 win over the Ravens on Monday night. He also fumbled once but recovered.,RB
 4040842,Kayode Awosika,Los Angeles Chargers,Active,2026-11-17T00:03Z,,,,,,Awosika (fibula) is active for Monday's game against the Ravens.,G
 4411189,Trey Pipkins III,Los Angeles Chargers,Injured Reserve,2026-11-16T23:47Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,Pipkins (knee) won't be available for Monday's game against the Ravens after the Chargers didn't activate him from injured reserve.,OT
 4433914,Branson Taylor,Los Angeles Chargers,Injured Reserve,2026-11-16T23:41Z,Ankle,Not Specified,Not Specified,2026-12-13,IR,Taylor (ankle) was placed on injured reserve Monday.,G
-16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-20T17:49Z,Hamstring,Surgery,Left,2026-11-25,IR,"Coach Sean McVay noted Friday that Adams (hamstring) isn't expected to practice this weekend, Greg Beacham of the Associated Press reports.",WR
+16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-20T17:49Z,Hamstring,Surgery,Left,2026-12-03,IR,"Coach Sean McVay noted Friday that Adams (hamstring) isn't expected to practice this weekend, Greg Beacham of the Associated Press reports.",WR
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-20T17:21Z,Hamstring,Strain,Not Specified,2026-11-25,IR-R,"Ferguson (hamstring/ankle) isn't ready to return to game action, but the Rams still plan to activate him from injured reserve before Week 12 and keep him on the active roster, Adam Grosbard of The Orange County Register reports.",TE
 4426515,Puka Nacua,Los Angeles Rams,Injured Reserve,2026-11-20T17:09Z,Knee - MCL,Sprain,Right,2027-01-10,IR,"Coach Sean McVay revealed Friday that Nacua (knee) had surgery to repair his MCL on Tuesday and is on track to miss a couple of months, Sarah Barshop of ESPN.com reports.",WR
 3122132,Myles Garrett,Los Angeles Rams,Active,2026-11-19T02:57Z,,,,,,Garrett played 17 defensive snaps but did not show up on the box score otherwise during the Rams' 34-6 win over the Cardinals in Week 10.,DE
