@@ -349,14 +349,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-17T03:43Z,,,,,,Shrader made his sole field-goal attempt and converted all three PATs in the Colts' 24-22 win over the Dolphins on Sunday.,PK
 3917142,Akeem Davis-Gaither,Indianapolis Colts,Injured Reserve,2026-11-14T17:34Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Colts placed Davis-Gaither (knee) on injured reserve Saturday.,LB
 3843843,Arden Key,Indianapolis Colts,Active,2026-11-14T17:32Z,,,,,,Key (hamstring) was activated from injured reserve Saturday and does not carry an injury designation into Sunday's game against the Dolphins.,DE
+4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Active,2026-11-20T21:37Z,,,,,,Allen (hamstring) doesn't have an injury designation for Sunday's game against the Giants.,RB
+4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-20T21:35Z,,,,,,Rodriguez (hand) doesn't have an injury designation for Sunday's game against the Giants.,RB
 4576129,Jalen McLeod,Jacksonville Jaguars,Active,2026-11-20T21:24Z,,,,,,,LB
 4430481,Jonah Monheim,Jacksonville Jaguars,Active,2026-11-20T21:24Z,,,,,,,C
 4426349,Travon Walker,Jacksonville Jaguars,Active,2026-11-20T21:24Z,,,,,,,DE
 4429168,Antonio Johnson,Jacksonville Jaguars,Active,2026-11-20T21:23Z,,,,,,,S
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Active,2026-11-20T21:19Z,,,,,,Tuten (ankle/foot) doesn't carry an injury designation for Sunday's game against the Giants.,RB
 3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-20T21:11Z,,,,,,Meyers (ankle) doesn't have an injury designation for Sunday's game against the Giants.,WR
-4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Active,2026-11-19T21:26Z,,,,,,"Allen (hamstring) was a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
-4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-19T21:24Z,,,,,,"Rodriguez (hand) was listed as a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",RB
 4573319,Danny Striggow,Jacksonville Jaguars,Questionable,2026-11-19T02:05Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Striggow (concussion) was a limited participant at practice Wednesday.,DE
 3134316,Matt Dickerson,Jacksonville Jaguars,Questionable,2026-11-18T21:25Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,DE
 4242391,Robert Hainsey,Jacksonville Jaguars,Out,2026-11-18T16:05Z,Knee,Sprain,Not Specified,2026-11-29,OUT,"Jaguars head coach Liam Coen announced Wednesday that Hainsey (knee) is out for Sunday's game against the Giants, Ryan O'Halloran of The Florida Times-Union reports.",C
@@ -424,10 +424,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-16T02:35Z,,,,,,"Mendoza completed 17 of 29 passes for 143 yards, no touchdowns and no interceptions and rushed six times for 22 yards and one TD during Sunday's 21-13 loss to the Seahawks.",QB
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-16T02:19Z,,,,,,Washington compiled eight rushes for 23 yards and secured his only target for four yards during Sunday's 21-13 defeat to the Seahawks.,RB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-16T02:10Z,,,,,,Jeanty turned his nine carries into just 18 yards and caught all four of his targets for 46 yards during Sunday's 21-13 loss to the Seahawks.,RB
+4360745,Kendall Williamson,Los Angeles Chargers,Out,2026-11-20T21:40Z,Calf,Not Specified,Not Specified,2026-11-29,OUT,out,S
+4838693,Rodney Shelley,Los Angeles Chargers,Out,2026-11-20T21:40Z,Ankle,Not Specified,Not Specified,2026-11-29,OUT,out,CB
+4241263,Charlie Kolar,Los Angeles Chargers,Questionable,2026-11-20T21:39Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Kolar (concussion) is questionable for Sunday's game against the Jets.,TE
+4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-20T21:34Z,Back,Spasms,Not Specified,2026-11-22,QUESTIONABLE,McConkey (back) is listed as questionable for Sunday's game against the Jets.,WR
 4241597,Daiyan Henley,Los Angeles Chargers,Out,2026-11-20T21:27Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,out,LB
 4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-20T21:26Z,Hamstring,Not Specified,Not Specified,2026-11-22,DOUBTFUL,doubtful,WR
-4241263,Charlie Kolar,Los Angeles Chargers,Questionable,2026-11-19T23:20Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Kolar (concussion) remained sidelined for Thursday's practice.,TE
-4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-19T23:15Z,Back,Spasms,Not Specified,2026-11-22,QUESTIONABLE,McConkey (back) was a limited participant in Thursday's practice.,WR
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-11-19T02:47Z,,,,,,Tomlinson recorded five tackles (three solo) including 2.0 sacks during Monday's 23-20 win at Baltimore.,DT
 4240528,Del'Shawn Phillips,Los Angeles Chargers,Active,2026-11-19T02:39Z,,,,,,Phillips recorded nine tackles (four solo) and an interception during Monday's 23-20 win at Baltimore.,LB
 3843769,Donte Jackson,Los Angeles Chargers,Questionable,2026-11-19T00:18Z,Groin,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
@@ -436,14 +438,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-18T00:24Z,,,,,,Gadsden hauled in his lone target for seven yards in Monday's 23-20 win over Baltimore.,TE
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-18T00:13Z,,,,,,"Vidal turned two carries into zero yards, brought in both of his targets for 14 yards and returned one kickoff for 32 yards during the Chargers' 23-20 win over the Ravens on Monday.",RB
 4596334,Keaton Mitchell,Los Angeles Chargers,Active,2026-11-18T00:06Z,,,,,,"Mitchell turned three carries into four yards, failed to haul in his lone target and returned two kickoffs for 30 yards during the Chargers' 23-20 win over the Ravens on Monday.",RB
-4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-17T12:19Z,Calf,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,S
 4574105,Isas Waxter,Los Angeles Chargers,Questionable,2026-11-17T12:19Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,CB
 2576702,Bud Dupree,Los Angeles Chargers,Active,2026-11-17T12:17Z,,,,,,,LB
 4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-11-17T05:58Z,,,,,,Johnston brought in his sole target for six yards in the Chargers' 23-20 win over the Ravens on Monday night.,WR
 4686612,Tre' Harris,Los Angeles Chargers,Active,2026-11-17T05:53Z,,,,,,Harris secured all five targets for 86 yards in the Chargers' 23-20 win over the Ravens on Monday night.,WR
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-11-17T05:43Z,,,,,,Herbert completed 12 of 18 passes for 129 yards with no touchdowns or interceptions and rushed seven times for 51 yards and a touchdown in the Chargers' 23-20 win over the Ravens on Monday night.,QB
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-17T05:07Z,,,,,,Hampton rushed 22 times for 105 yards and a touchdown and brought in one of two targets for no gain in the Chargers' 23-20 win over the Ravens on Monday night. He also fumbled once but recovered.,RB
-4838693,Rodney Shelley,Los Angeles Chargers,Questionable,2026-11-17T03:17Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Shelley (ankle) is questionable to return to Monday night's contest against the Ravens, Noah Furtado of The Athletic reports.",CB
 4040842,Kayode Awosika,Los Angeles Chargers,Active,2026-11-17T00:03Z,,,,,,Awosika (fibula) is active for Monday's game against the Ravens.,G
 4567138,Justin Eboigbe,Los Angeles Chargers,Questionable,2026-11-17T00:02Z,Ankle,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Eboigbe (ankle) is inactive for Monday's game against the Ravens, Omar Navarro of the Chargers' official site reports.",DT
 4411189,Trey Pipkins III,Los Angeles Chargers,Injured Reserve,2026-11-16T23:47Z,Knee,Not Specified,Not Specified,2026-11-22,IR-R,Pipkins (knee) won't be available for Monday's game against the Ravens after the Chargers didn't activate him from injured reserve.,OT
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427366,Breece Hall,New York Jets,Active,2026-11-15T22:06Z,,,,,,Hall rushed 11 times for 41 yards and caught all four of his targets for 67 yards in Sunday's 31-12 loss to the Bills.,RB
 4569618,Garrett Wilson,New York Jets,Active,2026-11-15T22:05Z,,,,,,Wilson (concussion) caught seven of 14 targets for 106 yards and lost a fumble in Sunday's 31-12 loss to the Bills.,WR
 4837388,VJ Payne,New York Jets,Active,2026-11-15T17:39Z,,,,,,Payne (knee) is active for Sunday's game against Buffalo.,S
+3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-20T21:38Z,,,,,,"Barkley (hamstring) told EJ Smith of PHLY Sports on Friday that he ""feels better physically"" after the team's Week 10 bye, and the running back doesn't have a designation for Sunday's contest against the Steelers.",RB
 4431573,Smael Mondon Jr.,Philadelphia Eagles,Doubtful,2026-11-20T21:23Z,Ankle,Not Specified,Not Specified,2026-11-22,DOUBTFUL,doubtful,LB
 3917657,Zack Baun,Philadelphia Eagles,Out,2026-11-20T21:22Z,Back,Not Specified,Not Specified,2026-11-26,OUT,out,LB
 4428850,Dontayvion Wicks,Philadelphia Eagles,Out,2026-11-20T20:58Z,Ankle,Not Specified,Not Specified,2026-11-26,OUT,Wicks (ankle/foot) is listed as out for Sunday's game against the Steelers.,WR
@@ -647,7 +648,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-10T02:43Z,,,,,,Stowers failed to catch his only target in Sunday's 19-11 loss to the Giants.,TE
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-09T02:33Z,,,,,,Lemon caught six of nine targets for 61 yards in Sunday's 19-11 loss to the Giants.,WR
 3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-11-09T00:28Z,,,,,,Goedert caught five of six targets for 50 yards in Sunday's 19-11 loss to the Giants.,TE
-3929630,Saquon Barkley,Philadelphia Eagles,Active,2026-11-08T22:02Z,,,,,,Barkley rushed 13 times for 22 yards and a touchdown while failing to catch his only target in Sunday's 19-11 loss to the Giants.,RB
 4571162,Jalyx Hunt,Philadelphia Eagles,Active,2026-11-06T22:32Z,,,,,,,LB
 4431492,Roman Wilson,Pittsburgh Steelers,Injured Reserve,2026-11-20T20:09Z,Finger,Not Specified,Left,2026-11-22,IR-R,"Wilson (finger) is questionable for Sunday's game against the Eagles, Brooke Pryor of ESPN.com reports.",WR
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-20T19:51Z,Foot,Plantar Fasciitis,Left,2026-11-22,IR-R,"Pittman (foot) is listed as questionable for Sunday's game against the Eagles, Mark Kaboly reports.",WR
