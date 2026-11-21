@@ -274,8 +274,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429795,Jahmyr Gibbs,Detroit Lions,Active,2026-11-15T19:22Z,,,,,,Gibbs carried the ball 22 times for 153 yards and two touchdowns while catching seven of eight targets for 99 yards in Sunday's 35-10 win over the Patriots.,RB
 3046779,Jared Goff,Detroit Lions,Active,2026-11-15T18:59Z,,,,,,Goff completed 20 of 31 passes for 303 yards and three touchdowns with two interceptions in Sunday's 35-10 win over the Patriots in Munich. He added three yards on his only carry.,QB
 4038849,DJ Wonnum,Detroit Lions,Active,2026-11-13T22:22Z,,,,,,"Wonnum (concussion) does not carry an injury designation into Sunday's game against the Patriots in Munich, Nolan Bianchi of The Detroit News reports.",LB
+4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-21T18:29Z,Finger,Surgery,Right,2026-11-25,QUESTIONABLE,"Jacobs (finger) is participating in Saturday's practice session, Bill Huber of SI.com reports.",RB
 4361423,Micah Parsons,Green Bay Packers,Out,2026-11-21T17:31Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Parsons (knee) is expected to participate in all three practice sessions during Week 12 prep ahead of Wednesday's game against the Rams, Tom Silverstein of the Milwaukee Journal Sentinel reports.",DE
-4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-21T17:17Z,Finger,Surgery,Right,2026-11-25,QUESTIONABLE,"Jacobs (finger) isn't expected to play Wednesday against the Rams, Matt Schneidman of The Athletic reports.",RB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-19T02:35Z,,,,,,Williams logged eight tackles (two solo) and a pass defense during the Packers' 30-10 loss to the Vikings in Week 10.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-19T02:33Z,,,,,,McKinney registered six tackles (three solo) and an interception during the Packers' 30-10 loss to the Vikings in Week 10.,S
 14931,Kevin Zeitler,Green Bay Packers,Out,2026-11-17T12:21Z,Triceps,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,out,G
@@ -474,6 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4386544,Xavier Smith,Los Angeles Rams,Active,2026-11-16T03:15Z,,,,,,Smith caught both of his targets for 40 yards and a touchdown in Sunday's 34-6 win over the Cardinals.,WR
 12483,Matthew Stafford,Los Angeles Rams,Active,2026-11-16T02:47Z,,,,,,Stafford completed 18 of 26 passes for 249 yards with three touchdowns and one interception and rushed twice for minus-2 yards in the Rams' 34-6 win over the Cardinals on Sunday.,QB
 4430737,Kyren Williams,Los Angeles Rams,Active,2026-11-16T02:38Z,,,,,,Williams rushed 12 times for 23 yards and brought in two of five targets for nine yards in the Rams' 34-6 win over the Cardinals on Sunday.,RB
+4036660,Darrell Baker Jr.,Miami Dolphins,Active,2026-11-21T18:23Z,,,,,,,CB
 4567225,Jaylin Simpson,Miami Dolphins,Doubtful,2026-11-21T01:26Z,Knee,Not Specified,Not Specified,2026-11-22,DOUBTFUL,"Simpson (knee) is listed as doubtful for Sunday's game against the Bills, David Furones of the South Florida Sun Sentinel reports.",S
 2977680,Bradley Pinion,Miami Dolphins,Out,2026-11-21T01:24Z,Groin,Not Specified,Right,2026-11-29,OUT,"Pinion (groin) has been ruled out ahead of Sunday's game against the Bills, David Furones of the South Florida Sun Sentinel reports.",P
 4362064,Andrew Meyer,Miami Dolphins,Active,2026-11-21T01:22Z,,,,,,"Meyer (neck) does not carry an injury designation into Sunday's game against the Bills, David Furones of the South Florida Sun Sentinel reports.",C
@@ -485,7 +486,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034729,Tucker Addington,Miami Dolphins,Active,2026-11-20T20:56Z,,,,,,,LS
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-20T20:21Z,,,,,,"Douglas (shoulder) will play Sunday against the Bills, David Furones of the South Florida Sun Sentinel reports.",WR
 4431664,Dante Trader Jr.,Miami Dolphins,Doubtful,2026-11-20T19:10Z,Shoulder,Not Specified,Not Specified,2026-11-22,DOUBTFUL,"Trader (shoulder/groin) is doubtful for Sunday's game against the Bills, Barry Jackson of the Miami Herald reports.",S
-4036660,Darrell Baker Jr.,Miami Dolphins,Out,2026-11-19T02:09Z,Knee,Not Specified,Not Specified,2026-11-22,PUP-R,"Baker (knee) was a full participant at practice Wednesday, David Furones of the South Florida Sun Sentinel reports.",CB
 4837188,Jordan Phillips,Miami Dolphins,Injured Reserve,2026-11-18T19:24Z,Biceps,Surgery,Not Specified,2027-02-15,IR,"Phillips underwent surgery on his injured bicep Wednesday, David Furones of the South Florida Sun Sentinel reports.",DT
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-18T03:49Z,,,,,,"Brooks produced nine total tackles (six solo), a pass defensed and a forced fumble during Sunday's 24-22 loss to the Colts.",LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-18T03:43Z,,,,,,Rodriguez recorded one solo tackle during Sunday's 24-22 loss to the Colts.,LB
@@ -749,13 +749,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-09T05:30Z,,,,,,Godwin caught two of three targets for 16 yards and added a 12-yard rush during Sunday night's 27-24 loss to the Bears.,WR
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-09T05:23Z,,,,,,Gainwell rushed five times for 16 yards and caught all three of his targets for 60 yards in Sunday's 27-24 loss to the Bears.,RB
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-09T05:20Z,,,,,,Egbuka (foot) caught three of five targets for 38 yards and added a one-yard run in Sunday's 27-24 loss to the Bears.,WR
+4428557,Tyjae Spears,Tennessee Titans,Injured Reserve,2026-11-21T18:41Z,Knee,Not Specified,Not Specified,2026-12-20,IR,ir,RB
 4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-21T16:43Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tate (shoulder) is questionable for Sunday's game against the Cowboys but is ""considered likely"" to be cleared to play, Matt Zenitz of CBS Sports reports.",WR
 4695280,Micah Robinson,Tennessee Titans,Questionable,2026-11-21T00:05Z,Hip,,,2026-11-22,QUESTIONABLE,questionable,CB
 4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-20T22:56Z,,,,,,Winston (shoulder) does not have an injury designation for Sunday's game against the Cowboys.,S
 4870805,Anthony Hill Jr.,Tennessee Titans,Questionable,2026-11-20T22:53Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hill (neck) is questionable to face the Cowboys on Sunday.,LB
 3926229,Cody Barton,Tennessee Titans,Active,2026-11-20T22:47Z,,,,,,Barton (concussion) does not carry an injury designation into Sunday's game against Dallas.,LB
-4240532,Tony Adams,Tennessee Titans,Questionable,2026-11-20T22:45Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Adams (concussion) is listed as questionable for Sunday's game against the Cowboys.,S
-4428557,Tyjae Spears,Tennessee Titans,Questionable,2026-11-20T21:01Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Spears (knee) is questionable for Sunday's game against Dallas.,RB
+4240532,Tony Adams,Tennessee Titans,Active,2026-11-20T22:45Z,,,,,,Adams (concussion) is listed as questionable for Sunday's game against the Cowboys.,S
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-20T00:37Z,,,,,,Franklin-Myers (back) was a full participant at practice Thursday.,DE
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-19T02:26Z,,,,,,Gray posted nine tackles (eight solo) and two pass defenses (including an interception) during the Titans' 40-23 loss to the Jaguars in Week 10.,LB
 4710000,Fernando Carmona,Tennessee Titans,Injured Reserve,2026-11-18T21:49Z,Ankle,Sprain,Not Specified,2026-11-29,IR-R,"The Titans designated Carmona (ankle) for return from injured reserve Wednesday, Jim Wyatt of the team's official site reports.",G
