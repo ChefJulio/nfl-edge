@@ -449,7 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-11-17T05:43Z,,,,,,Herbert completed 12 of 18 passes for 129 yards with no touchdowns or interceptions and rushed seven times for 51 yards and a touchdown in the Chargers' 23-20 win over the Ravens on Monday night.,QB
 4040842,Kayode Awosika,Los Angeles Chargers,Active,2026-11-17T00:03Z,,,,,,Awosika (fibula) is active for Monday's game against the Ravens.,G
 4433914,Branson Taylor,Los Angeles Chargers,Injured Reserve,2026-11-16T23:41Z,Ankle,Not Specified,Not Specified,2026-12-13,IR,Taylor (ankle) was placed on injured reserve Monday.,G
-4430737,Kyren Williams,Los Angeles Rams,Questionable,2026-11-21T21:53Z,Toe,Soreness,Not Specified,2026-11-25,QUESTIONABLE,questionable,RB
+4430737,Kyren Williams,Los Angeles Rams,Questionable,2026-11-21T21:55Z,Toe,Soreness,Not Specified,2026-11-25,QUESTIONABLE,"Head coach Sean McVay said Saturday that Williams is tending to a sore toe but is expected to play Wednesday against the Packers, Sarah Barshop of ESPN reports.",RB
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-20T23:18Z,,,,,,"The Rams are expected to lean more on Mumpfield and the rest of the team's wide receivers in the absence of Puka Nacua (knee/toe), the latter of whom is expected to be sidelined for the remainder of the regular season, Nate Atkins and Jonathan Jones of The Athletic report.",WR
 16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-20T17:49Z,Hamstring,Surgery,Left,2026-12-03,IR,"Coach Sean McVay noted Friday that Adams (hamstring) isn't expected to practice this weekend, Greg Beacham of the Associated Press reports.",WR
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-20T17:21Z,Hamstring,Strain,Not Specified,2026-11-25,IR-R,"Ferguson (hamstring/ankle) isn't ready to return to game action, but the Rams still plan to activate him from injured reserve before Week 12 and keep him on the active roster, Adam Grosbard of The Orange County Register reports.",TE
@@ -458,7 +458,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-11-19T02:55Z,,,,,,Lake posted two tackles (one solo) during the Rams' 34-6 win over the Cardinals in Week 10.,S
 4833029,Max Klare,Los Angeles Rams,Active,2026-11-18T17:23Z,,,,,,Klare went without a target while playing four of the Rams' 76 offensive snaps in Sunday's 34-6 win over the Cardinals.,TE
 2575907,Joe Cardona,Los Angeles Rams,Out,2026-11-17T12:22Z,Ankle,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,out,LS
-4362474,Steve Avila,Los Angeles Rams,Out,2026-11-17T12:22Z,Hamstring,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,out,G
+4362474,Steve Avila,Los Angeles Rams,Out,2026-11-17T12:22Z,Hamstring,Not Specified,Not Specified,2026-12-03,QUESTIONABLE,out,G
 4605951,CJ Daniels,Los Angeles Rams,Active,2026-11-17T04:58Z,,,,,,Daniels caught one of two targets for 22 yards in Sunday's 34-6 win over the Cardinals.,WR
 4360797,Tutu Atwell,Los Angeles Rams,Active,2026-11-17T04:54Z,,,,,,Atwell caught one of two targets for 31 yards in Sunday's 34-6 win over the Cardinals.,WR
 4243003,Ronnie Rivers,Los Angeles Rams,Active,2026-11-17T04:51Z,,,,,,Rivers rushed 15 times for 81 yards in Sunday's 34-6 win over the Cardinals.,RB
@@ -674,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4682980,Derrick Harmon,Pittsburgh Steelers,Active,2026-11-16T00:15Z,,,,,,Harmon (foot) is active for Sunday's Week 10 clash against Cincinnati.,DT
 4567979,Brandin Echols,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Echols (hamstring) was a full participant at practice Wednesday, Teresa Varley of the Steelers' official site reports.",CB
 4692628,Doneiko Slaughter,Pittsburgh Steelers,Active,2026-11-12T01:50Z,,,,,,"Slaughter (hamstring) was a full participant in Wednesday's practice, Teresa Varley of the Steelers' official site reports.",CB
-16731,Brandin Cooks,San Francisco 49ers,Active,2026-11-21T21:24Z,,,,,,The 49ers waived Cooks on Saturday.,WR
 4686308,C.J. West,San Francisco 49ers,Active,2026-11-21T00:55Z,,,,,,West (knee) is listed as questionable for Sunday's game against the Vikings in Mexico City.,DT
 4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-21T00:54Z,Groin,Not Specified,Not Specified,2026-11-29,IR-R,Hobbs (groin) is questionable for Sunday's game against the Vikings in Mexico City.,CB
 4693644,Ji'Ayir Brown,San Francisco 49ers,Active,2026-11-21T00:52Z,,,,,,Brown (ankle) does not carry an injury designation into Sunday's game against the Vikings in Mexico City.,S
@@ -699,6 +698,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-16T19:37Z,,,,,,,OT
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-11-16T19:37Z,,,,,,,QB
 4426698,Tatum Bethune,San Francisco 49ers,Active,2026-11-16T19:37Z,,,,,,,LB
+15818,Keenan Allen,San Francisco 49ers,Active,2026-11-16T04:28Z,,,,,,Allen brought in five of seven targets for 61 yards in the 49ers' 46-40 win over the Cowboys on Sunday.,WR
 4575431,Devon Witherspoon,Seattle Seahawks,Active,2026-11-19T03:07Z,,,,,,"Witherspoon logged four solo tackles, including 2.0 sacks, in the Seahawks' 21-13 win over the Raiders on Sunday.",CB
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-19T03:01Z,,,,,,Jones logged 10 tackles (five solo) in the Seahawks' 21-13 win over the Raiders on Sunday.,LB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-17T12:23Z,Shoulder,Stinger,Not Specified,2026-11-29,QUESTIONABLE,out,DT
@@ -774,12 +774,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-16T05:11Z,,,,,,Helm caught all four of his targets for 23 yards in Sunday's 40-23 loss to the Jaguars.,TE
 4883647,Elic Ayomanor,Tennessee Titans,Active,2026-11-16T02:17Z,,,,,,Ayomanor caught five of 10 targets for 79 yards in Sunday's 40-23 loss to the Jaguars.,WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-11-16T02:13Z,,,,,,Pollard carried the ball nine times for 33 yards and caught eight of nine targets for 66 yards and a touchdown in Sunday's 40-23 loss to the Jaguars.,RB
+4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-21T22:10Z,Ankle,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,questionable,CB
+2576736,Lucas Patrick,Washington Commanders,Questionable,2026-11-21T22:09Z,Concussion,Concussion,Not Specified,2026-11-23,QUESTIONABLE,questionable,G
+4360378,Quan Martin,Washington Commanders,Active,2026-11-21T22:09Z,,,,,,,S
 4567156,Treylon Burks,Washington Commanders,Active,2026-11-21T21:46Z,,,,,,Burks (foot) does not carry an injury designation into Monday's game against the Bengals.,WR
 4697815,Rachaad White,Washington Commanders,Questionable,2026-11-21T21:21Z,Heel,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,White (heel) is listed as questionable for Monday's game versus the Bengals.,RB
 4575131,Jacory Croskey-Merritt,Washington Commanders,Injured Reserve,2026-11-21T21:15Z,Groin,Not Specified,Not Specified,2026-11-23,IR-R,Croskey-Merritt (groin) is listed as questionable for Monday's game against the Bengals.,RB
 3051890,Laremy Tunsil,Washington Commanders,Injured Reserve,2026-11-21T00:56Z,Triceps,Surgery,Right,2026-12-20,IR,"Tunsil (triceps) is progressing well in his recovery but is not expected to return by the end of the 2026 regular season, Tashan Reed of The Washington Post reports.",OT
-2576736,Lucas Patrick,Washington Commanders,Active,2026-11-20T02:13Z,,,,,,Patrick (concussion) was a full participant in Thursday's practice.,G
-4360378,Quan Martin,Washington Commanders,Questionable,2026-11-20T00:54Z,Shoulder,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Martin (shoulder) was a limited participant at practice Thursday.,S
 4361088,Colson Yankoff,Washington Commanders,Active,2026-11-20T00:51Z,,,,,,Yankoff (knee) was a full participant at practice Thursday.,TE
 4426948,Luke McCaffrey,Washington Commanders,Active,2026-11-18T16:20Z,,,,,,McCaffrey returned two punts for 13 yards and three kickoffs for 58 yards in Thursday's 24-21 win over the Giants.,WR
 3122797,Isaac Yiadom,Washington Commanders,Active,2026-11-16T20:11Z,,,,,,,CB
@@ -798,4 +799,3 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426348,Jayden Daniels,Washington Commanders,Active,2026-11-13T04:56Z,,,,,,Daniels completed 23 of 33 passes for 249 yards with three touchdowns and two interceptions and rushed 11 times for 28 yards in the Commanders' 24-21 win over the Giants on Thursday.,QB
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-13T04:38Z,,,,,,"Okonkwo (back) returned to Thursday's eventual 24-21 win at the Giants, finishing with four catches (on eight targets) for 24 yards.",TE
 3886601,Shy Tuttle,Washington Commanders,Active,2026-11-10T23:18Z,,,,,,,DT
-2971586,Fabian Moreau,Washington Commanders,Active,2026-11-09T21:36Z,,,,,,,CB
