@@ -388,5 +388,75 @@
 "at": "2026-11-22T16:41:00+00:00",
 "post": 0.974,
 "status": "Active (LLD)"
+},
+"00-0037755": {
+"name": "Jelani Woods",
+"team": "NYJ",
+"pos": "TE",
+"pre": 0.4977,
+"ruling": "INA",
+"at": "2026-11-22T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038046": {
+"name": "Charlie Kolar",
+"team": "LAC",
+"pos": "TE",
+"pre": 0.6699,
+"ruling": "ACT",
+"at": "2026-11-22T19:43:00+00:00",
+"post": 0.974,
+"status": "Active (DDL)"
+},
+"00-0039451": {
+"name": "Isaiah Williams",
+"team": "NYJ",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039915": {
+"name": "Ladd McConkey",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.6207,
+"ruling": "ACT",
+"at": "2026-11-22T19:39:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0040184": {
+"name": "KeAndre Lambert-Smith",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.9358,
+"ruling": "INA",
+"at": "2026-11-22T19:43:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041511": {
+"name": "Omar Cooper Jr.",
+"team": "NYJ",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T19:37:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0041550": {
+"name": "Brenen Thompson",
+"team": "LAC",
+"pos": "WR",
+"pre": 0.01,
+"ruling": "INA",
+"at": "2026-11-22T19:43:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
 }
 }
