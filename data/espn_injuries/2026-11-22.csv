@@ -349,7 +349,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
-4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T22:13Z,Chest,,,2026-11-22,QUESTIONABLE,Jones (chest) is questionable to return to Sunday's contest against the Giants.,CB
+4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T22:13Z,Chest,,,2026-11-29,QUESTIONABLE,Jones (chest) is questionable to return to Sunday's contest against the Giants.,CB
 3134316,Matt Dickerson,Jacksonville Jaguars,Out,2026-11-22T20:03Z,Neck,Not Specified,Not Specified,2026-11-29,INACTIVE,Dickerson (neck) is inactive for Sunday's game against the Giants.,DE
 5085024,CJ Williams,Jacksonville Jaguars,Out,2026-11-22T19:58Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,WR
 4573319,Danny Striggow,Jacksonville Jaguars,Out,2026-11-22T19:58Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,DE
@@ -374,6 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4877475,Cam'Ron Silmon-Craig,Jacksonville Jaguars,Active,2026-11-16T16:51Z,,,,,,,S
 4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-16T02:00Z,,,,,,"Cameron caught all three of his targets for 67 yards and a touchdown in Sunday's 40-23, Week 10 win over Tennessee. He also returned five kickoffs for 142 yards.",WR
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-16T01:40Z,,,,,,Thomas caught three of four targets for 29 yards in Sunday's 40-23 win over the Titans.,WR
+15847,Travis Kelce,Kansas City Chiefs,Active,2026-11-22T23:10Z,,,,,,Kelce brought in six of seven targets for 74 yards and two touchdowns in the Chiefs' 34-7 win over the Cardinals on Sunday.,TE
 3139477,Patrick Mahomes,Kansas City Chiefs,Active,2026-11-22T21:57Z,,,,,,Mahomes completed 27 of 39 passes for 324 yards with three touchdowns and no interceptions in the Chiefs' 34-7 win over the Cardinals on Sunday.,QB
 4832955,Emmett Johnson,Kansas City Chiefs,Active,2026-11-22T21:45Z,,,,,,Johnson rushed 23 times for 105 yards and a touchdown and brought in all four targets for 38 yards in the Chiefs' 34-7 win over the Cardinals on Sunday.,RB
 4372070,Ben VanSumeren,Kansas City Chiefs,Questionable,2026-11-22T20:49Z,Knee,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,VanSumeren (knee) has been ruled out for the rest of Sunday's game against the Cardinals.,FB
@@ -386,7 +387,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567048,Kenneth Walker III,Kansas City Chiefs,Out,2026-11-22T16:37Z,Groin,Soreness,Not Specified,2026-11-26,INACTIVE,inactive,RB
 4043041,Jaylon Moore,Kansas City Chiefs,Out,2026-11-22T16:37Z,Ankle,Not Specified,Right,2026-11-26,INACTIVE,inactive,OT
 4605841,Nate Carter,Kansas City Chiefs,Active,2026-11-22T00:33Z,,,,,,"The Chiefs elevated Carter from the practice squad to the active roster Saturday, Matt Derrick of ChiefsDigest.com reports.",RB
-15847,Travis Kelce,Kansas City Chiefs,Active,2026-11-20T20:47Z,,,,,,Kelce (ankle/calf) doesn't have an injury designation for Sunday's game against the Cardinals.,TE
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-11-20T00:32Z,,,,,,Bolton (shin) was a full participant at practice Thursday.,LB
 4430723,Jared Wiley,Kansas City Chiefs,Injured Reserve,2026-11-19T01:06Z,Ankle,Fracture,Right,2026-12-21,IR,"The Chiefs placed Wiley (ankle) on injured reserve Wednesday, Matt Derrick of ChiefsDigest.com reports.",TE
 4685489,Jaydn Ott,Kansas City Chiefs,Active,2026-11-19T00:50Z,,,,,,Ott (hamstring) was a full participant in Wednesday's practice.,RB
@@ -399,8 +399,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-11-16T00:50Z,,,,,,Worthy failed to catch any of his three targets in Sunday's 35-13 win over the Falcons.,WR
 4688813,Josh Downs,Kansas City Chiefs,Active,2026-11-15T22:53Z,,,,,,"Downs secured four of five targets for 53 yards and a touchdown, fumbled once but recovered and returned three punts for 10 yards in the Chiefs' 35-13 win over the Falcons on Sunday.",WR
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-15T22:31Z,,,,,,Rice brought in five of six targets for 82 yards in the Chiefs' 35-13 win over the Falcons on Sunday.,WR
+4401805,Dareke Young,Las Vegas Raiders,Questionable,2026-11-22T22:53Z,Undisclosed,,,2026-11-22,QUESTIONABLE,Young (stinger) is questionable to return to Sunday's contest against Denver.,WR
 2972342,Adam Butler,Las Vegas Raiders,Questionable,2026-11-22T22:50Z,Head,,,2026-11-22,QUESTIONABLE,Butler (head) is questionable to return to Sunday's matchup with the Broncos.,DT
-4401805,Dareke Young,Las Vegas Raiders,Questionable,2026-11-22T22:49Z,Undisclosed,,,2026-11-22,QUESTIONABLE,questionable,WR
 4431414,Tim Keenan III,Las Vegas Raiders,Questionable,2026-11-22T22:36Z,Knee,,,2026-11-22,QUESTIONABLE,Keenan (knee) is questionable to return to Sunday's contest against the Broncos.,DT
 4429086,Michael Mayer,Las Vegas Raiders,Active,2026-11-22T20:14Z,,,,,,"With Brock Bowers (ankle/quad) inactive for Sunday's game against the Broncos, Mayer is in line to see an expanded role in Week 11.",TE
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-22T20:12Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Thornton (coach's decision) is inactive for Sunday's Week 11 tilt against Denver.,WR
@@ -660,7 +660,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Out,2026-11-22T16:39Z,Coach's Decision,Not Specified,Not Specified,2026-11-27,INACTIVE,inactive,CB
 5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-11-22T16:39Z,Coach's Decision,Not Specified,Not Specified,2026-11-27,INACTIVE,inactive,RB
 4714771,Drew Allar,Pittsburgh Steelers,Out,2026-11-22T16:39Z,Coach's Decision,Not Specified,Not Specified,2026-11-27,INACTIVE,inactive,QB
-4694237,Max Hurleman,Pittsburgh Steelers,Active,2026-11-22T00:06Z,,,,,,The Steelers elevated Hurleman from the practice squad Saturday.,RB
+4694237,Max Hurleman,Pittsburgh Steelers,Active,2026-11-22T00:06Z,,,,,,The Steelers elevated Hurleman from the practice squad Saturday.,WR
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-21T20:06Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Pittman (foot) is not expected to be activated from injured reserve for Sunday's game against the Eagles, Brooke Pryor of ESPN reports.",WR
 4429164,Nick Herbig,Pittsburgh Steelers,Out,2026-11-21T18:52Z,Hip,Not Specified,Not Specified,2026-11-27,INACTIVE,"Herbig (hip) has been downgraded from questionable to out for Sunday's game against the Eagles, Burt Lauten of the Steelers' official site reports.",LB
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-19T02:00Z,Knee,Not Specified,Not Specified,2026-11-27,IR-R,"The Steelers designated Dunker (knee) for return to practice from injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
@@ -724,6 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-14T00:44Z,,,,,,"Nwosu (ankle) does not have an injury designation against the Raiders on Sunday, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
+4596448,Bucky Irving,Tampa Bay Buccaneers,Active,2026-11-22T23:02Z,,,,,,Irving rushed 18 times for 68 yards and a touchdown and brought in three of four targets for 32 yards in the Buccaneers' 31-21 loss to the Lions on Sunday.,RB
 4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-11-22T20:21Z,Hamstring,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Morrison (hamstring) has been ruled out for the remainder of Sunday's matchup against Detroit, Scott Smith of the Buccaneers' official site reports.",CB
 4912847,Jacob Parrish,Tampa Bay Buccaneers,Questionable,2026-11-22T19:39Z,Back,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Parrish (back) has been ruled out for the rest of Sunday's game against the Lions.,CB
 4686334,Yaya Diaby,Tampa Bay Buccaneers,Active,2026-11-22T17:22Z,,,,,,"Diaby is active for Sunday's matchup against Detroit, Scott Smith of the Buccaneers' official site reports.",LB
@@ -746,7 +747,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-10T05:51Z,,,,,,Tucker didn't log any offensive snaps in a loss to the Bears on Sunday. He returned four kickoffs for 92 yards.,RB
 3150744,Chase McLaughlin,Tampa Bay Buccaneers,Active,2026-11-10T02:37Z,,,,,,McLaughlin converted all three of his field-goal attempts and both of his extra-point tries during Tampa Bay's loss to the Bears on Sunday.,PK
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-11-10T02:15Z,,,,,,Otton caught four of eight targets for 25 yards in Sunday night's 27-24 loss to the Bears.,TE
-4596448,Bucky Irving,Tampa Bay Buccaneers,Active,2026-11-09T19:49Z,,,,,,"Head coach Todd Bowles said Monday that the Buccaneers ""will try and lessen the load"" on Irving following their Week 10 bye, Rick Stroud of the Tampa Bay Times reports.",RB
 4430834,Jalen McMillan,Tampa Bay Buccaneers,Injured Reserve,2026-11-09T19:19Z,Knee - PCL,Sprain,Left,2026-11-30,IR,"Head coach Todd Bowles suggested Monday that McMillan (knee) isn't likely to immediately return to action following the Buccaneers' Week 10 bye, Rick Stroud of the Tampa Bay Times reports.",WR
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-09T05:30Z,,,,,,Godwin caught two of three targets for 16 yards and added a 12-yard rush during Sunday night's 27-24 loss to the Bears.,WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-11-22T22:32Z,,,,,,Pollard rushed 21 times for 110 yards and failed to bring in his only target in the Titans' 51-30 loss to the Cowboys on Sunday.,RB
