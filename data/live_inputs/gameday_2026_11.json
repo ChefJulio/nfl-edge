@@ -318,5 +318,75 @@
 "at": "2026-11-22T16:46:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0976,
+"ruling": "INA",
+"at": "2026-11-22T16:51:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040891": {
+"name": "Cole Payton",
+"team": "PHI",
+"pos": "QB",
+"pre": 0.7879,
+"ruling": "INA",
+"at": "2026-11-22T16:38:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041397": {
+"name": "Kaden Wetjen",
+"team": "PIT",
+"pos": "WR",
+"pre": 0.9533,
+"ruling": "INA",
+"at": "2026-11-22T17:19:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.1821,
+"ruling": "INA",
+"at": "2026-11-22T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0972,
+"ruling": "INA",
+"at": "2026-11-22T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039739": {
+"name": "Roman Wilson",
+"team": "PIT",
+"pos": "WR",
+"pre": 0.7722,
+"ruling": "ACT",
+"at": "2026-11-22T16:49:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0039746": {
+"name": "Will Shipley",
+"team": "PHI",
+"pos": "RB",
+"pre": 0.1959,
+"ruling": "ACT",
+"at": "2026-11-22T16:41:00+00:00",
+"post": 0.974,
+"status": "Active (LLD)"
 }
 }
