@@ -324,6 +324,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429059,Woody Marks,Houston Texans,Out,2026-11-19T23:50Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,RB
 4432708,Marvin Harrison Jr.,Houston Texans,Out,2026-11-19T23:50Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,WR
 4362732,Jake Andrews,Houston Texans,Out,2026-11-19T23:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,C
+4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-11-22T12:52Z,Heel,Not Specified,Left,2026-11-29,IR,"Pierce's season ""is almost certainly over"" due to the heel injury that landed the wideout on IR on Sept. 26, according to Ian Rapoport of NFL Network.",WR
 5088571,Bryce Boettcher,Indianapolis Colts,Active,2026-11-21T03:31Z,,,,,,Boettcher recorded six tackles (three solo) during the Colts' 26-3 loss to the Texans on Thursday.,LB
 4427635,Adetomiwa Adebawore,Indianapolis Colts,Active,2026-11-21T03:29Z,,,,,,"Adebawore finished Thursday's 26-3 loss to the Texans with seven tackles (four solo), including 1.0 sacks.",DT
 4905664,A.J. Haulcy,Indianapolis Colts,Active,2026-11-21T03:27Z,,,,,,Haulcy logged nine tackles (four solo) and an interception during the Colts' 26-3 loss to the Texans on Thursday.,S
@@ -348,7 +349,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
-4682909,Justin Walley,Indianapolis Colts,Active,2026-11-18T17:53Z,,,,,,"Walley registered five tackles, a sack, a forced fumble and two pass breakups in Sunday's 24-22 win over the Dolphins.",CB
 4573319,Danny Striggow,Jacksonville Jaguars,Out,2026-11-22T00:45Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,Striggow (concussion) has been downgraded to out for Sunday's game against the Giants.,DE
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-21T01:27Z,Forearm,Not Specified,Not Specified,2026-11-29,IR-R,Green (forearm) has been ruled out for Sunday's game against the Giants.,DE
 4426349,Travon Walker,Jacksonville Jaguars,Active,2026-11-21T00:00Z,,,,,,Walker (ribs) does not have an injury designation for Sunday's game against the Giants.,DE
