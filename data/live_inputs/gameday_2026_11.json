@@ -238,5 +238,45 @@
 "at": "2026-11-22T16:37:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0035282": {
+"name": "Easton Stick",
+"team": "TB",
+"pos": "QB",
+"pre": 0.7994,
+"ruling": "INA",
+"at": "2026-11-22T16:44:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037013": {
+"name": "Zach Wilson",
+"team": "NO",
+"pos": "QB",
+"pre": 0.0958,
+"ruling": "INA",
+"at": "2026-11-22T16:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039364": {
+"name": "Sione Vaki",
+"team": "DET",
+"pos": "RB",
+"pre": 0.9253,
+"ruling": "ACT",
+"at": "2026-11-22T16:42:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0039373": {
+"name": "Audric Estime",
+"team": "NO",
+"pos": "RB",
+"pre": 0.8843,
+"ruling": "INA",
+"at": "2026-11-22T16:43:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }

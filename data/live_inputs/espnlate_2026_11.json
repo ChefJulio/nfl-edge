@@ -16,5 +16,41 @@
 "pre": 0.7879,
 "post": 0.0,
 "at": "2026-11-22T16:38:00+00:00"
+},
+"00-0040203": {
+"name": "Will Howard",
+"team": "PIT",
+"pos": "QB",
+"ruling": "Out",
+"pre": 0.0976,
+"post": 0.0,
+"at": "2026-11-22T16:51:00+00:00"
+},
+"00-0041397": {
+"name": "Kaden Wetjen",
+"team": "PIT",
+"pos": "WR",
+"ruling": "Out",
+"pre": 0.9533,
+"post": 0.0,
+"at": "2026-11-22T16:39:00+00:00"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"ruling": "Out",
+"pre": 0.1821,
+"post": 0.0,
+"at": "2026-11-22T16:39:00+00:00"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"ruling": "Out",
+"pre": 0.0972,
+"post": 0.0,
+"at": "2026-11-22T16:39:00+00:00"
 }
 }
