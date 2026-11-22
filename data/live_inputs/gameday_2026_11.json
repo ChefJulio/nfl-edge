@@ -458,5 +458,85 @@
 "at": "2026-11-22T19:43:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDD)"
+},
+"00-0035406": {
+"name": "Lil'Jordan Humphrey",
+"team": "DEN",
+"pos": "WR",
+"pre": 0.3003,
+"ruling": "INA",
+"at": "2026-11-22T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0953,
+"ruling": "INA",
+"at": "2026-11-22T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0039338": {
+"name": "Brock Bowers",
+"team": "LV",
+"pos": "TE",
+"pre": 0.7137,
+"ruling": "INA",
+"at": "2026-11-22T19:58:00+00:00",
+"post": 0.0,
+"status": "Inactive (DLL)"
+},
+"00-0040225": {
+"name": "Thomas Fidone II",
+"team": "NYG",
+"pos": "TE",
+"pre": 0.1912,
+"ruling": "INA",
+"at": "2026-11-22T20:05:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040581": {
+"name": "Dont'e Thornton Jr.",
+"team": "LV",
+"pos": "WR",
+"pre": 0.1831,
+"ruling": "INA",
+"at": "2026-11-22T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040894": {
+"name": "Malik Benson",
+"team": "LV",
+"pos": "WR",
+"pre": 0.2307,
+"ruling": "INA",
+"at": "2026-11-22T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041106": {
+"name": "C.J. Williams",
+"team": "JAX",
+"pos": "WR",
+"pre": 0.1854,
+"ruling": "INA",
+"at": "2026-11-22T19:58:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1392,
+"ruling": "INA",
+"at": "2026-11-22T20:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
