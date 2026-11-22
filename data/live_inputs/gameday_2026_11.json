@@ -278,5 +278,45 @@
 "at": "2026-11-22T16:43:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036265": {
+"name": "AJ Dillon",
+"team": "CAR",
+"pos": "RB",
+"pre": 0.6552,
+"ruling": "INA",
+"at": "2026-11-22T16:46:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037005": {
+"name": "Tommy Tremble",
+"team": "CAR",
+"pos": "TE",
+"pre": 0.856,
+"ruling": "ACT",
+"at": "2026-11-22T16:47:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0039356": {
+"name": "Ja'Tavion Sanders",
+"team": "CAR",
+"pos": "TE",
+"pre": 0.1655,
+"ruling": "INA",
+"at": "2026-11-22T16:46:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041149": {
+"name": "Haynes King",
+"team": "CAR",
+"pos": "QB",
+"pre": 0.0943,
+"ruling": "INA",
+"at": "2026-11-22T16:46:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
