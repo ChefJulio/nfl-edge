@@ -48,5 +48,195 @@
 "at": "2026-11-19T23:50:00+00:00",
 "post": 0.0,
 "status": "Inactive (DDD)"
+},
+"00-0028986": {
+"name": "Case Keenum",
+"team": "CHI",
+"pos": "QB",
+"pre": 0.1256,
+"ruling": "INA",
+"at": "2026-11-22T16:40:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0031610": {
+"name": "Darren Waller",
+"team": "CAR",
+"pos": "TE",
+"pre": 0.8971,
+"ruling": "ACT",
+"at": "2026-11-22T16:40:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0034855": {
+"name": "Baker Mayfield",
+"team": "TB",
+"pos": "QB",
+"pre": 0.6617,
+"ruling": "ACT",
+"at": "2026-11-22T16:36:00+00:00",
+"post": 0.974,
+"status": "Active (DLL)"
+},
+"00-0038041": {
+"name": "Jake Ferguson",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T16:31:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038134": {
+"name": "Kenneth Walker III",
+"team": "KC",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T16:37:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038547": {
+"name": "Luke Schoonmaker",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.6647,
+"ruling": "ACT",
+"at": "2026-11-22T16:31:00+00:00",
+"post": 0.974,
+"status": "Active (FDD)"
+},
+"00-0038728": {
+"name": "Jared Wayne",
+"team": "MIA",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T16:40:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0038933": {
+"name": "Dalton Kincaid",
+"team": "BUF",
+"pos": "TE",
+"pre": 0.01,
+"ruling": "INA",
+"at": "2026-11-22T16:34:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039062": {
+"name": "Jonathan Mingo",
+"team": "DAL",
+"pos": "WR",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T16:31:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0039577": {
+"name": "Kedon Slovis",
+"team": "BAL",
+"pos": "QB",
+"pre": 0.5225,
+"ruling": "INA",
+"at": "2026-11-22T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040194": {
+"name": "Jackson Hawes",
+"team": "BUF",
+"pos": "TE",
+"pre": 0.8559,
+"ruling": "ACT",
+"at": "2026-11-22T16:38:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0040876": {
+"name": "Elijah Sarratt",
+"team": "BAL",
+"pos": "WR",
+"pre": 0.1867,
+"ruling": "INA",
+"at": "2026-11-22T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040886": {
+"name": "Nicholas Singleton",
+"team": "TEN",
+"pos": "RB",
+"pre": 0.6369,
+"ruling": "INA",
+"at": "2026-11-22T16:36:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0040888": {
+"name": "Adam Randall",
+"team": "BAL",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-22T16:32:00+00:00",
+"post": 0.0,
+"status": "Inactive (FFF)"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"pre": 0.0953,
+"ruling": "INA",
+"at": "2026-11-22T16:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041051": {
+"name": "Zavion Thomas",
+"team": "CHI",
+"pos": "WR",
+"pre": 0.1935,
+"ruling": "ACT",
+"at": "2026-11-22T16:41:00+00:00",
+"post": 0.974,
+"status": "Active (FFD)"
+},
+"00-0041077": {
+"name": "Justin Joly",
+"team": "MIA",
+"pos": "TE",
+"pre": 0.1715,
+"ruling": "INA",
+"at": "2026-11-22T16:40:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041438": {
+"name": "Carnell Tate",
+"team": "TEN",
+"pos": "WR",
+"pre": 0.9231,
+"ruling": "ACT",
+"at": "2026-11-22T16:33:00+00:00",
+"post": 0.974,
+"status": "Active (LLF)"
+},
+"00-0041443": {
+"name": "Skyler Bell",
+"team": "BUF",
+"pos": "WR",
+"pre": 0.7546,
+"ruling": "INA",
+"at": "2026-11-22T16:37:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
