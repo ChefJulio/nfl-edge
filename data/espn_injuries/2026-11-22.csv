@@ -424,6 +424,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428718,Tre Tucker,Las Vegas Raiders,Active,2026-11-16T04:18Z,,,,,,Tucker caught one pass for nine yards on two targets in Sunday's 21-13 loss to the Seahawks.,WR
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-16T02:35Z,,,,,,"Mendoza completed 17 of 29 passes for 143 yards, no touchdowns and no interceptions and rushed six times for 22 yards and one TD during Sunday's 21-13 loss to the Seahawks.",QB
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-16T02:19Z,,,,,,Washington compiled eight rushes for 23 yards and secured his only target for four yards during Sunday's 21-13 defeat to the Seahawks.,RB
+4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-22T12:33Z,Back,Spasms,Not Specified,2026-11-22,QUESTIONABLE,"McConkey (back) is expected to play in Sunday's game against the Jets, Ian Rapoport of NFL Network reports.",WR
 4838693,Rodney Shelley,Los Angeles Chargers,Injured Reserve,2026-11-22T00:49Z,Ankle,Not Specified,Not Specified,2026-12-17,IR,The Chargers placed Shelley (ankle) on injured reserve Saturday.,CB
 4411189,Trey Pipkins III,Los Angeles Chargers,Questionable,2026-11-22T00:44Z,Knee,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,The Chargers activated Pipkins (knee) from injured reserve Saturday.,OT
 2576702,Bud Dupree,Los Angeles Chargers,Active,2026-11-21T03:18Z,,,,,,"Dupree requested his release from the Chargers earlier this week, Jeremy Fowler of ESPN.com reports.",LB
@@ -436,7 +437,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-20T23:06Z,,,,,,"Offensive coordinator Mike McDaniel told reporters Friday that his ""expectation"" is that Hampton is the lead back for the Chargers, Omar Navarro of the team's official site reports.",RB
 3843769,Donte Jackson,Los Angeles Chargers,Active,2026-11-20T22:05Z,,,,,,,CB
 4241263,Charlie Kolar,Los Angeles Chargers,Questionable,2026-11-20T21:39Z,Concussion,Concussion,Not Specified,2026-11-22,QUESTIONABLE,Kolar (concussion) is questionable for Sunday's game against the Jets.,TE
-4612826,Ladd McConkey,Los Angeles Chargers,Questionable,2026-11-20T21:34Z,Back,Spasms,Not Specified,2026-11-22,QUESTIONABLE,McConkey (back) is listed as questionable for Sunday's game against the Jets.,WR
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Active,2026-11-19T02:47Z,,,,,,Tomlinson recorded five tackles (three solo) including 2.0 sacks during Monday's 23-20 win at Baltimore.,DT
 4240528,Del'Shawn Phillips,Los Angeles Chargers,Active,2026-11-19T02:39Z,,,,,,Phillips recorded nine tackles (four solo) and an interception during Monday's 23-20 win at Baltimore.,LB
 4362081,Cameron Dicker,Los Angeles Chargers,Active,2026-11-18T01:55Z,,,,,,Dicker made all three of his field-goal tries and converted both of his extra-point attempts during Monday's 23-20 win at Baltimore.,PK
@@ -724,7 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-14T00:44Z,,,,,,"Nwosu (ankle) does not have an injury designation against the Raiders on Sunday, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
-3052587,Baker Mayfield,Tampa Bay Buccaneers,Questionable,2026-11-21T15:31Z,Foot,Strain,Not Specified,2026-11-22,QUESTIONABLE,"Mayfield (thumb) is dealing with a plantar fascia injury in his foot, and he will wear a special orthotic and new cleats to stabilize his foot if he's cleared to play against the Lions on Sunday, Tom Pelissero of The Ringer and Netflix reports.",QB
+3052587,Baker Mayfield,Tampa Bay Buccaneers,Questionable,2026-11-22T12:24Z,Foot,Strain,Not Specified,2026-11-22,QUESTIONABLE,"Mayfield (foot/right thumb) is slated to play in Sunday's game against the Lions, Ian Rapoport of NFL Network reports.",QB
 4248533,Josh Hayes,Tampa Bay Buccaneers,Injured Reserve,2026-11-21T01:19Z,Knee,Surgery,Not Specified,2026-11-30,IR-R,Hayes (knee) has been ruled out for Sunday's game against the Lions.,CB
 4686334,Yaya Diaby,Tampa Bay Buccaneers,Questionable,2026-11-20T23:55Z,Knee - MCL,Sprain,Not Specified,2026-11-22,QUESTIONABLE,Diaby (knee) is questionable for Sunday's game against the Lions.,LB
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Out,2026-11-20T23:52Z,Ankle,Not Specified,Not Specified,2026-11-30,OUT,Winfield (ankle) has been ruled out for Sunday's game against the Lions.,S
@@ -749,11 +749,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-09T05:30Z,,,,,,Godwin caught two of three targets for 16 yards and added a 12-yard rush during Sunday night's 27-24 loss to the Bears.,WR
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-09T05:23Z,,,,,,Gainwell rushed five times for 16 yards and caught all three of his targets for 60 yards in Sunday's 27-24 loss to the Bears.,RB
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-09T05:20Z,,,,,,Egbuka (foot) caught three of five targets for 38 yards and added a one-yard run in Sunday's 27-24 loss to the Bears.,WR
+4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-22T12:40Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tate (shoulder) is expected to play in Sunday's game against the Cowboys, Ian Rapoport of NFL Network reports.",WR
 4429058,Jaylen Harrell,Tennessee Titans,Injured Reserve,2026-11-22T00:41Z,Knee - ACL,Not Specified,Not Specified,2027-02-15,IR,"Harrell (knee) was taken to a hospital in Tampa on Saturday following a serious car accident, Terry McCormick of TitanInsider.com reports.",LB
 4240532,Tony Adams,Tennessee Titans,Active,2026-11-21T20:20Z,,,,,,"Adams has cleared the league's concussion protocol and no longer carries an injury designation into Sunday's game against the Cowboys, Jim Wyatt of the Titans' official site reports.",S
 4240657,Michael Carter,Tennessee Titans,Active,2026-11-21T20:17Z,,,,,,"The Titans elevated Carter from the practice squad to the active roster Saturday, Jim Wyatt of the Titans' official site reports.",RB
 4428557,Tyjae Spears,Tennessee Titans,Injured Reserve,2026-11-21T18:44Z,Knee,Not Specified,Not Specified,2026-12-20,IR,"The Titans placed Spears (knee) on injured reserve Saturday, Jim Wyatt of the Titans' official site reports.",RB
-4871023,Carnell Tate,Tennessee Titans,Questionable,2026-11-21T16:43Z,Shoulder,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Tate (shoulder) is questionable for Sunday's game against the Cowboys but is ""considered likely"" to be cleared to play, Matt Zenitz of CBS Sports reports.",WR
 4695280,Micah Robinson,Tennessee Titans,Questionable,2026-11-21T00:05Z,Hip,,,2026-11-22,QUESTIONABLE,questionable,CB
 4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-20T22:56Z,,,,,,Winston (shoulder) does not have an injury designation for Sunday's game against the Cowboys.,S
 4870805,Anthony Hill Jr.,Tennessee Titans,Questionable,2026-11-20T22:53Z,Neck,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,Hill (neck) is questionable to face the Cowboys on Sunday.,LB
