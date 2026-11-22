@@ -274,11 +274,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429795,Jahmyr Gibbs,Detroit Lions,Active,2026-11-15T19:22Z,,,,,,Gibbs carried the ball 22 times for 153 yards and two touchdowns while catching seven of eight targets for 99 yards in Sunday's 35-10 win over the Patriots.,RB
 3046779,Jared Goff,Detroit Lions,Active,2026-11-15T18:59Z,,,,,,Goff completed 20 of 31 passes for 303 yards and three touchdowns with two interceptions in Sunday's 35-10 win over the Patriots in Munich. He added three yards on his only carry.,QB
 4038849,DJ Wonnum,Detroit Lions,Active,2026-11-13T22:22Z,,,,,,"Wonnum (concussion) does not carry an injury designation into Sunday's game against the Patriots in Munich, Nolan Bianchi of The Detroit News reports.",LB
+4361423,Micah Parsons,Green Bay Packers,Out,2026-11-22T14:36Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Parsons (knee) is ""on track"" to return from the PUP list to make his season debut Wednesday against the Rams, Ian Rapoport of NFL Network reports.",DE
 4428085,Luke Musgrave,Green Bay Packers,Out,2026-11-22T14:06Z,Neck,Not Specified,Not Specified,2027-02-15,PUP-R,"Packers head coach Matt LaFleur said Saturday that he doesn't anticipate Musgrove (neck) returning from the PUP list this season, according to NFL reporter Jason B. Hirschhorn.",TE
 5076652,Brandon Cisse,Green Bay Packers,Questionable,2026-11-22T00:37Z,Ribs,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Cisse (ribs) practiced Saturday, Bill Huber of SI.com reports.",CB
 3124005,Zaire Franklin,Green Bay Packers,Out,2026-11-22T00:36Z,Shin,Fracture,Not Specified,2026-11-25,QUESTIONABLE,"Franklin (shin) participated in practice Saturday, Bill Huber of SI.com reports.",LB
 4430191,Skyy Moore,Green Bay Packers,Questionable,2026-11-22T00:33Z,Ankle,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Moore (ankle) participated in practice Saturday, Bill Huber of SI.com reports.",WR
-4361423,Micah Parsons,Green Bay Packers,Out,2026-11-22T00:31Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Parsons (knee) participated in practice Saturday, Bill Huber of SI.com reports.",DE
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-21T18:29Z,Finger,Surgery,Right,2026-11-25,QUESTIONABLE,"Jacobs (finger) is participating in Saturday's practice session, Bill Huber of SI.com reports.",RB
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-19T02:35Z,,,,,,Williams logged eight tackles (two solo) and a pass defense during the Packers' 30-10 loss to the Vikings in Week 10.,S
 4241470,Xavier McKinney,Green Bay Packers,Active,2026-11-19T02:33Z,,,,,,McKinney registered six tackles (three solo) and an interception during the Packers' 30-10 loss to the Vikings in Week 10.,S
@@ -349,6 +349,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
+4381558,Jordan Davis,Jacksonville Jaguars,Active,2026-11-22T14:11Z,,,,,,"Davis is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",DT
+3919512,Jessie Bates III,Jacksonville Jaguars,Active,2026-11-22T14:09Z,,,,,,"Bates is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",S
 4573319,Danny Striggow,Jacksonville Jaguars,Out,2026-11-22T00:45Z,Concussion,Concussion,Not Specified,2026-11-29,OUT,Striggow (concussion) has been downgraded to out for Sunday's game against the Giants.,DE
 4875266,B.J. Green II,Jacksonville Jaguars,Injured Reserve,2026-11-21T01:27Z,Forearm,Not Specified,Not Specified,2026-11-29,IR-R,Green (forearm) has been ruled out for Sunday's game against the Giants.,DE
 4426349,Travon Walker,Jacksonville Jaguars,Active,2026-11-21T00:00Z,,,,,,Walker (ribs) does not have an injury designation for Sunday's game against the Giants.,DE
@@ -366,14 +368,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-11-17T01:33Z,,,,,,"Hunter caught both of his targets for 16 yards, recorded a three-yard carry and contributed five tackles (three solo) and an interception during the Jaguars' 40-23 win over the Titans on Sunday.",WR
 4612298,Albert Regis,Jacksonville Jaguars,Active,2026-11-16T19:22Z,,,,,,,DT
 4832922,Wesley Williams,Jacksonville Jaguars,Active,2026-11-16T19:22Z,,,,,,,DE
-3919512,Jessie Bates III,Jacksonville Jaguars,Active,2026-11-16T19:22Z,,,,,,,S
 5085024,CJ Williams,Jacksonville Jaguars,Active,2026-11-16T19:22Z,,,,,,,WR
 4877475,Cam'Ron Silmon-Craig,Jacksonville Jaguars,Active,2026-11-16T16:51Z,,,,,,,S
 4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-16T02:00Z,,,,,,"Cameron caught all three of his targets for 67 yards and a touchdown in Sunday's 40-23, Week 10 win over Tennessee. He also returned five kickoffs for 142 yards.",WR
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-16T01:40Z,,,,,,Thomas caught three of four targets for 29 yards in Sunday's 40-23 win over the Titans.,WR
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-16T01:33Z,,,,,,Washington caught seven of nine targets for 152 yards and a touchdown in Sunday's 40-23 win over the Titans.,WR
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-16T01:25Z,,,,,,Lawrence completed 25 of 35 passes for 352 yards and three touchdowns with one interception in Sunday's 40-23 win over the Titans. He added 27 yards on four carries.,QB
-4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-16T01:10Z,,,,,,Strange caught two of three targets for nine yards and a touchdown in Sunday's 40-23 win over the Titans.,TE
 4605841,Nate Carter,Kansas City Chiefs,Active,2026-11-22T00:33Z,,,,,,"The Chiefs elevated Carter from the practice squad to the active roster Saturday, Matt Derrick of ChiefsDigest.com reports.",RB
 4591008,Omarr Norman-Lott,Kansas City Chiefs,Questionable,2026-11-21T01:05Z,Knee - ACL,Surgery,Right,2026-11-22,QUESTIONABLE,Norman-Lott (knee) is questionable for Sunday's game against Arizona.,DT
 4043041,Jaylon Moore,Kansas City Chiefs,Out,2026-11-21T01:03Z,Ankle,Not Specified,Right,2026-11-26,OUT,Moore (ankle) has been ruled out for Sunday's game against the Cardinals.,OT
@@ -449,13 +449,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038941,Justin Herbert,Los Angeles Chargers,Active,2026-11-17T05:43Z,,,,,,Herbert completed 12 of 18 passes for 129 yards with no touchdowns or interceptions and rushed seven times for 51 yards and a touchdown in the Chargers' 23-20 win over the Ravens on Monday night.,QB
 4040842,Kayode Awosika,Los Angeles Chargers,Active,2026-11-17T00:03Z,,,,,,Awosika (fibula) is active for Monday's game against the Ravens.,G
 4433914,Branson Taylor,Los Angeles Chargers,Injured Reserve,2026-11-16T23:41Z,Ankle,Not Specified,Not Specified,2026-12-13,IR,Taylor (ankle) was placed on injured reserve Monday.,G
-4426515,Puka Nacua,Los Angeles Rams,Injured Reserve,2026-11-22T01:25Z,Knee - MCL,Sprain,Right,2027-01-10,IR,"Nacua (knee) is expected to be sidelined 4-to-5 months after undergoing MCL surgery, which means he likely won't be able to return to action even if the Rams advance to the Super Bowl, Adam Schefter of ESPN reports.",WR
+16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-22T14:32Z,Hamstring,Surgery,Left,2026-12-13,IR,"Adams (hamstring) has an ""outside chance"" to return from injured reserve for the Rams' Week 13 matchup with the Chiefs but is more likely to be activated around mid-December, Ian Rapoport of NFL Networkreports.",WR
+4426515,Puka Nacua,Los Angeles Rams,Injured Reserve,2026-11-22T01:25Z,Knee - MCL,Surgery,Right,2027-02-15,IR,"Nacua (knee/toe) is expected to be sidelined 4-to-5 months after undergoing surgery Tuesday to repair his MCL, which means he won't be on track to return at any point during the playoffs, Adam Schefter of ESPN reports.",WR
 4362474,Steve Avila,Los Angeles Rams,Out,2026-11-22T01:01Z,Hamstring,Not Specified,Not Specified,2026-12-03,OUT,"Coach Sean McVay said Saturday that Avila (hamstring) will not play in Wednesday's game against the Packers, Adam Grosbard of The Orange County Register reports.",G
 4360859,Justin Dedich,Los Angeles Rams,Injured Reserve,2026-11-22T00:23Z,Undisclosed,Not Specified,Not Specified,2026-11-25,IR-R,The Rams opened the 21-day practice window for Dedich (undisclosed) on Saturday.,G
 4250621,Kobie Turner,Los Angeles Rams,Injured Reserve,2026-11-22T00:22Z,Groin,Strain,Not Specified,2026-11-25,IR-R,The Rams designated Turner (groin) to return from injured reserve Saturday.,DE
 4430737,Kyren Williams,Los Angeles Rams,Questionable,2026-11-21T21:55Z,Toe,Soreness,Not Specified,2026-11-25,QUESTIONABLE,"Head coach Sean McVay said Saturday that Williams is tending to a sore toe but is expected to play Wednesday against the Packers, Sarah Barshop of ESPN reports.",RB
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-20T23:18Z,,,,,,"The Rams are expected to lean more on Mumpfield and the rest of the team's wide receivers in the absence of Puka Nacua (knee/toe), the latter of whom is expected to be sidelined for the remainder of the regular season, Nate Atkins and Jonathan Jones of The Athletic report.",WR
-16800,Davante Adams,Los Angeles Rams,Injured Reserve,2026-11-20T17:49Z,Hamstring,Surgery,Left,2026-12-03,IR,"Coach Sean McVay noted Friday that Adams (hamstring) isn't expected to practice this weekend, Greg Beacham of the Associated Press reports.",WR
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-20T17:21Z,Hamstring,Strain,Not Specified,2026-11-25,IR-R,"Ferguson (hamstring/ankle) isn't ready to return to game action, but the Rams still plan to activate him from injured reserve before Week 12 and keep him on the active roster, Adam Grosbard of The Orange County Register reports.",TE
 3122132,Myles Garrett,Los Angeles Rams,Active,2026-11-19T02:57Z,,,,,,Garrett played 17 defensive snaps but did not show up on the box score otherwise during the Rams' 34-6 win over the Cardinals in Week 10.,DE
 4249128,Quentin Lake,Los Angeles Rams,Active,2026-11-19T02:55Z,,,,,,Lake posted two tackles (one solo) during the Rams' 34-6 win over the Cardinals in Week 10.,S
