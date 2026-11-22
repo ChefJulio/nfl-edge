@@ -49,6 +49,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-11-13T22:07Z,,,,,,"Thomas and the Falcons agreed to a three-year extension worth up to $33 million Friday, Adam Schefter of ESPN reports.",DE
 4243220,Andrew Vorhees,Atlanta Falcons,Active,2026-11-11T00:29Z,,,,,,"The Ravens traded Vorhees and a conditional 2028 sixth-round pick to the Falcons on Tuesday in exchange for Ryan Neuzil, Jamison Hensley of ESPN.com reports.",G
 4431194,Billy Bowman Jr.,Atlanta Falcons,Active,2026-11-09T20:54Z,,,,,,,CB
+4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
 3052743,Trey Hendrickson,Baltimore Ravens,Active,2026-11-22T20:15Z,,,,,,,LB
 5088338,Elijah Sarratt,Baltimore Ravens,Out,2026-11-22T16:43Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Sarratt (coach's decision) is inactive for Sunday's game against Carolina.,WR
 4685526,Adam Randall,Baltimore Ravens,Out,2026-11-22T16:39Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Randall (coach's decision) is inactive for Sunday's game against Carolina.,RB
@@ -73,7 +74,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870847,Ja'Kobi Lane,Baltimore Ravens,Active,2026-11-17T06:03Z,,,,,,Lane brought in three of 11 targets for 61 yards in the Ravens' 23-20 loss to the Chargers on Monday night.,WR
 3116365,Mark Andrews,Baltimore Ravens,Active,2026-11-17T05:48Z,,,,,,Andrews brought in all eight targets for 82 yards in the Ravens' 23-20 loss to the Chargers on Monday.,TE
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-17T05:20Z,,,,,,Flowers brought in six of seven targets for 74 yards and lost a fumble in the Ravens' 23-20 loss to the Chargers on Monday night.,WR
-2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-17T05:14Z,,,,,,Brissett completed 33 of 49 passes for 340 yards with no touchdowns and one interception and added two rushes for two yards in the Ravens' 23-20 loss to the Chargers on Monday night.,QB
 3915416,DJ Moore,Buffalo Bills,Active,2026-11-22T19:36Z,,,,,,"Moore (knee) has returned to Sunday's game against the Dolphins, Katherine Fitzgerald of The Buffalo News reports.",WR
 4036060,Damar Hamlin,Buffalo Bills,Active,2026-11-22T17:21Z,,,,,,Hamlin (toe) is active for Sunday's game against the Dolphins.,S
 4241476,Tyrell Shavers,Buffalo Bills,Active,2026-11-22T17:11Z,,,,,,Shavers (knee) is active for Sunday's game against the Dolphins.,WR
@@ -199,7 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915535,Denzel Ward,Cleveland Browns,Active,2026-11-13T23:58Z,,,,,,Ward (quadriceps) does not have an injury designation for Sunday's game against the Texans.,CB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,C
 3131498,Tytus Howard,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
-4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-22T19:05Z,Knee,Not Specified,Right,2026-11-22,QUESTIONABLE,"Winters (knee) is questionable to return to Sunday's game against the Titans, Nick Harris of the Fort Worth Star-Telegram reports.",LB
+4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-22T19:05Z,Knee,Not Specified,Right,2026-11-26,QUESTIONABLE,"Winters (knee) is questionable to return to Sunday's game against the Titans, Nick Harris of the Fort Worth Star-Telegram reports.",LB
 4685266,Jaishawn Barham,Dallas Cowboys,Out,2026-11-22T17:16Z,Hip,Not Specified,Not Specified,2026-11-26,INACTIVE,Barham (hip/groin) is inactive for Sunday's game versus Tennessee.,LB
 4372096,Luke Schoonmaker,Dallas Cowboys,Active,2026-11-22T16:45Z,,,,,,Schoonmaker (illness) is active for Sunday's Week 11 matchup against Tennessee.,TE
 3929850,P.J. Locke,Dallas Cowboys,Out,2026-11-22T16:31Z,Concussion,Concussion,Not Specified,2026-11-26,INACTIVE,inactive,S
@@ -549,7 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3129446,Robert Spillane,New England Patriots,Questionable,2026-11-15T17:18Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Spillane (illness) is questionable to return to Sunday's game against the Lions in Munich.,LB
 16771,Morgan Moses,New England Patriots,Active,2026-11-15T15:32Z,,,,,,"Moses (knee) has returned to Sunday's game against the Lions in Munich, Mike Reiss of ESPN.com reports.",OT
 15718,Greg Van Roten,New England Patriots,Active,2026-11-15T13:23Z,,,,,,Van Roten (hamstring) is active for Sunday's game against the Lions in Munich.,G
-3929645,Juwan Johnson,New Orleans Saints,Questionable,2026-11-22T20:15Z,Undisclosed,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,questionable,TE
+3929645,Juwan Johnson,New Orleans Saints,Questionable,2026-11-22T20:20Z,Hamstring,Not Specified,Not Specified,2026-11-22,QUESTIONABLE,"Johnson injured his hamstring during Sunday's game in Chicago, Jeff Nowak of WWL Radio reports.",TE
 4361259,Zach Wilson,New Orleans Saints,Out,2026-11-22T16:48Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Wilson (coach's decision) is inactive but will serve as the Saints' emergency third quarterback against the Bears on Sunday.,QB
 4241993,Pete Werner,New Orleans Saints,Out,2026-11-22T16:45Z,Hamstring,Not Specified,Left,2026-11-29,INACTIVE,Werner (hamstring) is inactive for Sunday's game against Chicago.,LB
 4569682,Audric Estime,New Orleans Saints,Out,2026-11-22T16:43Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Estime (coach's decision) is inactive for Sunday's game against the Bears.,RB
