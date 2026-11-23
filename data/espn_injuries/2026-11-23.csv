@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4676004,Cole Bishop,Buffalo Bills,Active,2026-11-20T01:06Z,,,,,,"Bishop (knee) was a full participant in practice Thursday, Sal Capaccio of WGR Sports Radio 550 Buffalo reports.",S
 4870886,TJ Parker,Buffalo Bills,Active,2026-11-19T02:39Z,,,,,,"Parker accumulated five tackles (three solo), including 2.0 sacks, in the Bills' 31-12 win over the Jets on Sunday.",LB
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-18T02:27Z,,,,,,Johnson caught his only target for four yards in a 31-12 win over the Jets on Sunday.,RB
+4034948,Feleipe Franks,Carolina Panthers,Active,2026-11-23T16:47Z,,,,,,Franks played all 21 of his snaps on special teams and was credited with two tackles in Sunday's 35-33 win over the Ravens.,TE
 3117253,Bobby Okereke,Carolina Panthers,Out,2026-11-23T15:21Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,out,LB
 4431077,TeRah Edwards,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,DT
 4240595,Marco Wilson,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,CB
@@ -123,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430034,Xavier Legette,Carolina Panthers,Active,2026-11-18T02:46Z,,,,,,Legette didn't produce any output in the boxscore during Carolina's win over the Saints on Sunday.,WR
 4567096,John Metchie III,Carolina Panthers,Active,2026-11-18T02:34Z,,,,,,Metchie caught his only target for four yards Sunday in a 20-17 win against New Orleans.,WR
 4685350,Trevor Etienne,Carolina Panthers,Active,2026-11-18T02:32Z,,,,,,Etienne took three carries for one yard and caught both of his two targets for nine yards during Sunday's 20-17 win at New Orleans. He also returned three punts for 43 yards.,RB
-4568263,Ryan Fitzgerald,Carolina Panthers,Active,2026-11-17T03:15Z,,,,,,Fitzgerald made two of his three field-goal attempts and both PATs in the Panthers' 20-17 win over the Saints on Sunday.,PK
+3948283,Stephen Carlson,Chicago Bears,Active,2026-11-23T16:56Z,,,,,,Carlson played 15 of his 19 snaps on special teams in Sunday's 21-13 win over the Saints.,TE
 4361093,Kyler Gordon,Chicago Bears,Out,2026-11-23T15:21Z,Shoulder,Not Specified,Left,2026-11-26,QUESTIONABLE,out,CB
 4877376,Jayden Loving,Chicago Bears,Active,2026-11-23T15:21Z,,,,,,,DT
 4360319,Jordan McFadden,Chicago Bears,Active,2026-11-23T15:21Z,,,,,,,G
@@ -148,7 +149,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17427,Cairo Santos,Chicago Bears,Active,2026-11-10T02:46Z,,,,,,Santos made both of his two field-goal attempts and converted all three of his extra-point tries during Sunday's 27-24 win versus the Buccaneers.,PK
 2576492,Grady Jarrett,Chicago Bears,Active,2026-11-07T00:17Z,,,,,,Jarrett (groin) does not carry an official injury designation ahead of Sunday's game versus the Buccaneers.,DE
 5125873,Theo Benedet,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,OT
-4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-06T20:03Z,,,,,,,LB
 3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-23T16:23Z,Hamstring,Not Specified,Left,2026-11-29,IR-R,The Bengals list Davis (hamstring) as doubtful for Monday's game against the Commanders.,CB
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-11-22T00:54Z,Quadriceps,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Dugger (quadriceps) is questionable for Monday night's game against the Commanders.,S
 3125082,Dalton Risner,Cincinnati Bengals,Out,2026-11-22T00:42Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,"Risner (knees) has been ruled out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",G
