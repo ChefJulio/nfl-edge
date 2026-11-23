@@ -474,6 +474,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5082391,Maximus Pulley,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,S
 4598574,Darryl Peterson III,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,LB
 4362294,Desjuan Johnson,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,DE
+4360488,JuJu Brents,Miami Dolphins,Questionable,2026-11-23T20:38Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Dolphins head coach Jeff Hafley said Monday that Brents is day-to-day with a shoulder injury, Barry Jackson of the Miami Herald reports.",CB
 4242512,Malik Willis,Miami Dolphins,Injured Reserve,2026-11-23T17:19Z,Abdomen,Not Specified,Not Specified,2026-12-13,IR,"Head coach Jeff Hafley said Monday that, at this time, surgery to address Willis' groin/core injury is not foreseen, Joe Schad of The Palm Beach Post reports.",QB
 4430681,Jared Wayne,Miami Dolphins,Out,2026-11-23T15:39Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,out,WR
 2977680,Bradley Pinion,Miami Dolphins,Out,2026-11-23T15:39Z,Groin,Not Specified,Right,2026-11-29,QUESTIONABLE,out,P
@@ -486,7 +487,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-23T01:57Z,,,,,,Douglas caught two of 10 targets for 30 yards in Sunday's 26-9 loss to the Bills.,WR
 4433971,Kyle McCord,Miami Dolphins,Active,2026-11-22T23:57Z,,,,,,"McCord completed 12 of 33 passes for 102 yards, no touchdowns and one interception in Sunday's 26-9 loss to the Bills. He also rushed twice for nine yards.",QB
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-11-22T23:54Z,,,,,,Gordon rushed 11 times for 69 yards while catching two of three targets for minus-2 yards in Sunday's 26-9 loss to the Bills.,RB
-4360488,JuJu Brents,Miami Dolphins,Questionable,2026-11-22T20:53Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Brents (shoulder) is questionable to return to Sunday's tilt against Buffalo.,CB
 4869961,Chris Bell,Miami Dolphins,Active,2026-11-22T20:01Z,,,,,,"Bell (chest) has returned to Sunday's Week 11 matchup against the Bills, David Furones of the South Florida Sun Sentinel reports.",WR
 4819257,Jonah Savaiinaea,Miami Dolphins,Active,2026-11-22T19:54Z,,,,,,"Savaiinaea (ankle) has been cleared to return to Sunday's game against the Bills, David Furones of the South Florida Sun Sentinel reports.",G
 4567225,Jaylin Simpson,Miami Dolphins,Out,2026-11-22T17:29Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Simpson (knee) is listed as inactive for Sunday's matchup against the Bills.,S
@@ -499,8 +499,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837188,Jordan Phillips,Miami Dolphins,Injured Reserve,2026-11-18T19:24Z,Biceps,Surgery,Not Specified,2027-02-15,IR,"Phillips underwent surgery on his injured bicep Wednesday, David Furones of the South Florida Sun Sentinel reports.",DT
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-18T03:49Z,,,,,,"Brooks produced nine total tackles (six solo), a pass defensed and a forced fumble during Sunday's 24-22 loss to the Colts.",LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-18T03:43Z,,,,,,Rodriguez recorded one solo tackle during Sunday's 24-22 loss to the Colts.,LB
+4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-23T20:30Z,Thumb,Surgery,Not Specified,2026-11-29,DOUBTFUL,"Vikings head coach Kevin O'Connell said Monday that Addison is ""progressing really well"" in his recovery from thumb surgery, though the wide receiver isn't expected to be available Week 12 versus the Falcons, Ben Goessling of The Minnesota Star Tribune reports.",WR
 3917315,Kyler Murray,Minnesota Vikings,Out,2026-11-23T15:41Z,Hamstring,Strain,Not Specified,2026-11-29,QUESTIONABLE,out,QB
-4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-23T15:41Z,Thumb,Surgery,Not Specified,2026-12-06,OUT,out,WR
 4565185,Tai Felton,Minnesota Vikings,Active,2026-11-23T05:03Z,,,,,,Felton caught six of 12 targets for 42 yards during Sunday night's 35-10 loss to the 49ers.,WR
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-23T05:02Z,,,,,,Mason rushed 11 times for 38 yards while catching his lone target for minus-1 yard in Sunday's 35-10 loss to the 49ers.,RB
 3042519,Aaron Jones Sr.,Minnesota Vikings,Active,2026-11-23T05:01Z,,,,,,Jones rushed eight times for 30 yards and a touchdown while catching his lone target for 13 yards in Sunday's 35-10 loss to the 49ers.,RB
@@ -649,7 +649,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-18T00:54Z,,,,,,The Eagles signed Blue from their practice squad to their active roster Tuesday.,RB
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-11-16T18:31Z,,,,,,The Eagles signed Ertz from the practice squad to the active roster Monday.,TE
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
-4037333,Alex Highsmith,Pittsburgh Steelers,Doubtful,2026-11-23T20:06Z,Ankle,Not Specified,Not Specified,2026-11-27,DOUBTFUL,"The Steelers believe Highsmith (ankle) avoided a major injury in Sunday's loss to the Eagles, Jeremy Fowler of ESPN.com reports.",LB
+4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-23T20:37Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Steelers coach Mike McCarthy said Monday that he's ""very confident"" Pittman (foot) will be on the field this week when the Steelers face the Broncos on Friday, Brooke Pryor of ESPN reports.",WR
+4037333,Alex Highsmith,Pittsburgh Steelers,Doubtful,2026-11-23T20:06Z,Ankle,Not Specified,Not Specified,2026-11-27,DOUBTFUL,"Steelers head coach Mike McCarthy suggested Monday that Highsmith (ankle) is likely to be sidelined for Friday's game against the Broncos, Brooke Pryor of ESPN.com reports. ""It's going to be tough for him to make it this week,"" McCarthy said.",LB
 4429164,Nick Herbig,Pittsburgh Steelers,Out,2026-11-23T15:50Z,Hip,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,out,LB
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,CB
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,DE
@@ -668,7 +669,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-22T16:58Z,,,,,,Elliott (knee) is active for Sunday's game against the Eagles.,S
 4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-22T16:51Z,,,,,,Howard (coach's decision) is inactive but will serve as the Steelers' emergency quarterback against the Eagles on Sunday.,QB
 4431492,Roman Wilson,Pittsburgh Steelers,Active,2026-11-22T16:49Z,,,,,,Wilson (hand/finger) is active for Sunday's game against the Eagles.,WR
-4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-21T20:06Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Pittman (foot) is not expected to be activated from injured reserve for Sunday's game against the Eagles, Brooke Pryor of ESPN reports.",WR
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-19T02:00Z,Knee,Not Specified,Not Specified,2026-11-27,IR-R,"The Steelers designated Dunker (knee) for return to practice from injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4368304,Mason McCormick,Pittsburgh Steelers,Injured Reserve,2026-11-19T01:44Z,Ankle,Dislocated,Not Specified,2027-01-03,IR,"The Steelers placed McCormick (ankle) on injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-11-18T05:57Z,,,,,,Brisker notched 10 tackles (two solo) Sunday in a Week 10 loss to the Bengals.,S
