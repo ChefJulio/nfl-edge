@@ -203,7 +203,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-23T17:24Z,,,,,,Mitchell recorded two receptions for 40 yards on two targets in Sunday's 51-30 win over the Titans.,TE
 3929850,P.J. Locke,Dallas Cowboys,Out,2026-11-23T15:26Z,Concussion,Concussion,Not Specified,2026-11-26,QUESTIONABLE,out,S
 4426485,Jonathan Mingo,Dallas Cowboys,Out,2026-11-23T15:26Z,Ankle,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,out,WR
-4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-23T15:26Z,Knee,Not Specified,Not Specified,2026-12-07,OUT,out,TE
+4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-23T15:26Z,Knee,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,out,TE
 2980097,Jonathan Bullard,Dallas Cowboys,Active,2026-11-23T15:26Z,,,,,,,DT
 4685263,Tyler Booker,Dallas Cowboys,Out,2026-11-23T15:26Z,Ankle,Sprain,Left,2026-12-07,OUT,out,G
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-23T05:55Z,,,,,,Aubrey made his lone field-goal attempt and all six PATs in Sunday's 51-30 win over the Titans.,PK
@@ -624,19 +624,19 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-18T04:52Z,,,,,,Sherwood secured nine tackles (four solo) in Sunday's Week 10 loss to the Bills.,LB
 3134353,Tim Patrick,New York Jets,Active,2026-11-16T19:35Z,,,,,,,WR
 4685413,Cade Klubnik,New York Jets,Active,2026-11-15T23:54Z,,,,,,"Klubnik completed 11 of 20 passes for 137 yards, no touchdowns and one interception in Sunday's 31-12 loss to the Bills. He added three rushing attempts for 26 yards.",QB
+3121023,Dallas Goedert,Philadelphia Eagles,Questionable,2026-11-23T22:08Z,Shin,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,questionable,TE
+3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-23T22:04Z,Neck,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Barkley was listed as a limited participant on Monday's estimated practice report due to a neck injury and an illness.,RB
 4696203,Ajani Cornelius,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,OT
 4430814,Jake Majors,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,C
 4689651,Mac McWilliams,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,CB
 4431573,Smael Mondon Jr.,Philadelphia Eagles,Out,2026-11-23T15:48Z,Ankle,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,out,LB
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-23T05:05Z,,,,,,Elliott went 4-for-4 on field-goal attempts and made his lone PAT in Sunday's 19-16 win over the Steelers.,PK
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-23T01:41Z,,,,,,Lemon caught one of three targets for three yards in Sunday's 19-16 win over the Steelers.,WR
-3121023,Dallas Goedert,Philadelphia Eagles,Active,2026-11-23T01:39Z,,,,,,Goedert caught his only target for 38 yards in Sunday's 19-16 win over the Steelers.,TE
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-23T01:37Z,,,,,,Milton completed 11 of 21 passes for 141 yards while rushing five times for seven yards in Sunday's 19-16 win over the Steelers.,QB
-3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-22T22:41Z,Neck,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,"Barkley (left arm) said after Sunday's 19-16 win over the Steelers that he believes he'll play in Thursday's game at Dallas, Johnny McGonigal of PennLive.com reports.",RB
 4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-22T22:23Z,,,,,,Smith (hamstring) caught five of 12 targets for 41 yards in Sunday's 19-16 win over the Steelers.,WR
 2971027,Jonathan Jones,Philadelphia Eagles,Questionable,2026-11-22T22:18Z,Foot,Not Specified,Right,2026-11-26,QUESTIONABLE,"Jones (foot) was spotted in a walking boot following Sunday's 19-16 win over the Steelers, Dave Zangaro of NBC Sports Philadelphia reports.",CB
 4686273,Quinyon Mitchell,Philadelphia Eagles,Questionable,2026-11-22T20:56Z,Hamstring,Not Specified,Left,2026-11-26,QUESTIONABLE,Mitchell (hamstring) has been ruled out for the rest of Sunday's game against the Steelers.,CB
-4431545,Will Shipley,Philadelphia Eagles,Active,2026-11-22T16:41Z,,,,,,Shipley (foot) is active for Sunday's game against Pittsburgh.,RB
+4431545,Will Shipley,Philadelphia Eagles,Active,2026-11-22T16:41Z,Illness,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Shipley (foot) is active for Sunday's game against Pittsburgh.,RB
 4879250,Cole Payton,Philadelphia Eagles,Active,2026-11-22T16:38Z,,,,,,Payton (coach's decision) is inactive but will serve as the Eagles' emergency third quarterback against the Steelers on Sunday.,QB
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-11-22T16:37Z,,,,,,Carter (quadriceps) is active for Sunday's game against the Steelers.,DT
 3917657,Zack Baun,Philadelphia Eagles,Injured Reserve,2026-11-22T00:14Z,Back,Not Specified,Not Specified,2026-12-19,IR,Baun (back) was placed on the Eagles' injured reserve Saturday.,LB
@@ -645,7 +645,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-11-21T00:20Z,,,,,,Smith (illness) does not carry an injury designation into Sunday's game against Pittsburgh.,LB
 3926231,Britain Covey,Philadelphia Eagles,Active,2026-11-21T00:12Z,,,,,,Covey (knee) does not have an injury designation for Sunday's game against the Steelers.,WR
 4685287,Jihaad Campbell,Philadelphia Eagles,Active,2026-11-19T01:38Z,,,,,,Campbell (hamstring/quadriceps) was a full participant in Wednesday's practice.,LB
-4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-18T20:12Z,,,,,,"McKee will remain in a backup role for Sunday's game against the Steelers after head coach Nick Sirianni announced Wednesday that Joe Milton will serve as the Eagles' starting quarterback for a second straight game, Jeff McLane of The Philadelphia Inquirer reports.",QB
+4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-18T20:12Z,Ribs,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,"McKee will remain in a backup role for Sunday's game against the Steelers after head coach Nick Sirianni announced Wednesday that Joe Milton will serve as the Eagles' starting quarterback for a second straight game, Jeff McLane of The Philadelphia Inquirer reports.",QB
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-18T00:54Z,,,,,,The Eagles signed Blue from their practice squad to their active roster Tuesday.,RB
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-11-16T18:31Z,,,,,,The Eagles signed Ertz from the practice squad to the active roster Monday.,TE
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
