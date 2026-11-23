@@ -201,7 +201,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3131498,Tytus Howard,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-23T05:55Z,,,,,,Aubrey made his lone field-goal attempt and all six PATs in Sunday's 51-30 win over the Titans.,PK
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-23T04:09Z,,,,,,Flournoy caught just one pass for 11 yards on one target in Sunday's 51-30 win over the Titans.,WR
-3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-11-23T02:34Z,,,,,,Turpin failed to reel in his only target while rushing twice for 41 yards and a touchdown during Sunday's 51-30 win over the Titans.,WR
+3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-11-23T02:34Z,,,,,,Turpin failed to reel in his only target while rushing twice for 41 yards and a touchdown during Sunday's 51-30 win over the Titans. He added 121 yards as a kick returner and logged a 13-yard punt return.,WR
 4361579,Javonte Williams,Dallas Cowboys,Active,2026-11-22T22:27Z,,,,,,Williams rushed 18 times for 67 yards and a touchdown and brought in all three targets for 24 yards and another score in the Cowboys' 51-30 win over the Titans on Sunday.,RB
 4426354,George Pickens,Dallas Cowboys,Active,2026-11-22T22:17Z,,,,,,Pickens secured seven of 10 targets for 102 yards and a touchdown in the Cowboys' 51-30 win over the Titans on Sunday.,WR
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-11-22T22:11Z,,,,,,Lamb brought 11 of 12 targets for 132 yards and a touchdown in the Cowboys' 51-30 win over the Titans on Sunday.,WR
@@ -349,13 +349,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
-4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-23T05:28Z,,,,,,Little went 4-for-4 on field-goal attempts during Sunday's 23-18 loss to the Giants.,PK
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-23T12:56Z,Undisclosed,,Not Specified,2026-11-29,QUESTIONABLE,"Tuten (undisclosed) exited Sunday's 23-18 loss to the Giants after an eight-yard gain with 3:40 left in the contest, Garry Smitsof the Florida Times-Union reports.",RB
+4686361,Cam Little,Jacksonville Jaguars,Questionable,2026-11-23T05:28Z,Lower Body,,,2026-11-29,QUESTIONABLE,Little went 4-for-4 on field-goal attempts during Sunday's 23-18 loss to the Giants.,PK
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-23T03:18Z,,,,,,Strange caught all three of his targets for 16 yards during Sunday's 23-18 loss to the Giants.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-23T03:11Z,,,,,,Rodriguez rushed four times for 28 yards in Sunday's 23-18 loss to the Giants. He added one catch for 13 yards on one target.,RB
 3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-23T02:45Z,,,,,,Meyers brought in four of 10 targets for 85 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-23T02:40Z,,,,,,Thomas caught one pass for an 18-yard touchdown on three targets in Sunday's 23-18 loss to the Giants.,WR
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-23T02:38Z,,,,,,Lawrence completed 25 of 47 passes for 301 yards with one touchdown and two interceptions and rushed three times for seven yards in the Jaguars' 23-18 loss to the Giants on Sunday. He also fumbled twice but recovered.,QB
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Active,2026-11-23T02:26Z,,,,,,Tuten rushed 10 times for 33 yards and brought in all three targets for 20 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,RB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-23T02:04Z,,,,,,Washington secured eight of 17 targets for 103 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
 4242554,Walker Little,Jacksonville Jaguars,Questionable,2026-11-23T00:22Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Little is questionable to return to Sunday's game against the Giants due to a knee injury.,OT
 4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T23:17Z,Chest,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Jones (chest) has been ruled out for the rest of Sunday's contest against the Giants.,CB
@@ -679,6 +679,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Active,2026-11-23T05:01Z,,,,,,"Samuel logged two carries for 27 yards, gathered in three of four targets for 20 yards and returned two kickoffs for 57 yards during Sunday's 35-10 win against the Vikings in Mexico City.",WR
 3040151,George Kittle,San Francisco 49ers,Active,2026-11-23T04:53Z,,,,,,Kittle caught all three of his targets for 34 yards and two touchdowns in Sunday's 35-10 win over the Vikings.,TE
 4361741,Brock Purdy,San Francisco 49ers,Active,2026-11-23T04:52Z,,,,,,Purdy completed 21 of 26 pass attempts for 255 yards and three touchdowns in Sunday's 35-10 win over the Vikings.,QB
+16737,Mike Evans,San Francisco 49ers,Active,2026-11-23T04:44Z,,,,,,Evans (Achilles) caught six of seven targets for 109 yards and a touchdown in Sunday's 35-10 win over the Vikings.,WR
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-23T04:41Z,,,,,,McCaffrey rushed 12 times for 49 yards and a touchdown while catching both of his targets for 13 yards in Sunday's 35-10 win over the Vikings.,RB
 3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T02:51Z,Lower Leg,Not Specified,Left,2026-11-29,OUT,"McKivitz (lower leg) was carted off the field Sunday night against the Vikings, Eric Branch of the San Francisco Chronicle reports.",OT
 3916903,Dre Greenlaw,San Francisco 49ers,Out,2026-11-23T00:25Z,Neck,Not Specified,Not Specified,2026-11-29,INACTIVE,"Greenlaw (neck) is inactive for Sunday night's contest against the Vikings in Mexico City, Brooke Evans of the 49ers' official website reports.",LB
@@ -690,7 +691,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Out,2026-11-23T00:02Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,OT
 3116097,Luke Gifford,San Francisco 49ers,Active,2026-11-23T00:02Z,,,,,,,LB
 4565200,Upton Stout,San Francisco 49ers,Active,2026-11-23T00:02Z,,,,,,,CB
-16737,Mike Evans,San Francisco 49ers,Active,2026-11-22T23:56Z,,,,,,"Evans (Achilles) is listed as active Sunday against the Vikings in Mexico City, Matt Barrows of The Athletic reports.",WR
 4240542,Nate Hobbs,San Francisco 49ers,Injured Reserve,2026-11-22T00:25Z,Groin,Not Specified,Not Specified,2026-11-29,IR-R,Hobbs (groin) has been downgraded to out for Sunday night's game against the Vikings.,CB
 4686308,C.J. West,San Francisco 49ers,Active,2026-11-22T00:22Z,,,,,,The 49ers activated West (knee) from injured reserve Saturday.,DT
 4693644,Ji'Ayir Brown,San Francisco 49ers,Active,2026-11-21T00:52Z,,,,,,Brown (ankle) does not carry an injury designation into Sunday's game against the Vikings in Mexico City.,S
