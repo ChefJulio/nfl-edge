@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915535,Denzel Ward,Cleveland Browns,Active,2026-11-13T23:58Z,,,,,,Ward (quadriceps) does not have an injury designation for Sunday's game against the Texans.,CB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,C
 3131498,Tytus Howard,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
+3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-23T05:55Z,,,,,,Aubrey made his lone field-goal attempt and all six PATs in Sunday's 51-30 win over the Titans.,PK
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-23T04:09Z,,,,,,Flournoy caught just one pass for 11 yards on one target in Sunday's 51-30 win over the Titans.,WR
 3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-11-23T02:34Z,,,,,,Turpin failed to reel in his only target while rushing twice for 41 yards and a touchdown during Sunday's 51-30 win over the Titans.,WR
 4361579,Javonte Williams,Dallas Cowboys,Active,2026-11-22T22:27Z,,,,,,Williams rushed 18 times for 67 yards and a touchdown and brought in all three targets for 24 yards and another score in the Cowboys' 51-30 win over the Titans on Sunday.,RB
@@ -220,7 +221,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5095865,Shavon Revel Jr.,Dallas Cowboys,Active,2026-11-20T20:34Z,,,,,,,CB
 4360590,Juanyeh Thomas,Dallas Cowboys,Active,2026-11-19T21:40Z,,,,,,,S
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-18T01:54Z,,,,,,Spann-Ford caught one of three targets for 26 yards during the Cowboys' 46-40 loss to the 49ers on Sunday.,TE
-3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-17T02:53Z,,,,,,Aubrey made both of his field-goal attempts and went 2-for-3 on extra-point tries during the Cowboys' 46-40 loss to the 49ers on Sunday.,PK
 4429202,Israel Abanikanda,Dallas Cowboys,Active,2026-11-17T01:24Z,,,,,,"Abanikanda reverted to the Cowboys' practice squad Monday, per the NFL's transaction log.",RB
 4360307,Derion Kendrick,Dallas Cowboys,Active,2026-11-16T19:08Z,,,,,,,CB
 4367210,Otito Ogbonnia,Dallas Cowboys,Active,2026-11-15T23:15Z,,,,,,"Ogbonnia (finger) has re-entered Sunday's matchup against San Francisco, Joe Hoyt of The Dallas Morning News reports.",DT
@@ -349,6 +349,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-19T23:48Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4362523,Will Mallory,Indianapolis Colts,Out,2026-11-19T23:48Z,Hamstring,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 3895840,Charlie Heck,Indianapolis Colts,Active,2026-11-19T21:35Z,,,,,,,OT
+4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-23T05:28Z,,,,,,Little went 4-for-4 on field-goal attempts during Sunday's 23-18 loss to the Giants.,PK
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-23T03:18Z,,,,,,Strange caught all three of his targets for 16 yards during Sunday's 23-18 loss to the Giants.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-23T03:11Z,,,,,,Rodriguez rushed four times for 28 yards in Sunday's 23-18 loss to the Giants. He added one catch for 13 yards on one target.,RB
 3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-23T02:45Z,,,,,,Meyers brought in four of 10 targets for 85 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
@@ -373,7 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4576129,Jalen McLeod,Jacksonville Jaguars,Active,2026-11-20T21:24Z,,,,,,,LB
 4430481,Jonah Monheim,Jacksonville Jaguars,Active,2026-11-20T21:24Z,,,,,,,C
 3050073,Foyesade Oluokun,Jacksonville Jaguars,Active,2026-11-18T02:55Z,,,,,,Oluokun finished Sunday's 40-23 win over the Titans with 10 tackles (nine solo).,LB
-4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-17T02:34Z,,,,,,Little went 4-for-4 on field-goal attempts and made all four of his PATs during Sunday's 40-23 win over the Titans.,PK
+3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-23T05:41Z,,,,,,Butker made both of his field-goal attempts while going 4-for-4 on extra-point tries during Sunday's 34-7 win over the Cardinals.,PK
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-11-23T03:29Z,,,,,,Worthy caught two of four targets for 38 yards and a touchdown during Sunday's 34-7 win over the Cardinals.,WR
 4688813,Josh Downs,Kansas City Chiefs,Active,2026-11-22T23:20Z,,,,,,Downs brought in four of five targets for 59 yards in the Chiefs' 34-7 win over the Cardinals on Sunday.,WR
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-22T23:16Z,,,,,,Rice secured all six targets for 53 yards in the Chiefs' 34-7 win over the Cardinals on Sunday.,WR
@@ -396,7 +397,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-11-18T03:19Z,,,,,,Tranquill recorded nine total tackles (six solo) during Sunday's 35-13 victory over the Falcons.,LB
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-11-18T03:09Z,,,,,,"Williams recorded five total tackles (two solo) and two passes defensed, including an interception, during Sunday's 35-13 win over the Falcons.",CB
 4431196,Jake Briningstool,Kansas City Chiefs,Active,2026-11-18T02:54Z,,,,,,Briningstool caught one of two targets for 20 yards in Sunday's 35-13 win against the Jets on Sunday.,TE
-3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-17T03:56Z,,,,,,Butker made all five PATs in the Chiefs' 35-13 win over the Falcons on Sunday.,PK
 5093923,Andrew Armstrong,Kansas City Chiefs,Active,2026-11-16T03:36Z,,,,,,Armstrong caught his only target for a 43-yard touchdown in Sunday's 35-13 win over the Falcons.,WR
 4912218,Cyrus Allen,Kansas City Chiefs,Active,2026-11-16T02:45Z,,,,,,Allen caught two of four targets for 44 yards and a touchdown in Sunday's 35-13 win over the Falcons.,WR
 4382466,Jalen Nailor,Las Vegas Raiders,Active,2026-11-23T04:25Z,,,,,,Nailor caught one of five targets for 16 yards during Sunday's 38-24 loss to the Broncos.,WR
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4373809,Jevon Holland,New York Giants,Active,2026-11-14T02:56Z,,,,,,Holland logged three tackles (one solo) and one pass defensed for an interception in the Giants' 24-21 loss to the Commanders on Thursday.,S
 4362492,Ar'Darius Washington,New York Giants,Active,2026-11-14T02:53Z,,,,,,"Washington accumulated seven tackles (five solo) and two passes defensed, including one interception, in the Giants' 24-21 loss to the Commanders on Thursday.",S
 4950400,Arvell Reese,New York Giants,Active,2026-11-14T02:50Z,,,,,,Reese logged 13 tackles (four solo) in the Giants' 24-21 loss to the Commanders on Thursday.,LB
+3124679,Jason Sanders,New York Jets,Active,2026-11-23T05:41Z,,,,,,Sanders made both of his field-goal attempts and all three PATs in Sunday's 27-24 win over the Chargers.,PK
 4808766,Mason Taylor,New York Jets,Active,2026-11-23T04:48Z,,,,,,Taylor caught two passes for 25 yards on two targets in Sunday's 27-24 win over the Chargers.,TE
 4695404,Isaiah Davis,New York Jets,Active,2026-11-23T04:40Z,,,,,,Davis didn't play an offensive snap in Sunday's 27-24 win over the Chargers.,RB
 5083315,Kenyon Sadiq,New York Jets,Active,2026-11-23T04:32Z,,,,,,Sadiq caught all three of his targets for 30 yards during Sunday's 27-24 win over the Chargers.,TE
@@ -621,7 +622,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426686,Dane Belton,New York Jets,Active,2026-11-18T05:03Z,,,,,,Belton finished Sunday's loss to the Bills with six tackles (one solo) and one defensed pass.,S
 14958,Demario Davis,New York Jets,Active,2026-11-18T04:59Z,,,,,,Davis posted six tackles (three solo) Sunday in a loss to Buffalo.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-18T04:52Z,,,,,,Sherwood secured nine tackles (four solo) in Sunday's Week 10 loss to the Bills.,LB
-3124679,Jason Sanders,New York Jets,Active,2026-11-17T02:54Z,,,,,,Sanders made all four of his field-goal attempts in the Jets' 31-12 loss to the Bills on Sunday.,PK
 3134353,Tim Patrick,New York Jets,Active,2026-11-16T19:35Z,,,,,,,WR
 4685413,Cade Klubnik,New York Jets,Active,2026-11-15T23:54Z,,,,,,"Klubnik completed 11 of 20 passes for 137 yards, no touchdowns and one interception in Sunday's 31-12 loss to the Bills. He added three rushing attempts for 26 yards.",QB
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-23T05:05Z,,,,,,Elliott went 4-for-4 on field-goal attempts and made his lone PAT in Sunday's 19-16 win over the Steelers.,PK
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-18T00:54Z,,,,,,The Eagles signed Blue from their practice squad to their active roster Tuesday.,RB
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-11-16T18:31Z,,,,,,The Eagles signed Ertz from the practice squad to the active roster Monday.,TE
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
+17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
 4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-11-23T04:02Z,,,,,,Freiermuth caught all five of his targets for 39 yards during Sunday's 19-16 loss to the Eagles.,TE
 4694237,Max Hurleman,Pittsburgh Steelers,Active,2026-11-23T01:48Z,,,,,,Hurleman caught six of seven targets for 61 yards and a touchdown in Sunday's 19-16 loss to the Eagles. He also had two kickoff returns for 32 yards and three punt returns for 36 yards.,WR
@@ -672,7 +673,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4368304,Mason McCormick,Pittsburgh Steelers,Injured Reserve,2026-11-19T01:44Z,Ankle,Dislocated,Not Specified,2027-01-03,IR,"The Steelers placed McCormick (ankle) on injured reserve Wednesday, Teresa Varley of the team's official site reports.",G
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-11-18T05:57Z,,,,,,Brisker notched 10 tackles (two solo) Sunday in a Week 10 loss to the Bengals.,S
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-18T05:39Z,,,,,,Wilson recorded 19 tackles (nine solo) in Sunday's 38-18 loss to the Bengals.,LB
-17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-17T03:59Z,,,,,,Boswell made his sole field-goal attempt and sole PAT in the Steelers' 38-18 loss to the Bengals on Sunday.,PK
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-17T01:36Z,,,,,,Bernard failed to reel in any of his three targets while notching a 10-yard rush during Sunday night's 38-18 loss to the Bengals.,WR
 15818,Keenan Allen,San Francisco 49ers,Active,2026-11-23T05:13Z,,,,,,Allen totaled three catches (on four targets) for 38 yards during Sunday's 35-10 victory against the Vikings in Mexico City.,WR
 4696044,Kaelon Black,San Francisco 49ers,Active,2026-11-23T05:07Z,,,,,,Black notched six carries for eight yards and secured his only target for seven yards during Sunday's 35-10 win versus the Vikings in Mexico City.,RB
@@ -749,6 +749,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-11-12T03:54Z,,,,,,Trotter recorded eight tackles (five solo) during the Buccaneers' 27-24 loss to the Bears in Week 9.,LB
 5097554,Kameron Johnson,Tampa Bay Buccaneers,Active,2026-11-11T15:26Z,,,,,,Johnson played all 17 of his snaps on special teams and recorded one tackle in Sunday's 27-24 loss to the Bears.,WR
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-11T00:51Z,,,,,,Johnson caught two passes for 76 yards on five targets in Sunday night's 27-24 loss to the Bears.,WR
+3124084,Joey Slye,Tennessee Titans,Active,2026-11-23T05:34Z,,,,,,Slye made all three field-goal attempts and went 3-for-3 on PATs in Sunday's 51-30 loss to the Cowboys.,PK
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-23T03:51Z,,,,,,Helm caught two of three targets for 14 yards in Sunday's 51-30 loss to the Cowboys.,TE
 4431268,Chimere Dike,Tennessee Titans,Active,2026-11-23T02:13Z,,,,,,Dike caught six of seven targets for 69 yards during Sunday's 51-30 loss to the Cowboys.,WR
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-23T01:41Z,,,,,,Ridley caught five of six targets for 68 yards and a touchdown during Sunday's 51-30 loss to the Cowboys.,WR
@@ -773,7 +774,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3926229,Cody Barton,Tennessee Titans,Active,2026-11-20T22:47Z,,,,,,Barton (concussion) does not carry an injury designation into Sunday's game against Dallas.,LB
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-20T00:37Z,,,,,,Franklin-Myers (back) was a full participant at practice Thursday.,DE
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-19T02:26Z,,,,,,Gray posted nine tackles (eight solo) and two pass defenses (including an interception) during the Titans' 40-23 loss to the Jaguars in Week 10.,LB
-4710000,Fernando Carmona,Tennessee Titans,Injured Reserve,2026-11-18T21:49Z,Ankle,Sprain,Not Specified,2026-11-29,IR-R,"The Titans designated Carmona (ankle) for return from injured reserve Wednesday, Jim Wyatt of the team's official site reports.",G
 2576736,Lucas Patrick,Washington Commanders,Questionable,2026-11-22T00:59Z,Concussion,Concussion,Not Specified,2026-11-23,QUESTIONABLE,Patrick (concussion) is questionable for Monday's game against the Bengals.,G
 4360378,Quan Martin,Washington Commanders,Active,2026-11-22T00:28Z,,,,,,Martin (shoulder) does not carry an injury designation into Monday's game against the Bengals.,S
 4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-22T00:26Z,Ankle,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Robertson (ankle) is listed as questionable for Monday's game against the Bengals.,CB
