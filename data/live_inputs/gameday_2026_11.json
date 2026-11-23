@@ -578,5 +578,45 @@
 "at": "2026-11-23T00:00:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0032775": {
+"name": "Demarcus Robinson",
+"team": "SF",
+"pos": "WR",
+"pre": 0.9867,
+"ruling": "INA",
+"at": "2026-11-23T00:12:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036972": {
+"name": "Mac Jones",
+"team": "SF",
+"pos": "QB",
+"pre": 0.1672,
+"ruling": "ACT",
+"at": "2026-11-23T00:17:00+00:00",
+"post": 0.974,
+"status": "Active (LDL)"
+},
+"00-0040177": {
+"name": "Jordan James",
+"team": "SF",
+"pos": "RB",
+"pre": 0.6233,
+"ruling": "ACT",
+"at": "2026-11-23T00:21:00+00:00",
+"post": 0.974,
+"status": "Active (FLL)"
+},
+"00-0040589": {
+"name": "Kurtis Rourke",
+"team": "SF",
+"pos": "QB",
+"pre": 0.0881,
+"ruling": "INA",
+"at": "2026-11-23T00:02:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
