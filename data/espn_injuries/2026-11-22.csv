@@ -399,6 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-17T03:56Z,,,,,,Butker made all five PATs in the Chiefs' 35-13 win over the Falcons on Sunday.,PK
 5093923,Andrew Armstrong,Kansas City Chiefs,Active,2026-11-16T03:36Z,,,,,,Armstrong caught his only target for a 43-yard touchdown in Sunday's 35-13 win over the Falcons.,WR
 4912218,Cyrus Allen,Kansas City Chiefs,Active,2026-11-16T02:45Z,,,,,,Allen caught two of four targets for 44 yards and a touchdown in Sunday's 35-13 win over the Falcons.,WR
+4382466,Jalen Nailor,Las Vegas Raiders,Active,2026-11-23T04:25Z,,,,,,Nailor caught one of five targets for 16 yards during Sunday's 38-24 loss to the Broncos.,WR
 4428718,Tre Tucker,Las Vegas Raiders,Active,2026-11-23T03:52Z,,,,,,Tucker caught two of 10 targets for 50 yards during Sunday's 38-24 loss to the Broncos.,WR
 4686658,Mike Washington Jr.,Las Vegas Raiders,Active,2026-11-23T02:44Z,,,,,,Washington turned nine carries into 42 yards during Sunday's 38-24 defeat in Denver.,RB
 4429086,Michael Mayer,Las Vegas Raiders,Active,2026-11-23T02:20Z,,,,,,Mayer posted one catch (on four targets) for four yards during Sunday's 38-24 defeat at Denver.,TE
@@ -423,7 +424,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431623,Trey Zuhn III,Las Vegas Raiders,Active,2026-11-20T22:00Z,,,,,,,C
 4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-19T02:15Z,,,,,,"Booker (ankle) was a full participant in Wednesday's practice, Sam Warren of The Athletic reports.",DT
 4258194,Kwity Paye,Las Vegas Raiders,Active,2026-11-19T01:37Z,,,,,,"Paye (neck) was not listed on the Raiders' injury report Wednesday, Sam Warren of The Athletic reports.",DE
-4043169,Jeremy Chinn,Las Vegas Raiders,Active,2026-11-18T03:34Z,,,,,,Chinn tallied seven tackles (three solo) in a loss to Seattle on Sunday.,S
 4429025,Quentin Johnston,Los Angeles Chargers,Active,2026-11-23T03:15Z,,,,,,Johnston caught one of two targets for nine yards in Sunday's 27-24 loss to the Jets. He added one yard on one rushing attempt.,WR
 4430968,Kimani Vidal,Los Angeles Chargers,Active,2026-11-23T01:29Z,,,,,,Vidal carried the ball seven times for 36 yards and caught both his targets for 18 yards in Sunday's 27-24 loss to the Jets.,RB
 4686612,Tre' Harris,Los Angeles Chargers,Active,2026-11-23T01:23Z,,,,,,Harris caught both his targets for 28 yards in Sunday's 27-24 loss to the Jets.,WR
@@ -599,6 +599,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362492,Ar'Darius Washington,New York Giants,Active,2026-11-14T02:53Z,,,,,,"Washington accumulated seven tackles (five solo) and two passes defensed, including one interception, in the Giants' 24-21 loss to the Commanders on Thursday.",S
 4950400,Arvell Reese,New York Giants,Active,2026-11-14T02:50Z,,,,,,Reese logged 13 tackles (four solo) in the Giants' 24-21 loss to the Commanders on Thursday.,LB
 5082424,Dominic Zvada,New York Giants,Active,2026-11-14T01:27Z,,,,,,Zvada missed his only field-goal try and made all three of his PATs on Thursday in a loss to Washington.,PK
+4695404,Isaiah Davis,New York Jets,Active,2026-11-23T04:40Z,,,,,,Davis didn't play an offensive snap in Sunday's 27-24 win over the Chargers.,RB
+5083315,Kenyon Sadiq,New York Jets,Active,2026-11-23T04:32Z,,,,,,Sadiq caught all three of his targets for 30 yards during Sunday's 27-24 win over the Chargers.,TE
+4597500,Adonai Mitchell,New York Jets,Active,2026-11-23T04:31Z,,,,,,Mitchell caught two passes for 30 yards on three targets in Sunday's 27-24 win over the Chargers.,WR
 2976592,Sterling Shepard,New York Jets,Active,2026-11-23T01:37Z,,,,,,Shepard caught two passes for 24 yards and two touchdowns in Sunday's 27-24 win over the Chargers.,WR
 4685247,Braelon Allen,New York Jets,Active,2026-11-23T01:06Z,,,,,,Allen rushed 16 times for 75 yards while catching his lone target for nine yards in Sunday's 27-24 win over the Chargers.,RB
 15864,Geno Smith,New York Jets,Active,2026-11-23T00:56Z,,,,,,Smith completed 17 of 21 passes for 176 yards and three touchdowns in Sunday's 27-24 win over the Chargers. He also rushed once for four yards.,QB
@@ -615,13 +618,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426817,Jarvis Brownlee Jr.,New York Jets,Out,2026-11-22T19:37Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-21T01:01Z,Abdomen,Surgery,Not Specified,2026-11-29,IR-R,"Onyemata (abdomen) has been ruled out for Sunday's game against the Chargers, Brian Costello of the New York Post reports.",DT
 4808766,Mason Taylor,New York Jets,Active,2026-11-20T17:18Z,,,,,,"With Omar Cooper (ankle) ruled out, coach Aaron Glenn said Friday that Taylor could see more pass-catching opportunities Sunday against the Chargers.",TE
-5083315,Kenyon Sadiq,New York Jets,Active,2026-11-20T17:16Z,,,,,,"With Omar Cooper (ankle) ruled out, coach Aaron Glenn said Friday that Sadiq could see more pass-catching opportunities Sunday against the Chargers.",TE
-4597500,Adonai Mitchell,New York Jets,Active,2026-11-20T17:13Z,,,,,,"With Omar Cooper (ankle) ruled out, Mitchell is expected to play an elevated role on offense Sunday against the Chargers.",WR
 4426686,Dane Belton,New York Jets,Active,2026-11-18T05:03Z,,,,,,Belton finished Sunday's loss to the Bills with six tackles (one solo) and one defensed pass.,S
 14958,Demario Davis,New York Jets,Active,2026-11-18T04:59Z,,,,,,Davis posted six tackles (three solo) Sunday in a loss to Buffalo.,LB
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-18T04:52Z,,,,,,Sherwood secured nine tackles (four solo) in Sunday's Week 10 loss to the Bills.,LB
 3124679,Jason Sanders,New York Jets,Active,2026-11-17T02:54Z,,,,,,Sanders made all four of his field-goal attempts in the Jets' 31-12 loss to the Bills on Sunday.,PK
-4695404,Isaiah Davis,New York Jets,Active,2026-11-17T00:49Z,,,,,,Davis didn't touch the ball on offense in Sunday's 31-12 loss to the Bills.,RB
 3134353,Tim Patrick,New York Jets,Active,2026-11-16T19:35Z,,,,,,,WR
 4685413,Cade Klubnik,New York Jets,Active,2026-11-15T23:54Z,,,,,,"Klubnik completed 11 of 20 passes for 137 yards, no touchdowns and one interception in Sunday's 31-12 loss to the Bills. He added three rushing attempts for 26 yards.",QB
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-23T01:41Z,,,,,,Lemon caught one of three targets for three yards in Sunday's 19-16 win over the Steelers.,WR
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-17T03:59Z,,,,,,Boswell made his sole field-goal attempt and sole PAT in the Steelers' 38-18 loss to the Bengals on Sunday.,PK
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-17T01:36Z,,,,,,Bernard failed to reel in any of his three targets while notching a 10-yard rush during Sunday night's 38-18 loss to the Bengals.,WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-17T00:47Z,,,,,,Washington caught one pass for five yards on two targets in Sunday night's loss to the Bengals.,TE
+3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-23T04:41Z,,,,,,McCaffrey rushed 12 times for 49 yards and a touchdown while catching both of his targets for 13 yards in Sunday's 35-10 win over the Vikings.,RB
 3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T02:51Z,Lower Leg,Not Specified,Left,2026-11-29,OUT,"McKivitz (lower leg) was carted off the field Sunday night against the Vikings, Eric Branch of the San Francisco Chronicle reports.",OT
 3916903,Dre Greenlaw,San Francisco 49ers,Out,2026-11-23T00:25Z,Neck,Not Specified,Not Specified,2026-11-29,INACTIVE,"Greenlaw (neck) is inactive for Sunday night's contest against the Vikings in Mexico City, Brooke Evans of the 49ers' official website reports.",LB
 4685397,Jordan James,San Francisco 49ers,Active,2026-11-23T00:21Z,,,,,,"James (calf) is active for Sunday night's matchup with the Vikings, Brooke Evans of the 49ers' official website reports.",RB
@@ -698,7 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4575665,Jacob Cowing,San Francisco 49ers,Active,2026-11-18T02:48Z,,,,,,Cowing did not draw any targets during Sunday's 46-40 win at Dallas.,WR
 4431466,Jordan Watkins,San Francisco 49ers,Active,2026-11-17T05:21Z,,,,,,Watkins caught two passes for 49 yards on three targets in Sunday's 46-40 win over the Cowboys.,WR
 4034949,Eddy Pineiro,San Francisco 49ers,Active,2026-11-17T03:37Z,,,,,,Pineiro made his only field-goal attempt and went 5-for-5 on PATs during Sunday's 46-40 win over the Cowboys.,PK
-4426698,Tatum Bethune,San Francisco 49ers,Active,2026-11-16T19:37Z,,,,,,,LB
 4575431,Devon Witherspoon,Seattle Seahawks,Active,2026-11-19T03:07Z,,,,,,"Witherspoon logged four solo tackles, including 2.0 sacks, in the Seahawks' 21-13 win over the Raiders on Sunday.",CB
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-19T03:01Z,,,,,,Jones logged 10 tackles (five solo) in the Seahawks' 21-13 win over the Raiders on Sunday.,LB
 2971622,Leonard Williams,Seattle Seahawks,Out,2026-11-17T12:23Z,Shoulder,Stinger,Not Specified,2026-11-29,QUESTIONABLE,out,DT
@@ -724,6 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-14T00:44Z,,,,,,"Nwosu (ankle) does not have an injury designation against the Raiders on Sunday, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
+4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-23T04:36Z,,,,,,Tucker didn't record any stats during Sunday's 31-21 loss to the Lions.,RB
 4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-11-23T04:18Z,,,,,,Otton caught one pass for eight yards on three targets in Sunday's 31-21 loss to the Lions.,TE
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-23T02:55Z,,,,,,Godwin caught three passes for 18 yards on three targets in Sunday's 31-21 loss to the Lions.,WR
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-23T01:22Z,,,,,,Hurst caught five of seven targets for 56 yards and two touchdowns during Sunday's 31-21 loss to the Lions.,WR
@@ -748,7 +749,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-11-12T03:54Z,,,,,,Trotter recorded eight tackles (five solo) during the Buccaneers' 27-24 loss to the Bears in Week 9.,LB
 5097554,Kameron Johnson,Tampa Bay Buccaneers,Active,2026-11-11T15:26Z,,,,,,Johnson played all 17 of his snaps on special teams and recorded one tackle in Sunday's 27-24 loss to the Bears.,WR
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-11T00:51Z,,,,,,Johnson caught two passes for 76 yards on five targets in Sunday night's 27-24 loss to the Bears.,WR
-4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-10T05:51Z,,,,,,Tucker didn't log any offensive snaps in a loss to the Bears on Sunday. He returned four kickoffs for 92 yards.,RB
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-23T03:51Z,,,,,,Helm caught two of three targets for 14 yards in Sunday's 51-30 loss to the Cowboys.,TE
 4431268,Chimere Dike,Tennessee Titans,Active,2026-11-23T02:13Z,,,,,,Dike caught six of seven targets for 69 yards during Sunday's 51-30 loss to the Cowboys.,WR
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-23T01:41Z,,,,,,Ridley caught five of six targets for 68 yards and a touchdown during Sunday's 51-30 loss to the Cowboys.,WR
