@@ -78,7 +78,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036060,Damar Hamlin,Buffalo Bills,Questionable,2026-11-23T23:12Z,Toe,,,2026-11-26,QUESTIONABLE,questionable,S
 4030899,Spencer Brown,Buffalo Bills,Questionable,2026-11-23T23:12Z,Back,,,2026-11-26,QUESTIONABLE,questionable,OT
 4428696,O'Cyrus Torrence,Buffalo Bills,Questionable,2026-11-23T23:11Z,Ankle,,,2026-11-26,QUESTIONABLE,questionable,G
-4385690,Dalton Kincaid,Buffalo Bills,Out,2026-11-23T22:53Z,Thumb,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Kincaid (thumb/ankle) was listed as a limited participanton Monday's practice estimate.,TE
+4385690,Dalton Kincaid,Buffalo Bills,Out,2026-11-23T22:53Z,Thumb,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Kincaid (thumb/ankle) was listed as a limited participant on Monday's practice estimate.,TE
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-23T16:44Z,,,,,,Latu recorded a 30-yard reception on four targets in Sunday's 26-9 win over the Dolphins.,TE
 4568624,Dorian Williams,Buffalo Bills,Out,2026-11-23T15:20Z,Calf,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,out,LB
 3915487,Mike Danna,Buffalo Bills,Active,2026-11-23T15:20Z,,,,,,,DE
@@ -154,8 +154,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-23T22:36Z,Thumb,Surgery,Left,2026-11-29,IR-R,"Iosivas (thumb) was downgraded to out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",WR
 3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-23T16:23Z,Hamstring,Not Specified,Left,2026-11-29,IR-R,The Bengals list Davis (hamstring) as doubtful for Monday's game against the Commanders.,CB
 4401811,Kyle Dugger,Cincinnati Bengals,Questionable,2026-11-22T00:54Z,Quadriceps,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Dugger (quadriceps) is questionable for Monday night's game against the Commanders.,S
-3125082,Dalton Risner,Cincinnati Bengals,Out,2026-11-22T00:42Z,Knee,Not Specified,Not Specified,2026-11-29,OUT,"Risner (knees) has been ruled out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",G
-4426422,Dax Hill,Cincinnati Bengals,Questionable,2026-11-22T00:17Z,Illness,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Hill (illness) is listed as questionable for Monday's game against the Commanders.,CB
+3125082,Dalton Risner,Cincinnati Bengals,Out,2026-11-22T00:42Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,"Risner (knees) has been ruled out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",G
+4426422,Dax Hill,Cincinnati Bengals,Questionable,2026-11-22T00:17Z,,,,,,Hill (illness) is listed as questionable for Monday's game against the Commanders.,CB
 3915511,Joe Burrow,Cincinnati Bengals,Active,2026-11-21T21:30Z,,,,,,Burrow (illness) does not have an injury designation ahead of Monday's game against the Commanders.,QB
 3051746,Oren Burks,Cincinnati Bengals,Injured Reserve,2026-11-21T19:53Z,Groin,Not Specified,Not Specified,2026-12-20,IR,The Bengals placed Burks (groin) on injured reserve Saturday.,LB
 4429000,Myles Hinton,Cincinnati Bengals,Active,2026-11-20T02:30Z,,,,,,"Hinton (illness) was a full participant in practice Thursday, Paul Dehner Jr. of The Athletic reports.",OT
@@ -170,7 +170,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4384852,Dohnte Meyers,Cincinnati Bengals,Active,2026-11-17T03:07Z,,,,,,Meyers caught both of his targets for 20 yards and a touchdown while also adding 58 yards as a kick returner during Sunday night's 38-18 win over the Steelers.,WR
 3116389,Samaje Perine,Cincinnati Bengals,Active,2026-11-17T00:53Z,,,,,,Perine turned six carries into 14 yards and a touchdown and hauled in all four of his targets for 25 yards during the Bengals' 38-18 win over the Steelers on Sunday.,RB
 4870866,Connor Lew,Cincinnati Bengals,Active,2026-11-16T19:06Z,,,,,,,C
-5081542,Landon Robinson,Cincinnati Bengals,Active,2026-11-16T19:06Z,,,,,,,DT
+5081542,Landon Robinson,Cincinnati Bengals,Active,2026-11-16T19:06Z,Coach's Decision,,,,INACTIVE,,DT
 4429299,Tahj Brooks,Cincinnati Bengals,Active,2026-11-16T18:46Z,,,,,,Brooks carried three times for 12 yards while taking the field for three of the Bengals' 66 offensive snaps in Sunday's 38-18 win over the Steelers.,RB
 3116164,Mike Gesicki,Cincinnati Bengals,Active,2026-11-16T05:21Z,,,,,,Gesicki caught one pass for nine yards in Sunday night's 38-18 win over the Steelers.,TE
 4362238,Chase Brown,Cincinnati Bengals,Active,2026-11-16T04:51Z,,,,,,Brown rushed 10 times for 44 yards and brought in eight of nine targets for 39 yards for two touchdowns in the Bengals' 38-18 win over the Steelers on Sunday.,RB
@@ -674,7 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4570044,Jaquan Brisker,Pittsburgh Steelers,Active,2026-11-18T05:57Z,,,,,,Brisker notched 10 tackles (two solo) Sunday in a Week 10 loss to the Bengals.,S
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-18T05:39Z,,,,,,Wilson recorded 19 tackles (nine solo) in Sunday's 38-18 loss to the Bengals.,LB
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-17T01:36Z,,,,,,Bernard failed to reel in any of his three targets while notching a 10-yard rush during Sunday night's 38-18 loss to the Bengals.,WR
-3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T19:42Z,Ankle,Surgery,Left,2027-02-15,OUT,"McKivitz (ankle) suffered a season-ending injury in Sunday night's matchup against the Vikings, Nick Wagoner of ESPN.com reports.",OT
+3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T19:42Z,Ankle,Surgery,Left,2027-02-15,OUT,"McKivitz suffered a season-ending ankle injury in Sunday night's matchup against the Vikings, Nick Wagoner of ESPN.com reports.",OT
 4242488,Deommodore Lenoir,San Francisco 49ers,Questionable,2026-11-23T19:29Z,Foot,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"49ers head coach Kyle Shanahan said Monday that Lenoir is still dealing with a foot injury, Nick Wagoner of ESPN.com reports.",CB
 4360438,Brandon Aiyuk,San Francisco 49ers,Active,2026-11-23T19:16Z,,,,,,"The 49ers waived Aiyuk on Monday, Adam Schefter of ESPN reports.",WR
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,OT
@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4427325,Renardo Green,San Francisco 49ers,Active,2026-11-20T02:08Z,,,,,,Green (back) was a full participant at practice Thursday.,CB
 4372561,Isaac Guerendo,San Francisco 49ers,Out,2026-11-20T00:28Z,Pectoral,Surgery,Not Specified,2026-11-29,PUP-R,"Guerendo (pectoral) was working off to the side during practice Thursday, Nick Wagoner of ESPN.com reports.",RB
 3057524,Siran Neal,San Francisco 49ers,Active,2026-11-19T23:37Z,,,,,,,S
+3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-23T23:33Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Darnold (quadriceps/ribs) was suited up for Monday's unofficial practice, Bob Condotta of The Seattle Times reports.",QB
 4429835,George Holani,Seattle Seahawks,Injured Reserve,2026-11-23T23:11Z,Knee - MCL,Sprain,Not Specified,2026-12-25,IR,"The Seahawks placed Holani (knee) on injured reserve Monday, John Boyle of the team's official site reports.",RB
 4575431,Devon Witherspoon,Seattle Seahawks,Active,2026-11-19T03:07Z,,,,,,"Witherspoon logged four solo tackles, including 2.0 sacks, in the Seahawks' 21-13 win over the Raiders on Sunday.",CB
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-19T03:01Z,,,,,,Jones logged 10 tackles (five solo) in the Seahawks' 21-13 win over the Raiders on Sunday.,LB
@@ -710,7 +711,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597703,Tory Horton,Seattle Seahawks,Active,2026-11-17T02:47Z,,,,,,Horton failed to garner a target during Sunday's 21-13 win over the Raiders.,WR
 4609203,Deven Eastern,Seattle Seahawks,Active,2026-11-16T19:39Z,,,,,,,DT
 5082331,Avery Smith,Seattle Seahawks,Active,2026-11-16T19:39Z,,,,,,,CB
-3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-16T18:03Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Head coach Mike Macdonald said Monday that he's ""really optimistic"" Darnold (quadriceps/ribs) will be able to get a full week's worth of practice coming out of the Seahawks' Week 11 bye and start their next game Sunday, Nov. 29, against the 49ers, John Boyle of the team's official site reports.",QB
 4576297,AJ Barner,Seattle Seahawks,Active,2026-11-16T05:29Z,,,,,,Barner caught all three targets for 19 yards in Sunday's 21-13 win over the Raiders.,TE
 4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-11-16T05:27Z,,,,,,Shaheed caught one pass for eight yards on two targets in Sunday's 21-13 win over the Raiders.,WR
 3924327,Drew Lock,Seattle Seahawks,Active,2026-11-16T02:02Z,,,,,,"Lock completed 14 of 17 passes for 240 yards, two touchdowns and no interceptions and logged six carries for 20 yards during Sunday's 21-13 victory in Las Vegas.",QB
