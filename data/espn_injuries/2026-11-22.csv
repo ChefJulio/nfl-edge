@@ -356,8 +356,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-23T02:38Z,,,,,,Lawrence completed 25 of 47 passes for 301 yards with one touchdown and two interceptions and rushed three times for seven yards in the Jaguars' 23-18 loss to the Giants on Sunday. He also fumbled twice but recovered.,QB
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Active,2026-11-23T02:26Z,,,,,,Tuten rushed 10 times for 33 yards and brought in all three targets for 20 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,RB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-23T02:04Z,,,,,,Washington secured eight of 17 targets for 103 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
-4242554,Walker Little,Jacksonville Jaguars,Questionable,2026-11-23T00:22Z,Knee,,,2026-11-22,QUESTIONABLE,Little is questionable to return to Sunday's game against the Giants due to a knee injury.,OT
-4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T23:17Z,Chest,,,2026-11-29,QUESTIONABLE,Jones (chest) has been ruled out for the rest of Sunday's contest against the Giants.,CB
+4242554,Walker Little,Jacksonville Jaguars,Questionable,2026-11-23T00:22Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Little is questionable to return to Sunday's game against the Giants due to a knee injury.,OT
+4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T23:17Z,Chest,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Jones (chest) has been ruled out for the rest of Sunday's contest against the Giants.,CB
 3134316,Matt Dickerson,Jacksonville Jaguars,Out,2026-11-22T20:03Z,Neck,Not Specified,Not Specified,2026-11-29,INACTIVE,Dickerson (neck) is inactive for Sunday's game against the Giants.,DE
 5085024,CJ Williams,Jacksonville Jaguars,Out,2026-11-22T19:58Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,WR
 4573319,Danny Striggow,Jacksonville Jaguars,Out,2026-11-22T19:58Z,Concussion,Concussion,Not Specified,2026-11-29,INACTIVE,inactive,DE
@@ -406,10 +406,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-23T01:44Z,,,,,,Jeanty tallied 11 carries for 79 yards and gathered in five of eight targets for 90 yards and one touchdown during Sunday's 38-24 loss at Denver.,RB
 4603186,Jack Bech,Las Vegas Raiders,Active,2026-11-23T01:31Z,,,,,,Bech caught eight of nine targets for 88 yards and a touchdown during Sunday's 38-24 loss to the Broncos.,WR
 4432665,Brock Bowers,Las Vegas Raiders,Out,2026-11-23T01:15Z,Ankle,Not Specified,Not Specified,2026-11-29,INACTIVE,"Raiders coach Klink Kubiak said after Sunday's 38-24 loss to the Broncos that he's optimistic Bowers (ankle/quadriceps) will be available to face the Browns on Nov. 29, Ryan McFadden of ESPN.com reports.",TE
-4430896,JJ Pegues,Las Vegas Raiders,Questionable,2026-11-23T00:36Z,Forearm,,,2026-11-22,QUESTIONABLE,Pegues is questionable to return to Sunday's game against the Broncos due to a forearm injury.,DT
-4431414,Tim Keenan III,Las Vegas Raiders,Questionable,2026-11-22T23:22Z,Knee,,,2026-11-29,QUESTIONABLE,Keenan (knee) has been ruled out for the rest of Sunday's contest against Denver.,DT
-2972342,Adam Butler,Las Vegas Raiders,Questionable,2026-11-22T23:19Z,Concussion,,,2026-11-29,QUESTIONABLE,Butler (concussion) has been ruled out for the remainder of Sunday's contest against the Broncos.,DT
-4401805,Dareke Young,Las Vegas Raiders,Questionable,2026-11-22T22:53Z,Undisclosed,,,2026-11-22,QUESTIONABLE,Young (stinger) is questionable to return to Sunday's contest against Denver.,WR
+4430896,JJ Pegues,Las Vegas Raiders,Questionable,2026-11-23T00:36Z,Forearm,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Pegues is questionable to return to Sunday's game against the Broncos due to a forearm injury.,DT
+4431414,Tim Keenan III,Las Vegas Raiders,Questionable,2026-11-22T23:22Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Keenan (knee) has been ruled out for the rest of Sunday's contest against Denver.,DT
+2972342,Adam Butler,Las Vegas Raiders,Questionable,2026-11-22T23:19Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,Butler (concussion) has been ruled out for the remainder of Sunday's contest against the Broncos.,DT
+4401805,Dareke Young,Las Vegas Raiders,Questionable,2026-11-22T22:53Z,Neck,Stinger,Not Specified,2026-11-29,QUESTIONABLE,Young (stinger) is questionable to return to Sunday's contest against Denver.,WR
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Out,2026-11-22T20:12Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Thornton (coach's decision) is inactive for Sunday's Week 11 tilt against Denver.,WR
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-11-22T20:10Z,,,,,,Fatukasi (toe) is active against the Broncos on Sunday.,DT
 4249087,Matt Gay,Las Vegas Raiders,Active,2026-11-22T20:01Z,,,,,,Gay (hip) is active for Sunday's game at Denver.,PK
@@ -474,6 +474,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5082391,Maximus Pulley,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,S
 4598574,Darryl Peterson III,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,LB
 4362294,Desjuan Johnson,Los Angeles Rams,Active,2026-11-16T19:25Z,,,,,,,DE
+4569603,Malik Washington,Miami Dolphins,Active,2026-11-23T04:22Z,,,,,,Washington caught three of six targets for 30 yards in Sunday's 26-9 loss to the Bills. He rushed two times for 11 yards.,WR
+4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-23T04:15Z,,,,,,Dulcich caught two of seven targets for 12 yards during Sunday's 26-9 loss to the Bills.,TE
 4869645,Caleb Douglas,Miami Dolphins,Active,2026-11-23T01:57Z,,,,,,Douglas caught two of 10 targets for 30 yards in Sunday's 26-9 loss to the Bills.,WR
 4433971,Kyle McCord,Miami Dolphins,Active,2026-11-22T23:57Z,,,,,,"McCord completed 12 of 33 passes for 102 yards, no touchdowns and one interception in Sunday's 26-9 loss to the Bills. He also rushed twice for nine yards.",QB
 4711533,Ollie Gordon II,Miami Dolphins,Active,2026-11-22T23:54Z,,,,,,Gordon rushed 11 times for 69 yards while catching two of three targets for minus-2 yards in Sunday's 26-9 loss to the Bills.,RB
@@ -497,8 +499,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4043130,Jordyn Brooks,Miami Dolphins,Active,2026-11-18T03:49Z,,,,,,"Brooks produced nine total tackles (six solo), a pass defensed and a forced fumble during Sunday's 24-22 loss to the Colts.",LB
 4566094,Jacob Rodriguez,Miami Dolphins,Active,2026-11-18T03:43Z,,,,,,Rodriguez recorded one solo tackle during Sunday's 24-22 loss to the Colts.,LB
 4880346,Michael Taaffe,Miami Dolphins,Active,2026-11-18T03:36Z,,,,,,Taaffe recorded six total tackles (four solo) and an interception during Sunday's 24-22 loss to the Colts.,S
-4869579,Chris Johnson,Miami Dolphins,Active,2026-11-18T03:29Z,,,,,,Johnson recorded four total tackles (three solo) and a pick-six in Sunday's 24-22 loss to the Colts.,CB
-4685307,Kevin Coleman Jr.,Miami Dolphins,Active,2026-11-18T02:10Z,,,,,,Coleman logged one catch for six yards on six targets in Sunday's Week 10 loss to Indianapolis.,WR
 4361985,Christian Darrisaw,Minnesota Vikings,Active,2026-11-23T03:22Z,,,,,,"Darrisaw (shoulder) has returned to Sunday night's contest versus San Francisco, Alec Lewis of The Athletic reports.",OT
 4568007,Jay Ward,Minnesota Vikings,Out,2026-11-23T00:16Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,Ward (knee) is inactive for Sunday night's game against the 49ers.,S
 4044540,Isaiah Rodgers,Minnesota Vikings,Out,2026-11-23T00:09Z,Quadriceps,Not Specified,Not Specified,2026-11-29,INACTIVE,Rodgers (quadriceps) is inactive for Sunday night's matchup against the 49ers.,CB
@@ -674,7 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-17T03:59Z,,,,,,Boswell made his sole field-goal attempt and sole PAT in the Steelers' 38-18 loss to the Bengals on Sunday.,PK
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-17T01:36Z,,,,,,Bernard failed to reel in any of his three targets while notching a 10-yard rush during Sunday night's 38-18 loss to the Bengals.,WR
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-17T00:47Z,,,,,,Washington caught one pass for five yards on two targets in Sunday night's loss to the Bengals.,TE
-3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T02:51Z,Lower Leg,,Left,2026-11-29,OUT,"McKivitz (lower leg) was carted off the field Sunday night against the Vikings, Eric Branch of the San Francisco Chronicle reports.",OT
+3916075,Colton McKivitz,San Francisco 49ers,Out,2026-11-23T02:51Z,Lower Leg,Not Specified,Left,2026-11-29,OUT,"McKivitz (lower leg) was carted off the field Sunday night against the Vikings, Eric Branch of the San Francisco Chronicle reports.",OT
 3916903,Dre Greenlaw,San Francisco 49ers,Out,2026-11-23T00:25Z,Neck,Not Specified,Not Specified,2026-11-29,INACTIVE,"Greenlaw (neck) is inactive for Sunday night's contest against the Vikings in Mexico City, Brooke Evans of the 49ers' official website reports.",LB
 4685397,Jordan James,San Francisco 49ers,Active,2026-11-23T00:21Z,,,,,,"James (calf) is active for Sunday night's matchup with the Vikings, Brooke Evans of the 49ers' official website reports.",RB
 4039029,Khalid Kareem,San Francisco 49ers,Out,2026-11-23T00:18Z,Ankle,Not Specified,Not Specified,2026-11-29,INACTIVE,Kareem (ankle) is inactive for Sunday night's game against the Vikings.,DE
@@ -724,6 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-14T00:44Z,,,,,,"Nwosu (ankle) does not have an injury designation against the Raiders on Sunday, John Boyle of the Seahawks' official site reports.",LB
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
+4243331,Cade Otton,Tampa Bay Buccaneers,Active,2026-11-23T04:18Z,,,,,,Otton caught one pass for eight yards on three targets in Sunday's 31-21 loss to the Lions.,TE
 3116165,Chris Godwin Jr.,Tampa Bay Buccaneers,Active,2026-11-23T02:55Z,,,,,,Godwin caught three passes for 18 yards on three targets in Sunday's 31-21 loss to the Lions.,WR
 5220680,Ted Hurst III,Tampa Bay Buccaneers,Active,2026-11-23T01:22Z,,,,,,Hurst caught five of seven targets for 56 yards and two touchdowns during Sunday's 31-21 loss to the Lions.,WR
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-23T00:51Z,,,,,,Gainwell rushed four times for 16 yards and brought in four of five targets for 43 yards in the Buccaneers 31-21 loss to the Lions on Sunday.,RB
@@ -748,7 +749,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5097554,Kameron Johnson,Tampa Bay Buccaneers,Active,2026-11-11T15:26Z,,,,,,Johnson played all 17 of his snaps on special teams and recorded one tackle in Sunday's 27-24 loss to the Bears.,WR
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-11T00:51Z,,,,,,Johnson caught two passes for 76 yards on five targets in Sunday night's 27-24 loss to the Bears.,WR
 4430871,Sean Tucker,Tampa Bay Buccaneers,Active,2026-11-10T05:51Z,,,,,,Tucker didn't log any offensive snaps in a loss to the Bears on Sunday. He returned four kickoffs for 92 yards.,RB
-3150744,Chase McLaughlin,Tampa Bay Buccaneers,Active,2026-11-10T02:37Z,,,,,,McLaughlin converted all three of his field-goal attempts and both of his extra-point tries during Tampa Bay's loss to the Bears on Sunday.,PK
 4686728,Gunnar Helm,Tennessee Titans,Active,2026-11-23T03:51Z,,,,,,Helm caught two of three targets for 14 yards in Sunday's 51-30 loss to the Cowboys.,TE
 4431268,Chimere Dike,Tennessee Titans,Active,2026-11-23T02:13Z,,,,,,Dike caught six of seven targets for 69 yards during Sunday's 51-30 loss to the Cowboys.,WR
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-23T01:41Z,,,,,,Ridley caught five of six targets for 68 yards and a touchdown during Sunday's 51-30 loss to the Cowboys.,WR
