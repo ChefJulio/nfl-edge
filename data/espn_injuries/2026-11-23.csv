@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-18T00:54Z,,,,,,The Eagles signed Blue from their practice squad to their active roster Tuesday.,RB
 15835,Zach Ertz,Philadelphia Eagles,Active,2026-11-16T18:31Z,,,,,,The Eagles signed Ertz from the practice squad to the active roster Monday.,TE
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-12T02:12Z,,,,,,Trotter recorded 11 tackles (five solo) and one forced fumble during the Eagles' 19-11 loss to the Giants in Week 9.,LB
+4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T21:08Z,,,,,,"Metcalf won't receive a suspension after he was ejected from Sunday's 19-16 loss to the Eagles, but the NFL is still reviewing discipline for the receiver that could include a fine, Adam Schefter of ESPN reports.",WR
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-23T20:37Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Steelers coach Mike McCarthy said Monday that he's ""very confident"" Pittman (foot) will be on the field this week when the Steelers face the Broncos on Friday, Brooke Pryor of ESPN.com reports.",WR
 4037333,Alex Highsmith,Pittsburgh Steelers,Doubtful,2026-11-23T20:06Z,Ankle,Not Specified,Not Specified,2026-11-27,DOUBTFUL,"Steelers head coach Mike McCarthy suggested Monday that Highsmith (ankle) is likely to be sidelined for Friday's game against the Broncos, Brooke Pryor of ESPN.com reports. ""It's going to be tough for him to make it this week,"" McCarthy said.",LB
 4429164,Nick Herbig,Pittsburgh Steelers,Out,2026-11-23T15:50Z,Hip,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,out,LB
@@ -656,7 +657,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,DE
 4714771,Drew Allar,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,QB
 5081508,Eli Heidenreich,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,RB
-4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T13:39Z,,,,,,"Metcalf will have his actions from Sunday's game against the Eagles reviewed ""for potential additional discipline, including a suspension,"" Ian Rapoport of ESPN and NFL Network reports.",WR
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
 4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-11-23T04:02Z,,,,,,Freiermuth caught all five of his targets for 39 yards during Sunday's 19-16 loss to the Eagles.,TE
@@ -774,7 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3926229,Cody Barton,Tennessee Titans,Active,2026-11-20T22:47Z,,,,,,Barton (concussion) does not carry an injury designation into Sunday's game against Dallas.,LB
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-20T00:37Z,,,,,,Franklin-Myers (back) was a full participant at practice Thursday.,DE
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-19T02:26Z,,,,,,Gray posted nine tackles (eight solo) and two pass defenses (including an interception) during the Titans' 40-23 loss to the Jaguars in Week 10.,LB
-4575131,Jacory Croskey-Merritt,Washington Commanders,Injured Reserve,2026-11-23T20:24Z,Groin,Not Specified,Not Specified,2026-11-23,IR-R,"Croskey-Merritt (groin) remains listed as questionable for Monday's game against the Bengals but ""is looking good"" to return from injured reserve and play, John Keim of ESPN.com reports.",RB
+4575131,Jacory Croskey-Merritt,Washington Commanders,Active,2026-11-23T21:03Z,,,,,,,RB
 2576736,Lucas Patrick,Washington Commanders,Questionable,2026-11-22T00:59Z,Concussion,Concussion,Not Specified,2026-11-23,QUESTIONABLE,Patrick (concussion) is questionable for Monday's game against the Bengals.,G
 4360378,Quan Martin,Washington Commanders,Active,2026-11-22T00:28Z,,,,,,Martin (shoulder) does not carry an injury designation into Monday's game against the Bengals.,S
 4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-22T00:26Z,Ankle,Not Specified,Not Specified,2026-11-23,QUESTIONABLE,Robertson (ankle) is listed as questionable for Monday's game against the Bengals.,CB
