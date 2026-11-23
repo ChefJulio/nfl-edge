@@ -199,7 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915535,Denzel Ward,Cleveland Browns,Active,2026-11-13T23:58Z,,,,,,Ward (quadriceps) does not have an injury designation for Sunday's game against the Texans.,CB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,C
 3131498,Tytus Howard,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,OT
-4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-23T22:08Z,Knee,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,"Ferguson (knee) was present for Monday's walkthrough, Todd Archer of ESPN reports.",TE
+4242355,Jake Ferguson,Dallas Cowboys,Out,2026-11-23T23:01Z,Knee,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,"Ferguson (knee/ankle) was listed as a non-participant on Monday's practice estimate, Tommy Yarrish of the Cowboys' official site reports.",TE
 4248911,DaRon Bland,Dallas Cowboys,Injured Reserve,2026-11-23T21:40Z,Ankle,Sprain,Not Specified,2026-12-27,IR,"Bland (ankle) is expected to return this season, Calvin Watkins of  The Dallas Morning News reports.",CB
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-23T17:24Z,,,,,,Mitchell recorded two receptions for 40 yards on two targets in Sunday's 51-30 win over the Titans.,TE
 3929850,P.J. Locke,Dallas Cowboys,Out,2026-11-23T15:26Z,Concussion,Concussion,Not Specified,2026-11-26,QUESTIONABLE,out,S
@@ -274,9 +274,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4710422,Ahmed Hassanein,Detroit Lions,Active,2026-11-16T19:11Z,,,,,,,DE
 4689936,Jake Bates,Detroit Lions,Active,2026-11-15T19:35Z,,,,,,Bates made all five of his PATs in the Lions' 35-10 win over the Patriots on Sunday in Munich.,PK
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-11-15T19:32Z,,,,,,TeSlaa caught two of five targets for 19 yards and a touchdown during the Lions' 35-10 win over the Patriots on Sunday in Munich. He also recorded a tackle.,WR
+4361423,Micah Parsons,Green Bay Packers,Out,2026-11-23T22:48Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,Ian Rapoport of NFL Network reported Monday that Parsons (knee) has received clearance to return to action Wednesday at the Rams.,DE
 4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-23T22:18Z,Shoulder,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,questionable,OT
 5076652,Brandon Cisse,Green Bay Packers,Active,2026-11-23T22:17Z,,,,,,,CB
-4361423,Micah Parsons,Green Bay Packers,Out,2026-11-23T21:43Z,Knee - ACL,Surgery,Left,2026-11-25,PUP-R,"Parsons (knee) remained a limited practice participant Monday, Matt Schneidman of The Athletic reports.",DE
 4047365,Josh Jacobs,Green Bay Packers,Out,2026-11-23T21:35Z,Finger,Surgery,Right,2026-11-25,QUESTIONABLE,"Jacobs (finger) was a limited participant in Monday's practice, Matt Schneidman of The Athletic reports.",RB
 3124005,Zaire Franklin,Green Bay Packers,Out,2026-11-23T20:24Z,Shin,Fracture,Not Specified,2026-11-25,QUESTIONABLE,"Head coach Matt LaFleur said Monday that Franklin (shin) is progressing well, but the Packers haven't yet determined if he'll play Wednesday versus the Rams, Weston Hodkiewicz of the team's official site reports.",LB
 4819231,Kaleb Johnson,Green Bay Packers,Active,2026-11-22T22:04Z,,,,,,"Johnson handled the first RB reps during the open portion of Sunday's practice, Mike Spofford of the Packers' official site reports.",RB
@@ -707,7 +707,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2473037,Jason Myers,Seattle Seahawks,Active,2026-11-17T04:01Z,,,,,,Myers missed his sole field-goal attempt and made three PATs in the Seahawks' 21-13 win over the Raiders on Sunday.,PK
 2977187,Cooper Kupp,Seattle Seahawks,Active,2026-11-17T02:59Z,,,,,,Kupp hauled in his lone target for a 34-yard touchdown during the Seahawks' 21-13 win over the Raiders on Sunday.,WR
 4597703,Tory Horton,Seattle Seahawks,Active,2026-11-17T02:47Z,,,,,,Horton failed to garner a target during Sunday's 21-13 win over the Raiders.,WR
-4429835,George Holani,Seattle Seahawks,Questionable,2026-11-16T20:50Z,Knee - MCL,Sprain,Not Specified,2026-11-29,QUESTIONABLE,"Holani is week-to-week after suffering an MCL sprain in Sunday's win over Las Vegas, Ian Rapoport of NFL Network reported Monday.",RB
+4429835,George Holani,Seattle Seahawks,Questionable,2026-11-16T20:50Z,Knee - MCL,Sprain,Not Specified,2026-12-25,IR,"Holani is week-to-week after suffering an MCL sprain in Sunday's win over Las Vegas, Ian Rapoport of NFL Network reported Monday.",RB
 4609203,Deven Eastern,Seattle Seahawks,Active,2026-11-16T19:39Z,,,,,,,DT
 5082331,Avery Smith,Seattle Seahawks,Active,2026-11-16T19:39Z,,,,,,,CB
 3912547,Sam Darnold,Seattle Seahawks,Out,2026-11-16T18:03Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Head coach Mike Macdonald said Monday that he's ""really optimistic"" Darnold (quadriceps/ribs) will be able to get a full week's worth of practice coming out of the Seahawks' Week 11 bye and start their next game Sunday, Nov. 29, against the 49ers, John Boyle of the team's official site reports.",QB
