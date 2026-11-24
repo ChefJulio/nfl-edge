@@ -24,8 +24,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4040805,Roy Lopez,Arizona Cardinals,Active,2026-11-20T22:06Z,,,,,,,DT
 4709718,Jayden Williams,Arizona Cardinals,Active,2026-11-20T02:46Z,,,,,,Williams (knee) was a full participant in Thursday's practice.,OT
 4685503,Walter Nolen III,Arizona Cardinals,Active,2026-11-20T00:25Z,,,,,,"Nolen (illness) was a full participant in practice Thursday, Zach Gershman of the Cardinals' official site reports.",DT
+4870612,Zachariah Branch,Atlanta Falcons,Questionable,2026-11-24T23:21Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Branch (hamstring) went through warmups during the media-viewing portion of Monday's unofficial practice session, Daniel Flick of The Atlanta Journal-Constitution reports.",WR
 4037626,Divine Deablo,Atlanta Falcons,Questionable,2026-11-24T12:39Z,Forearm,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
-4870612,Zachariah Branch,Atlanta Falcons,Questionable,2026-11-24T12:39Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,WR
 4567111,DeMarcco Hellams,Atlanta Falcons,Active,2026-11-19T03:10Z,,,,,,Hellams logged 11 tackles (seven solo) in the Falcons' 35-13 loss to the Chiefs on Sunday.,S
 3917914,Olamide Zaccheaus,Atlanta Falcons,Active,2026-11-18T02:27Z,,,,,,Zaccheaus caught two of his four targets for 17 yards and returned five punts for 81 yards during Atlanta's loss Sunday versus the Chiefs.,WR
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-18T02:23Z,,,,,,Herbert caught two of his three targets for seven yards during Sunday's 35-13 loss versus the Chiefs. He also returned six kickoffs for 168 yards.,RB
@@ -633,7 +633,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-24T02:56Z,,,,,,Stowers didn't log any offensive snaps in Sunday's 19-16 win over the Steelers.,TE
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-24T01:32Z,,,,,,Cooper caught four of his five targets for 59 yards in the Eagles' 19-16 win over the Steelers on Sunday.,WR
 4431545,Will Shipley,Philadelphia Eagles,Questionable,2026-11-24T00:21Z,Illness,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Shipley (foot/illness) was estimated as a limited participant on Monday's injury report.,RB
-4685201,Tanner McKee,Philadelphia Eagles,Questionable,2026-11-24T00:14Z,,,,,,McKee (ribs) was estimated as a limited participant on Monday's injury report.,QB
+4685201,Tanner McKee,Philadelphia Eagles,Active,2026-11-24T00:14Z,,,,,,McKee (ribs) was estimated as a limited participant on Monday's injury report.,QB
 2971027,Jonathan Jones,Philadelphia Eagles,Questionable,2026-11-24T00:10Z,Ankle,Not Specified,Right,2026-11-26,QUESTIONABLE,Jones (ankle) was estimated as a DNP on Monday's injury report.,CB
 4257591,Arnold Ebiketie,Philadelphia Eagles,Questionable,2026-11-23T22:13Z,Oblique,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,questionable,LB
 4696203,Ajani Cornelius,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,OT
