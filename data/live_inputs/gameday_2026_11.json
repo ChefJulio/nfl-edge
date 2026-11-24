@@ -628,5 +628,45 @@
 "at": "2026-11-23T21:20:00+00:00",
 "post": 0.974,
 "status": "Active (FFF)"
+},
+"00-0037256": {
+"name": "Rachaad White",
+"team": "WAS",
+"pos": "RB",
+"pre": 0.6985,
+"ruling": "ACT",
+"at": "2026-11-23T23:48:00+00:00",
+"post": 0.974,
+"status": "Active (FLD)"
+},
+"00-0039631": {
+"name": "Cam Grandy",
+"team": "CIN",
+"pos": "TE",
+"pre": 0.9655,
+"ruling": "INA",
+"at": "2026-11-23T23:47:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041117": {
+"name": "Athan Kaliakmanis",
+"team": "WAS",
+"pos": "QB",
+"pre": 0.1275,
+"ruling": "INA",
+"at": "2026-11-23T23:50:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041178": {
+"name": "Robert Henry Jr.",
+"team": "WAS",
+"pos": "RB",
+"pre": 0.8925,
+"ruling": "INA",
+"at": "2026-11-23T23:50:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
