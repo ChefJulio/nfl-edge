@@ -149,17 +149,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2973405,Kalif Raymond,Chicago Bears,Active,2026-11-11T01:16Z,,,,,,Raymond caught four passes for 32 yards on seven targets in Sunday night's 27-24 win over the Bucs.,WR
 17427,Cairo Santos,Chicago Bears,Active,2026-11-10T02:46Z,,,,,,Santos made both of his two field-goal attempts and converted all three of his extra-point tries during Sunday's 27-24 win versus the Buccaneers.,PK
 2576492,Grady Jarrett,Chicago Bears,Active,2026-11-07T00:17Z,,,,,,Jarrett (groin) does not carry an official injury designation ahead of Sunday's game versus the Buccaneers.,DE
+4426422,Dax Hill,Cincinnati Bengals,Active,2026-11-24T00:05Z,,,,,,Hill (illness) is active for Monday night's contest against the Commanders.,CB
+3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-24T00:04Z,Hamstring,Not Specified,Left,2026-11-29,IR-R,"Davis (hamstring) has been ruled out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",CB
 3125082,Dalton Risner,Cincinnati Bengals,Out,2026-11-23T23:47Z,Knee,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,G
 5081542,Landon Robinson,Cincinnati Bengals,Out,2026-11-23T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,DT
 4401811,Kyle Dugger,Cincinnati Bengals,Out,2026-11-23T23:47Z,Quadriceps,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,S
 4700712,Cam Grandy,Cincinnati Bengals,Out,2026-11-23T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,TE
 4429000,Myles Hinton,Cincinnati Bengals,Out,2026-11-23T23:47Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,OT
 4646773,Dylan Fairchild,Cincinnati Bengals,Active,2026-11-23T23:47Z,,,,,,,G
-4426422,Dax Hill,Cincinnati Bengals,Active,2026-11-23T23:47Z,,,,,,,CB
 4570546,Swayze Bozeman,Cincinnati Bengals,Active,2026-11-23T23:47Z,,,,,,,LB
 4689117,Brian Parker II,Cincinnati Bengals,Active,2026-11-23T23:47Z,,,,,,,OT
 4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-23T22:36Z,Thumb,Surgery,Left,2026-11-29,IR-R,"Iosivas (thumb) was downgraded to out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",WR
-3125356,Jalen Davis,Cincinnati Bengals,Injured Reserve,2026-11-23T16:23Z,Hamstring,Not Specified,Left,2026-11-29,IR-R,The Bengals list Davis (hamstring) as doubtful for Monday's game against the Commanders.,CB
 3915511,Joe Burrow,Cincinnati Bengals,Active,2026-11-21T21:30Z,,,,,,Burrow (illness) does not have an injury designation ahead of Monday's game against the Commanders.,QB
 3051746,Oren Burks,Cincinnati Bengals,Injured Reserve,2026-11-21T19:53Z,Groin,Not Specified,Not Specified,2026-12-20,IR,The Bengals placed Burks (groin) on injured reserve Saturday.,LB
 4239993,Tee Higgins,Cincinnati Bengals,Active,2026-11-19T21:34Z,,,,,,"Higgins (knee) was a full participant in Thursday's practice, Paul Dehner Jr. of The Athletic reports.",WR
@@ -774,9 +774,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3926229,Cody Barton,Tennessee Titans,Active,2026-11-20T22:47Z,,,,,,Barton (concussion) does not carry an injury designation into Sunday's game against Dallas.,LB
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-20T00:37Z,,,,,,Franklin-Myers (back) was a full participant at practice Thursday.,DE
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-19T02:26Z,,,,,,Gray posted nine tackles (eight solo) and two pass defenses (including an interception) during the Titans' 40-23 loss to the Jaguars in Week 10.,LB
+4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-24T00:09Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,Kaliakmanis (coach's decision) is inactive but serving as the Commanders' emergency third quarterback Monday night against the Bengals.,QB
 4575131,Jacory Croskey-Merritt,Washington Commanders,Active,2026-11-23T23:52Z,,,,,,Croskey-Merritt (groin) is listed as active Monday against the Bengals.,RB
 4605488,Tanoa Togiai,Washington Commanders,Out,2026-11-23T23:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,G
-4432722,Athan Kaliakmanis,Washington Commanders,Out,2026-11-23T23:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,QB
 4239694,Amik Robertson,Washington Commanders,Out,2026-11-23T23:50Z,Ankle,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,CB
 5151317,Robert Henry Jr.,Washington Commanders,Out,2026-11-23T23:50Z,Coach's Decision,Not Specified,Not Specified,2026-11-29,INACTIVE,inactive,RB
 2576736,Lucas Patrick,Washington Commanders,Active,2026-11-23T23:50Z,,,,,,,G
