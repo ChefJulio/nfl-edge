@@ -230,7 +230,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431280,Troy Franklin,Denver Broncos,Active,2026-11-24T03:08Z,,,,,,Franklin did not record a catch in Sunday's 38-24 win over the Raiders.,WR
 3911853,Adam Trautman,Denver Broncos,Active,2026-11-24T02:38Z,,,,,,Trautman caught his only target for a one-yard touchdown during Sunday's 38-24 win versus the Raiders.,TE
 4686472,Marvin Mims Jr.,Denver Broncos,Active,2026-11-24T02:21Z,,,,,,Mims caught one of two targets for 36 yards and also added an 11-yard rush and 22 yards as a punt returner during Sunday's 38-24 win over the Raiders.,WR
-4241985,J.K. Dobbins,Denver Broncos,Active,2026-11-24T01:02Z,,,,,,"Dobbins logged just one snap in Sunday's 38-24 win over the Raiders, though head coach Sean Payton said Monday that Dobbins ""is going to be super important"" moving forward, Will Petersen of 104.3 The Fan reports.",RB
+4241985,J.K. Dobbins,Denver Broncos,Suspension,2026-11-24T01:02Z,Suspension,Not Specified,Not Specified,2026-12-06,RESERVE-SUS,"Dobbins logged just one snap in Sunday's 38-24 win over the Raiders, though head coach Sean Payton said Monday that Dobbins ""is going to be super important"" moving forward, Will Petersen of 104.3 The Fan reports.",RB
 2985659,Wil Lutz,Denver Broncos,Active,2026-11-24T00:29Z,,,,,,Lutz made his lone field-goal attempt and all five PATs in Sunday's 38-24 win over the Raiders.,PK
 4383440,Nate Adkins,Denver Broncos,Active,2026-11-23T17:28Z,,,,,,Adkins recorded a three-yard reception on two targets in Sunday's 38-24 win over the Raiders.,TE
 5085625,Gavin Ortega,Denver Broncos,Active,2026-11-23T15:27Z,,,,,,,OT
@@ -374,8 +374,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T23:17Z,Chest,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Jones (chest) has been ruled out for the rest of Sunday's contest against the Giants.,CB
 4381558,Jordan Davis,Jacksonville Jaguars,Active,2026-11-22T14:11Z,,,,,,"Davis is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",DT
 3919512,Jessie Bates III,Jacksonville Jaguars,Active,2026-11-22T14:09Z,,,,,,"Bates is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",S
+4567048,Kenneth Walker III,Kansas City Chiefs,Questionable,2026-11-24T21:49Z,Groin,Soreness,Not Specified,2026-11-26,QUESTIONABLE,The Chiefs listed Walker (groin) as a limited participant in Tuesday's practice.,RB
 4372070,Ben VanSumeren,Kansas City Chiefs,Injured Reserve,2026-11-24T21:28Z,Knee,Sprain,Not Specified,2026-12-27,IR,The Chiefs placed VanSumeren (knee) on the reserve/injured list Tuesday.,FB
-4567048,Kenneth Walker III,Kansas City Chiefs,Questionable,2026-11-24T18:03Z,Groin,Soreness,Not Specified,2026-11-26,QUESTIONABLE,"Chiefs head coach Andy Reid said that Walker (groin) will practice Tuesday, Nate Taylor of ESPN.com reports. ""I'm not anticipating a ton of work,"" Reid said. ""Let's see how does. He's feeling pretty good.""",RB
 4242459,Trey Smith,Kansas City Chiefs,Questionable,2026-11-24T12:39Z,Concussion,Concussion,Not Specified,2026-11-26,QUESTIONABLE,questionable,G
 4043041,Jaylon Moore,Kansas City Chiefs,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Right,2026-11-26,QUESTIONABLE,questionable,OT
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-11-24T03:44Z,,,,,,Tranquill recorded eight total tackles (three solo) during Sunday's 34-7 win against the Cardinals.,LB
@@ -556,7 +556,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429568,Martin Emerson Jr.,New Orleans Saints,Questionable,2026-11-24T12:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,questionable,CB
 4606711,Taliese Fuaga,New Orleans Saints,Questionable,2026-11-24T12:39Z,Knee,Sprain,Left,2026-11-29,QUESTIONABLE,questionable,OT
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-11-24T05:11Z,,,,,,Elliss recorded five tackles (two solo) in Sunday's 21-13 loss to the Bears.,LB
-4879276,Bryce Lance,New Orleans Saints,Active,2026-11-24T03:20Z,,,,,,Lance failed to catch his only target and added 47 yards as a kick returner during Sunday's 21-13 loss to the Bears.,WR
+4879276,Bryce Lance,New Orleans Saints,Active,2026-11-24T03:20Z,,,,,,Lance failed to catch his only target and added 47 yards on kickoff returns during Sunday's 21-13 loss to the Bears.,WR
 5081999,CJ Donaldson,New Orleans Saints,Active,2026-11-24T02:53Z,,,,,,Donaldson logged a five-yard carry and brought in all four of his targets for 12 yards during the Saints' 21-13 loss to the Bears on Sunday. He also lost a fumble.,RB
 4036131,Noah Fant,New Orleans Saints,Active,2026-11-24T02:13Z,,,,,,Fant caught two of his five targets for 19 yards in the Saints' 21-13 loss to the Bears on Sunday.,TE
 3929645,Juwan Johnson,New Orleans Saints,Questionable,2026-11-23T20:13Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Saints head coach Kellen Moore said Monday that Johnson is still undergoing further medical evaluation after injuring his hamstring during Sunday's 21-13 loss to the Bears, Ross Jackson of WWL-TV reports.",TE
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917657,Zack Baun,Philadelphia Eagles,Injured Reserve,2026-11-22T00:14Z,Back,Not Specified,Not Specified,2026-12-19,IR,Baun (back) was placed on the Eagles' injured reserve Saturday.,LB
 4428850,Dontayvion Wicks,Philadelphia Eagles,Injured Reserve,2026-11-21T21:09Z,Ankle,Not Specified,Not Specified,2026-12-19,IR,The Eagles placed Wicks (ankle/foot) on injured reserve Saturday.,WR
 4240456,Michael Carter II,Philadelphia Eagles,Active,2026-11-21T01:28Z,,,,,,Carter (abdomen) does not carry an injury designation into Sunday's game against the Steelers.,CB
+4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-24T21:36Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,Pittman (foot) was listed as a full participant in Tuesday's walkthrough practice.,WR
 4035656,Ben Skowronek,Pittsburgh Steelers,Questionable,2026-11-24T21:29Z,Calf,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,questionable,WR
 4429164,Nick Herbig,Pittsburgh Steelers,Questionable,2026-11-24T12:39Z,Hip,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,questionable,LB
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-24T04:31Z,,,,,,Wilson recorded just three tackles (one solo) and a pass breakup in Sunday's 19-16 loss to the Eagles.,LB
@@ -656,7 +657,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-24T02:08Z,,,,,,Bernard caught six passes for 40 yards on 10 targets in Sunday's 19-16 loss to the Eagles.,WR
 4694237,Max Hurleman,Pittsburgh Steelers,Active,2026-11-24T01:15Z,,,,,,Hurleman reverted to the Steelers' practice squad Monday.,WR
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T21:08Z,,,,,,"Metcalf won't receive a suspension after he was ejected from Sunday's 19-16 loss to the Eagles, but the NFL is still reviewing discipline for the receiver that could include a fine, Adam Schefter of ESPN reports.",WR
-4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-23T20:37Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Steelers coach Mike McCarthy said Monday that he's ""very confident"" Pittman (foot) will be on the field this week when the Steelers face the Broncos on Friday, Brooke Pryor of ESPN.com reports.",WR
 4037333,Alex Highsmith,Pittsburgh Steelers,Doubtful,2026-11-23T20:06Z,Ankle,Not Specified,Not Specified,2026-11-27,DOUBTFUL,"Steelers head coach Mike McCarthy suggested Monday that Highsmith (ankle) is likely to be sidelined for Friday's game against the Broncos, Brooke Pryor of ESPN.com reports. ""It's going to be tough for him to make it this week,"" McCarthy said.",LB
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,CB
 4431533,Gabriel Rubio,Pittsburgh Steelers,Active,2026-11-23T15:50Z,,,,,,,DE
