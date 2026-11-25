@@ -199,6 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3110565,Quincy Williams,Cleveland Browns,Active,2026-11-14T00:07Z,,,,,,Williams (hamstring) does not have an injury designation for Sunday's game against Houston.,LB
 3915535,Denzel Ward,Cleveland Browns,Active,2026-11-13T23:58Z,,,,,,Ward (quadriceps) does not have an injury designation for Sunday's game against the Texans.,CB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-13T21:38Z,,,,,,,C
+4702577,Devin Moore,Dallas Cowboys,Injured Reserve,2026-11-25T01:55Z,Hip,Not Specified,Not Specified,2026-11-26,IR-R,"Moore (hip) was a full participant in Tuesday's practice, Tommy Yarrish of the Cowboys' official site reports.",CB
 4428914,Dee Winters,Dallas Cowboys,Questionable,2026-11-24T22:40Z,Knee,Bruise,Right,2026-11-26,QUESTIONABLE,Winters (knee) was limited in practice Tuesday.,LB
 4426485,Jonathan Mingo,Dallas Cowboys,Questionable,2026-11-24T22:36Z,Ankle,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Mingo (ankle) did not participate in practice Tuesday.,WR
 3929850,P.J. Locke,Dallas Cowboys,Questionable,2026-11-24T22:29Z,Concussion,Concussion,Not Specified,2026-11-26,QUESTIONABLE,Locke (concussion) was a limited participant in practice Tuesday.,S
@@ -223,7 +224,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-11-22T22:11Z,,,,,,Lamb brought 11 of 12 targets for 132 yards and a touchdown in the Cowboys' 51-30 win over the Titans on Sunday.,WR
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-11-22T22:05Z,,,,,,Prescott completed 28 of 33 passes for 325 yards with four touchdowns and no interceptions and added four carries for nine yards and another score in the Cowboys' 51-30 win over the Titans on Sunday.,QB
 4043089,Jalen Thompson,Dallas Cowboys,Injured Reserve,2026-11-22T00:05Z,Hamstring,Not Specified,Not Specified,2026-11-26,IR-R,"Thompson (hamstring) has been downgraded to out for Sunday's game against the Titans, Tommy Yarrish of the Cowboys' official site reports.",S
-4683848,Donovan Ezeiruaku,Dallas Cowboys,Active,2026-11-20T22:37Z,,,,,,"Ezeiruaku (ankle) does not have an injury designation for Sunday's game against the Titans, Tommy Yarrish of the Cowboys' official site reports.",LB
 4039059,Brandon Jones,Denver Broncos,Active,2026-11-25T00:55Z,,,,,,"Jones (hamstring) was listed as a full participant at the Broncos' walkthrough practice Tuesday, Aric DiLalla of the team's official practice reports.",S
 4687592,Jonah Elliss,Denver Broncos,Injured Reserve,2026-11-25T00:37Z,Ankle,Not Specified,Not Specified,2026-12-06,IR,"Elliss (ankle) did not participate in Tuesday's practice and is unlikely to be designated to return from injured reserve ahead of Friday's game against the Steelers, Zac Stevens of TheDNVR.com reports.",LB
 4362748,Tyler Badie,Denver Broncos,Injured Reserve,2026-11-24T23:07Z,Thumb,Fracture,Not Specified,2026-11-27,IR-R,"The Broncos designated Badie (thumb) for return from injured reserve Tuesday, Susanna Weir of the team's official site reports.",RB
@@ -399,6 +399,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4610705,Nohl Williams,Kansas City Chiefs,Active,2026-11-18T03:09Z,,,,,,"Williams recorded five total tackles (two solo) and two passes defensed, including an interception, during Sunday's 35-13 win over the Falcons.",CB
 4431196,Jake Briningstool,Kansas City Chiefs,Active,2026-11-18T02:54Z,,,,,,Briningstool caught one of two targets for 20 yards in Sunday's 35-13 win against the Jets on Sunday.,TE
 5093923,Andrew Armstrong,Kansas City Chiefs,Active,2026-11-16T03:36Z,,,,,,Armstrong caught his only target for a 43-yard touchdown in Sunday's 35-13 win over the Falcons.,WR
+4043169,Jeremy Chinn,Las Vegas Raiders,Active,2026-11-25T01:49Z,,,,,,Chinn recorded seven total tackles (five solo) during Sunday's 38-24 loss to the Broncos.,S
 4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-24T12:39Z,Upper Body,Stinger,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,TE
 4379416,Quay Walker,Las Vegas Raiders,Active,2026-11-24T04:37Z,,,,,,Walker recorded 11 tackles (seven solo) in Sunday's 38-24 loss to the Broncos.,LB
@@ -423,7 +424,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Active,2026-11-22T20:12Z,,,,,,Thornton (coach's decision) is inactive for Sunday's Week 11 tilt against Denver.,WR
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-11-22T20:10Z,,,,,,Fatukasi (toe) is active against the Broncos on Sunday.,DT
 4431623,Trey Zuhn III,Las Vegas Raiders,Active,2026-11-20T22:00Z,,,,,,,C
-4360749,Thomas Booker IV,Las Vegas Raiders,Active,2026-11-19T02:15Z,,,,,,"Booker (ankle) was a full participant in Wednesday's practice, Sam Warren of The Athletic reports.",DT
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-24T15:18Z,,,,,,Gadsden went without a target while taking the field for 23 of the Chargers' 60 snaps on offense in Sunday's 27-24 loss to the Jets.,TE
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-24T12:39Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,S
 4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,CB
