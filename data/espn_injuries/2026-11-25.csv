@@ -49,13 +49,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-13T23:22Z,,,,,,"Daniels (Achilles) does not carry an injury designation into Sunday's game against the Chiefs, Will McFadden of the Falcons' official site reports.",LB
 4240596,C.J. Henderson,Atlanta Falcons,Active,2026-11-13T22:12Z,,,,,,Henderson and the Falcons agreed to a two-year contract extension Friday.,CB
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-11-13T22:07Z,,,,,,"Thomas and the Falcons agreed to a three-year extension worth up to $33 million Friday, Adam Schefter of ESPN reports.",DE
-4429615,Zay Flowers,Baltimore Ravens,Questionable,2026-11-25T23:19Z,Ankle,,,2026-11-29,QUESTIONABLE,questionable,WR
+4429615,Zay Flowers,Baltimore Ravens,Questionable,2026-11-25T23:25Z,Ankle,,,2026-11-29,QUESTIONABLE,Flowers (ankle) was listed as a limited participant in Wednesday's practice.,WR
+4565311,Aeneas Peebles,Baltimore Ravens,Questionable,2026-11-25T23:20Z,Elbow,,,2026-11-29,QUESTIONABLE,questionable,DT
+4035479,John Simpson,Baltimore Ravens,Questionable,2026-11-25T23:20Z,Groin,,,2026-11-29,QUESTIONABLE,questionable,G
 4360939,Rashod Bateman,Baltimore Ravens,Questionable,2026-11-25T23:18Z,Groin,,,2026-11-29,QUESTIONABLE,questionable,WR
 3043078,Derrick Henry,Baltimore Ravens,Questionable,2026-11-25T19:55Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Ravens head coach Jesse Minter said that Henry was a limited participant in Wednesday's practice after being placed back in concussion protocol, but the running back is expected to be available for Sunday's game against the Texans, Cordell Woodland of 105.7 The Fan Baltimore reports.",RB
 4362139,Travis Jones,Baltimore Ravens,Active,2026-11-25T02:42Z,,,,,,Jones recorded eight tackles (five solo) including 1.0 sacks during Sunday's 35-33 loss at Carolina.,DT
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-11-25T02:36Z,,,,,,Simpson recorded 10 total tackles (five solo) during Sunday's 35-33 loss to the Panthers.,LB
 4575517,Kyle Hamilton,Baltimore Ravens,Active,2026-11-25T02:31Z,,,,,,Hamilton recorded eight total tackles (five solo) during Sunday's 35-33 loss to the Panthers.,S
-4683188,Mike Green,Baltimore Ravens,Active,2026-11-25T02:24Z,,,,,,Green recorded five tackles (four solo) including 2.0 sacks during Sunday's 35-33 loss at Carolina.,LB
+4683188,Mike Green,Baltimore Ravens,Questionable,2026-11-25T02:24Z,Knee,,,2026-11-29,QUESTIONABLE,Green recorded five tackles (four solo) including 2.0 sacks during Sunday's 35-33 loss at Carolina.,LB
 4035245,Nnamdi Madubuike,Baltimore Ravens,Questionable,2026-11-24T12:39Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 3858276,Jaylinn Hawkins,Baltimore Ravens,Questionable,2026-11-24T12:39Z,Knee,Not Specified,Left,2026-11-29,QUESTIONABLE,questionable,S
 3915189,Roquan Smith,Baltimore Ravens,Active,2026-11-24T05:02Z,,,,,,Smith recorded nine tackles (two solo) in Sunday's 35-33 loss to the Panthers.,LB
@@ -72,8 +74,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
 3052743,Trey Hendrickson,Baltimore Ravens,Active,2026-11-22T20:15Z,,,,,,,LB
 5088338,Elijah Sarratt,Baltimore Ravens,Active,2026-11-22T16:43Z,,,,,,Sarratt (coach's decision) is inactive for Sunday's game against Carolina.,WR
-4685526,Adam Randall,Baltimore Ravens,Active,2026-11-22T16:39Z,,,,,,Randall (coach's decision) is inactive for Sunday's game against Carolina.,RB
-4832793,Olaivavega Ioane,Baltimore Ravens,Active,2026-11-20T00:37Z,,,,,,"Ioane (shoulder/knee) was a full participant in Thursday's practice, Cordell Woodland of 105.7 The Fan Baltimore reports.",G
 4568624,Dorian Williams,Buffalo Bills,Questionable,2026-11-25T22:46Z,Calf,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Williams (calf) is questionable for Thursday night's game against the Chiefs.,LB
 4379778,Christian Benford,Buffalo Bills,Questionable,2026-11-25T22:39Z,Groin,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Benford (groin) is questionable for Thursday night's game against the Chiefs.,CB
 4385690,Dalton Kincaid,Buffalo Bills,Questionable,2026-11-25T18:53Z,Thumb,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Kincaid (thumb/ankle) is listed as questionable for Thursday night's contest against the Chiefs.,TE
@@ -716,7 +716,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3924327,Drew Lock,Seattle Seahawks,Active,2026-11-16T02:02Z,,,,,,"Lock completed 14 of 17 passes for 240 yards, two touchdowns and no interceptions and logged six carries for 20 yards during Sunday's 21-13 victory in Las Vegas.",QB
 4685512,Jadarian Price,Seattle Seahawks,Active,2026-11-16T01:55Z,,,,,,Price posted nine carries for 36 yards and one touchdown and gathered in his only target for eight yards during Sunday's 21-13 victory at Las Vegas.,RB
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-11-16T01:48Z,,,,,,Charbonnet churned out 94 yards on 20 carries during Sunday's 21-13 win in Las Vegas.,RB
-4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-16T01:31Z,,,,,,Smith-Njigba gathered in eight of 10 targets for 171 yards and one touchdown during Sunday's 21-13 win at Las Vegas.,WR
+4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-16T01:31Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Smith-Njigba gathered in eight of 10 targets for 171 yards and one touchdown during Sunday's 21-13 win at Las Vegas.,WR
 3115312,Jarran Reed,Seattle Seahawks,Questionable,2026-11-15T22:20Z,Toe,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Reed is doubtful to return to Sunday's game against Las Vegas due to a toe injury.,DT
 4887558,Emanuel Wilson,Seattle Seahawks,Active,2026-11-15T19:55Z,,,,,,Wilson (coach's decision) is inactive for Sunday's game at Arizona.,RB
 4259651,Brandon Pili,Seattle Seahawks,Active,2026-11-14T02:30Z,,,,,,"Pili (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",DT
