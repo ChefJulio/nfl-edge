@@ -274,6 +274,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361861,Tyler Lacy,Detroit Lions,Active,2026-11-22T17:08Z,,,,,,Lacy (shoulder) is active for Sunday's game against the Buccaneers.,DT
 4036507,Joe Bachie,Detroit Lions,Active,2026-11-22T16:42Z,,,,,,,LB
 4361788,Cade Mays,Detroit Lions,Injured Reserve,2026-11-22T00:57Z,Ankle,Sprain,Not Specified,2026-12-20,IR,The Lions placed Mays (ankle) on injured reserve Saturday.,C
+4426411,Sean Rhyan,Green Bay Packers,Questionable,2026-11-25T01:18Z,Ankle,Sprain,Not Specified,2026-11-25,QUESTIONABLE,"Rhyan (ankle) is officially questionable for Wednesday's game against the Rams, Wes Hodkiewicz of the Packers' official site reports.",G
+4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-25T01:13Z,Shoulder,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Glover (shoulder) was estimated as a limited participant at practice Tuesday, Wes Hodkiewicz of the Packers' official site reports.",OT
 4430191,Skyy Moore,Green Bay Packers,Questionable,2026-11-24T20:48Z,Ankle,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Moore (ankle) is listed as questionable for Wednesday night's game against the Rams, Wes Hodkiewicz of the Packers' official site reports.",WR
 4259305,Bo Melton,Green Bay Packers,Questionable,2026-11-24T20:40Z,Thigh,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,"Melton (thigh) is listed as questionable for Wednesday night's game against the Rams, Wes Hodkiewicz of the Packers' official site reports.",WR
 3124005,Zaire Franklin,Green Bay Packers,Questionable,2026-11-24T20:28Z,Shin,Fracture,Not Specified,2026-11-25,QUESTIONABLE,"Franklin (shin) is listed as questionable for Wednesday night's game against the Rams, Wes Hodkiewicz of the Packers' official site reports.",LB
@@ -281,9 +283,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4239947,Isaiah McDuffie,Green Bay Packers,Active,2026-11-24T18:37Z,,,,,,,LB
 4047365,Josh Jacobs,Green Bay Packers,Questionable,2026-11-24T18:19Z,Finger,Surgery,Right,2026-11-25,QUESTIONABLE,"The Packers list Jacobs (finger) as questionable for Wednesday's game against the Rams, Wes Hodkiewicz of the team's official site reports.",RB
 14931,Kevin Zeitler,Green Bay Packers,Questionable,2026-11-24T12:39Z,Triceps,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,questionable,G
-4426411,Sean Rhyan,Green Bay Packers,Questionable,2026-11-24T12:39Z,Ankle,Sprain,Not Specified,2026-11-25,QUESTIONABLE,questionable,G
 5076652,Brandon Cisse,Green Bay Packers,Active,2026-11-24T00:13Z,,,,,,Cisse (ribs) practiced fully Monday.,CB
-4361904,Travis Glover,Green Bay Packers,Questionable,2026-11-23T22:18Z,Shoulder,Not Specified,Not Specified,2026-11-25,QUESTIONABLE,questionable,OT
 4819231,Kaleb Johnson,Green Bay Packers,Active,2026-11-22T22:04Z,,,,,,"Johnson handled the first RB reps during the open portion of Sunday's practice, Mike Spofford of the Packers' official site reports.",RB
 4428085,Luke Musgrave,Green Bay Packers,Out,2026-11-22T14:06Z,Neck,Not Specified,Not Specified,2027-02-15,PUP-R,"Packers head coach Matt LaFleur said Saturday that he doesn't anticipate Musgrove (neck) returning from the PUP list this season, according to NFL reporter Jason B. Hirschhorn.",TE
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-19T02:35Z,,,,,,Williams logged eight tackles (two solo) and a pass defense during the Packers' 30-10 loss to the Vikings in Week 10.,S
@@ -774,6 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4695280,Micah Robinson,Tennessee Titans,Active,2026-11-22T16:36Z,,,,,,,CB
 4429058,Jaylen Harrell,Tennessee Titans,Injured Reserve,2026-11-22T00:41Z,Knee - ACL,Not Specified,Not Specified,2027-02-15,IR,"Harrell (knee) was taken to a hospital in Tampa on Saturday following a serious car accident, Terry McCormick of TitanInsider.com reports.",LB
 4428557,Tyjae Spears,Tennessee Titans,Injured Reserve,2026-11-21T18:44Z,Knee,Not Specified,Not Specified,2026-12-20,IR,"The Titans placed Spears (knee) on injured reserve Saturday, Jim Wyatt of the Titans' official site reports.",RB
+5081335,Drew Stevens,Washington Commanders,Active,2026-11-25T01:12Z,,,,,,Stevens went 5-for-5 on field-goal attempts and made his only PAT during Monday night's 22-20 win over the Bengals.,PK
 4567156,Treylon Burks,Washington Commanders,Active,2026-11-25T00:24Z,,,,,,Burks caught two of three passes for 30 yards during the Commanders' 22-20 win over the Bengals on Monday.,WR
 3068267,Austin Ekeler,Washington Commanders,Active,2026-11-25T00:18Z,,,,,,Ekeler turned seven carries into 41 yards and caught two of three targets for three yards during the Commanders' 22-20 win over the Bengals on Monday.,RB
 4697815,Rachaad White,Washington Commanders,Active,2026-11-25T00:13Z,,,,,,White turned two kickoff returns into 48 yards during Monday's 22-20 win over the Bengals.,RB
@@ -796,6 +797,5 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426403,Nick Cross,Washington Commanders,Active,2026-11-14T02:55Z,,,,,,Cross finished Thursday's 24-21 win over the Giants with six tackles (one solo).,S
 3127273,Frankie Luvu,Washington Commanders,Active,2026-11-14T02:54Z,,,,,,Luvu recorded six tackles (two solo) and a forced fumble during the Commanders' 24-21 win over the Giants on Thursday.,LB
 5081807,Sonny Styles,Washington Commanders,Active,2026-11-14T02:51Z,,,,,,Styles recorded 13 tackles (five solo) during the Commanders' 24-21 win over the Giants on Thursday.,LB
-5081335,Drew Stevens,Washington Commanders,Active,2026-11-14T00:47Z,,,,,,Stevens made his only field-goal attempt and was successful on all three of his extra-point tries in Thursday's 24-21 win over the Giants.,PK
 4690923,Ben Sinnott,Washington Commanders,Active,2026-11-14T00:34Z,,,,,,Sinnott caught all four of his targets for 42 yards and a touchdown Thursday in a 24-21 victory against the Giants.,TE
 3886601,Shy Tuttle,Washington Commanders,Active,2026-11-10T23:18Z,,,,,,,DT
