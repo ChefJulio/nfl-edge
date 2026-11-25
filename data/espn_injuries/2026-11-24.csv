@@ -174,7 +174,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-23T22:36Z,Thumb,Surgery,Left,2026-11-29,IR-R,"Iosivas (thumb) was downgraded to out for Monday's game against the Commanders, Mike Petraglia of CLNSCincy.com reports.",WR
 3051746,Oren Burks,Cincinnati Bengals,Injured Reserve,2026-11-21T19:53Z,Groin,Not Specified,Not Specified,2026-12-20,IR,The Bengals placed Burks (groin) on injured reserve Saturday.,LB
 11252,Joe Flacco,Cincinnati Bengals,Active,2026-11-18T15:36Z,,,,,,"Flacco took the field for the Bengals' final possession of Sunday's 38-18 win over the Steelers, attempting no passes while handing off to running back Tahj Brooks on all three of his snaps.",QB
-4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-24T18:17Z,Toe,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Boston didn't take part in the Browns' unofficial practice Tuesday, Daniel Oyefusi of ESPN.com reports.",WR
+4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-24T18:17Z,Toe,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Boston (toe) didn't take part in the Browns' unofficial practice Tuesday, Daniel Oyefusi of ESPN.com reports.",WR
 4601080,Raheim Sanders,Cleveland Browns,Injured Reserve,2026-11-24T15:58Z,Hip,Not Specified,Not Specified,2026-11-29,IR-R,The Browns designated Sanders (hip) for return from injured reserve Tuesday.,RB
 4569620,Ronnie Hickman,Cleveland Browns,Questionable,2026-11-24T12:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,questionable,S
 4379397,Tyson Campbell,Cleveland Browns,Active,2026-11-19T02:56Z,,,,,,"Campbell logged five tackles (one solo) and three passes defensed, including one interception, in the Browns' 27-24 win over the Texans on Sunday.",CB
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-15T18:38Z,,,,,,Stevenson carried the ball six times for four yards and caught his only target for one yard in Sunday's 35-10 loss to the Lions in Munich.,RB
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-29,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
 3129446,Robert Spillane,New England Patriots,Questionable,2026-11-15T17:18Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Spillane (illness) is questionable to return to Sunday's game against the Lions in Munich.,LB
+4683813,Jonas Sanker,New Orleans Saints,Active,2026-11-25T02:52Z,,,,,,Sanker recorded seven tackles (four solo) including 1.0 sacks during Sunday's 21-13 loss at Chicago.,S
 4683215,Danny Stutsman,New Orleans Saints,Active,2026-11-25T02:33Z,,,,,,Stutsman recorded nine tackles (three solo) and an interception during Sunday's 21-13 loss at Chicago.,LB
 4702559,Oscar Delp,New Orleans Saints,Active,2026-11-24T17:02Z,,,,,,Delp hauled in his lone target for a six-yard reception in Sunday's 21-13 loss to the Bears.,TE
 4430379,Asim Richards,New Orleans Saints,Doubtful,2026-11-24T12:39Z,Knee,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,OT
@@ -573,7 +574,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4605498,Decamerion Richardson,New Orleans Saints,Active,2026-11-22T16:39Z,,,,,,,CB
 4566088,Jaylan Ford,New Orleans Saints,Active,2026-11-16T19:32Z,,,,,,,LB
 4775268,Mike Reid,New Orleans Saints,Active,2026-11-16T19:32Z,,,,,,,CB
-4685479,Christen Miller,New Orleans Saints,Injured Reserve,2026-11-15T01:04Z,Knee,Not Specified,Not Specified,2026-12-13,IR,The Saints placed Miller (knee) on injured reserve Saturday.,DT
 4725996,Abdul Carter,New York Giants,Active,2026-11-25T02:21Z,,,,,,"Carter recorded four total tackles (three solo), including 2.0 sacks, during Sunday's 23-18 win over the Jaguars.",LB
 4428328,Deonte Banks,New York Giants,Active,2026-11-25T02:15Z,,,,,,"Banks recorded six total tackles (five solo) and three passes defensed, including an interception, during Sunday's 23-18 win over the Jaguars.",CB
 3042476,Dawuane Smoot,New York Giants,Active,2026-11-25T02:06Z,,,,,,"The Giants signed Smoot off the practice squad to the active roster Tuesday, Dan Salomone of the team's official site reports.",LB
@@ -724,6 +724,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567226,Derick Hall,Seattle Seahawks,Active,2026-11-14T00:41Z,,,,,,"Hall (back) does not have an injury designation for Sunday's game against the Raiders, John Boyle of the Seahawks' official site reports.",LB
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,LB
 4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-13T22:43Z,,,,,,,G
+4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-11-25T02:59Z,,,,,,Smith logged nine tackles (six solo) during Tampa Bay's loss to the Lions on Sunday.,S
 4870998,Josiah Trotter,Tampa Bay Buccaneers,Active,2026-11-25T02:46Z,,,,,,Trotter posted 14 tackles (eight solo) during Tampa Bay's loss to the Lions on Sunday.,LB
 4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,S
 4608810,Tez Johnson,Tampa Bay Buccaneers,Active,2026-11-24T02:17Z,,,,,,Johnson caught two of three targets for 17 yards in Sunday's 31-21 loss to the Lions.,WR
@@ -747,7 +748,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3120590,Easton Stick,Tampa Bay Buccaneers,Active,2026-11-22T17:15Z,,,,,,"Stick (coach's decision) is inactive but will serve as the emergency third quarterback against the Lions, Scott Smith of the Buccaneers' official site reports.",QB
 4596472,Jalon Daniels,Tampa Bay Buccaneers,Active,2026-11-22T17:00Z,,,,,,"Daniels is set for his usual role as Tampa Bay's backup quarterback Sunday versus Detroit, as Baker Mayfield (foot/thumb) is active and will start, Scott Smith of the Buccaneers' official site reports.",QB
 4248533,Josh Hayes,Tampa Bay Buccaneers,Injured Reserve,2026-11-21T01:19Z,Knee,Surgery,Not Specified,2026-11-30,IR-R,Hayes (knee) has been ruled out for Sunday's game against the Lions.,CB
-4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-11-12T04:07Z,,,,,,Smith recorded seven tackles (four solo) and an interception in Sunday night's 27-24 loss to the Bears.,S
 4250392,Zyon McCollum,Tampa Bay Buccaneers,Active,2026-11-12T04:05Z,,,,,,McCollum recorded five tackles (four solo) and two interceptions in Sunday night's 27-24 loss to the Bears.,CB
 4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-25T03:00Z,,,,,,Winston recorded seven total tackles (four solo) during Sunday's 51-30 loss to the Cowboys.,S
 4429834,Cedric Gray,Tennessee Titans,Active,2026-11-25T02:59Z,,,,,,Gray posted eight tackles (four solo) during the Titans' 51-30 loss to the Cowboys on Sunday.,LB
