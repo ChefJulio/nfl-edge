@@ -349,6 +349,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683151,Deion Burks,Indianapolis Colts,Active,2026-11-21T01:48Z,,,,,,"Burks was targeted three times for zero catches, had one kick return for 10 yards and made one tackle on kick coverage during the Colts' 26-3 loss to the Texans on Thursday night.",WR
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-21T01:45Z,,,,,,Shrader went 1-for-3 on field-goal attempts during the Colts' 26-3 loss to the Texans on Thursday.,PK
 4429084,Anthony Richardson Sr.,Indianapolis Colts,Active,2026-11-20T18:16Z,,,,,,Head coach Shane Steichen announced Friday that Richardson will be the Colts' starting quarterback moving forward after the team waived Daniel Jones.,QB
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-25T17:05Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,"Tuten (ankle) wasn't spotted at Wednesday's practice,  Demetrius Harvey of the Florida Times Union reports.",RB
+3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-25T17:02Z,,,,,,"Meyers was spotted working off to the side during Wednesday's practice, Demetrius Harvey of The Florida Times-Union reports.",WR
 4573319,Danny Striggow,Jacksonville Jaguars,Questionable,2026-11-24T12:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,questionable,DE
 3134316,Matt Dickerson,Jacksonville Jaguars,Questionable,2026-11-24T12:39Z,Neck,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DE
 4242391,Robert Hainsey,Jacksonville Jaguars,Questionable,2026-11-24T12:39Z,Knee,Sprain,Not Specified,2026-11-29,QUESTIONABLE,questionable,C
@@ -356,7 +358,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4911851,LeQuint Allen Jr.,Jacksonville Jaguars,Active,2026-11-24T03:24Z,,,,,,Allen caught one pass for minus-1 yard in the Jaguars' 23-18 loss to the Giants on Sunday.,RB
 4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-24T02:20Z,,,,,,Cameron caught three of seven targets for 44 yards during Sunday's 23-18 loss against the Giants. He also returned two kickoffs for a total of 40 yards.,WR
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-11-24T01:49Z,,,,,,"Hunter caught his lone target for three yards, added a nine-yard carry and logged six tackles (four solo) during the Jaguars' 23-18 loss to the Giants on Sunday.",WR
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-23T19:28Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,"Jaguars head coach Liam Coen said Tuten aggravated a right ankle injury in Sunday's 23-18 loss to the Giants, while noting that an examination Monday revealed nothing ""too bad,"" Ryan O'Halloran of The Florida Times-Union reports.",RB
 4244049,Quintin Morris,Jacksonville Jaguars,Active,2026-11-23T17:57Z,,,,,,Morris went without a target while logging 11 of the Jaguars' 72 snaps on offense in Sunday's 23-18 loss to the Giants.,TE
 4917427,Tanner Koziol,Jacksonville Jaguars,Active,2026-11-23T17:54Z,,,,,,Koziol went without a target while playing four of the Jaguars' 72 snaps on offense in Sunday's 23-18 loss to the Giants.,TE
 4686248,Nate Boerkircher,Jacksonville Jaguars,Active,2026-11-23T17:49Z,,,,,,Boerkircher didn't draw a target while playing 22 of the Jaguars' 72 snaps on offense in Sunday's 23-18 loss to the Giants.,TE
@@ -366,7 +367,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686361,Cam Little,Jacksonville Jaguars,Active,2026-11-23T15:03Z,,,,,,,PK
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-23T03:18Z,,,,,,Strange caught all three of his targets for 16 yards during Sunday's 23-18 loss to the Giants.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-23T03:11Z,,,,,,Rodriguez rushed four times for 28 yards in Sunday's 23-18 loss to the Giants. He added one catch for 13 yards on one target.,RB
-3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-23T02:45Z,,,,,,Meyers brought in four of 10 targets for 85 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-23T02:40Z,,,,,,Thomas caught one pass for an 18-yard touchdown on three targets in Sunday's 23-18 loss to the Giants.,WR
 4360310,Trevor Lawrence,Jacksonville Jaguars,Active,2026-11-23T02:38Z,,,,,,Lawrence completed 25 of 47 passes for 301 yards with one touchdown and two interceptions and rushed three times for seven yards in the Jaguars' 23-18 loss to the Giants on Sunday. He also fumbled twice but recovered.,QB
 4432620,Parker Washington,Jacksonville Jaguars,Active,2026-11-23T02:04Z,,,,,,Washington secured eight of 17 targets for 103 yards in the Jaguars' 23-18 loss to the Giants on Sunday.,WR
@@ -374,18 +374,18 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426448,Jarrian Jones,Jacksonville Jaguars,Questionable,2026-11-22T23:17Z,Chest,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Jones (chest) has been ruled out for the rest of Sunday's contest against the Giants.,CB
 4381558,Jordan Davis,Jacksonville Jaguars,Active,2026-11-22T14:11Z,,,,,,"Davis is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",DT
 3919512,Jessie Bates III,Jacksonville Jaguars,Active,2026-11-22T14:09Z,,,,,,"Bates is slated to make his Jaguars debut Sunday against the Giants, Adam Schefter of ESPN reports.",S
+4871063,Peter Woods,Kansas City Chiefs,Questionable,2026-11-25T16:56Z,Neck,,Not Specified,2026-11-26,QUESTIONABLE,questionable,DT
+4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-11-25T16:55Z,Knee,Not Specified,Not Specified,2026-12-03,OUT,out,DT
+4043041,Jaylon Moore,Kansas City Chiefs,Out,2026-11-25T16:54Z,Ankle,Not Specified,Right,2026-12-03,OUT,out,OT
+4240472,Noah Gray,Kansas City Chiefs,Questionable,2026-11-25T16:53Z,Ribs,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,questionable,TE
+4567048,Kenneth Walker III,Kansas City Chiefs,Out,2026-11-25T16:48Z,Groin,Soreness,Not Specified,2026-12-03,OUT,"Walker (groin) is slated to be out for Thursday's game against the Bills, according to NFL reporter Jordan Schultz.",RB
 4242459,Trey Smith,Kansas City Chiefs,Active,2026-11-25T02:10Z,,,,,,Smith (concussion) was a full participant in Tuesday's practice.,G
-4240472,Noah Gray,Kansas City Chiefs,Active,2026-11-25T00:48Z,Ribs,,,2026-11-26,QUESTIONABLE,Gray (ribs) was a full participant at the Chiefs' practice Tuesday.,TE
-4567048,Kenneth Walker III,Kansas City Chiefs,Out,2026-11-24T21:49Z,Groin,Soreness,Not Specified,2026-12-03,OUT,The Chiefs listed Walker (groin) as a limited participant in Tuesday's practice.,RB
 4372070,Ben VanSumeren,Kansas City Chiefs,Injured Reserve,2026-11-24T21:28Z,Knee,Sprain,Not Specified,2026-12-27,IR,The Chiefs placed VanSumeren (knee) on the reserve/injured list Tuesday.,FB
-4043041,Jaylon Moore,Kansas City Chiefs,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Right,2026-12-03,OUT,questionable,OT
 3129310,Drue Tranquill,Kansas City Chiefs,Active,2026-11-24T03:44Z,,,,,,Tranquill recorded eight total tackles (three solo) during Sunday's 34-7 win against the Cardinals.,LB
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-11-24T03:37Z,,,,,,Bolton recorded five total tackles (two solo) and a pass defensed during Sunday's 34-7 win over Arizona.,LB
 4426659,George Karlaftis,Kansas City Chiefs,Active,2026-11-24T03:32Z,,,,,,"Karlaftis recorded four total tackles (three solo), including 2.5 sacks, and a forced fumble during Sunday's 34-7 win over the Cardinals.",DE
 4912218,Cyrus Allen,Kansas City Chiefs,Active,2026-11-24T02:04Z,,,,,,Allen caught two of four targets for 41 yards during Sunday's 34-7 win over the Cardinals.,WR
 4685489,Jaydn Ott,Kansas City Chiefs,Active,2026-11-24T01:56Z,,,,,,Ott logged five rushing attempts for 12 yards and logged one tackle on kick coverage in the Chiefs' 34-7 win over the Cardinals on Sunday.,RB
-4591008,Omarr Norman-Lott,Kansas City Chiefs,Questionable,2026-11-24T01:18Z,Knee,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Norman-Lott (knee) was listed as a full participant for Monday's estimated practice.,DT
-4871063,Peter Woods,Kansas City Chiefs,Active,2026-11-24T01:10Z,,,,,,Woods (neck) was listed as a full participant for Monday's estimated practice.,DT
 5278708,Melvin Smith Jr.,Kansas City Chiefs,Active,2026-11-23T15:35Z,,,,,,,CB
 3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-23T05:41Z,,,,,,Butker made both of his field-goal attempts while going 4-for-4 on extra-point tries during Sunday's 34-7 win over the Cardinals.,PK
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-11-23T03:29Z,,,,,,Worthy caught two of four targets for 38 yards and a touchdown during Sunday's 34-7 win over the Cardinals.,WR
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595348,Malik Nabers,New York Giants,Active,2026-11-23T02:10Z,,,,,,Nabers brought in seven of 12 targets for 55 yards and a touchdown in the Giants' 23-18 win over the Jaguars on Sunday.,WR
 4040615,Malik Harrison,New York Giants,Active,2026-11-20T02:31Z,,,,,,Harrison (groin) was a full participant at practice Thursday.,LB
 4360516,Tyrone Tracy Jr.,New York Giants,Injured Reserve,2026-11-18T20:16Z,Hamstring,Strain,Not Specified,2026-12-06,IR,"Tracy (hamstring) could be reinstated from injured reserve when first eligible ahead of the Giants' Week 13 game against the 49ers, Dan Duggan of The Athletic reports.",RB
+4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-25T17:05Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,Jets head coach Aaron Glenn said that Cooper (ankle/hip) won't practice Wednesday and is considered day-to-day.,WR
 4361372,Jeremy Ruckert,New York Jets,Active,2026-11-25T16:29Z,,,,,,Ruckert went without a target while logging 16 of the Jets' 60 snaps on offense in Sunday's 27-24 win over the Chargers.,TE
 3125107,Andrew Beck,New York Jets,Active,2026-11-25T16:26Z,,,,,,Beck played all but one of his 13 snaps on special teams in Sunday's 27-24 win over the Chargers.,FB
 14958,Demario Davis,New York Jets,Active,2026-11-25T02:35Z,,,,,,Davis registered six tackles (four solo) during Sunday's 27-24 win over the Chargers on Sunday.,LB
@@ -606,7 +607,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685248,David Bailey,New York Jets,Active,2026-11-25T02:28Z,,,,,,"Bailey recorded five tackles (two solo), including 2.0 sacks, one pass defense and one forced fumble during the Jets' 27-24 win over the Chargers on Sunday.",LB
 4569371,Isaiah Williams,New York Jets,Questionable,2026-11-24T12:39Z,Ribs,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,WR
 4683815,Trevin Wallace,New York Jets,Questionable,2026-11-24T12:39Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
-4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,questionable,WR
 4361331,Jamien Sherwood,New York Jets,Active,2026-11-24T04:58Z,,,,,,Sherwood recorded 11 tackles (eight solo) and a forced fumble in Sunday's 27-24 win over the Chargers.,LB
 2976592,Sterling Shepard,New York Jets,Active,2026-11-24T01:16Z,,,,,,Shepard reverted to the Jets' practice squad Monday.,WR
 4241410,Jelani Woods,New York Jets,Active,2026-11-23T15:45Z,,,,,,,TE
@@ -674,6 +674,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-11-22T23:10Z,,,,,,Warren rushed nine times for 28 yards and caught two of three targets for one yard in Sunday's 19-16 loss to the Eagles.,RB
 5081338,Kaden Wetjen,Pittsburgh Steelers,Active,2026-11-22T17:19Z,,,,,,Wetjen (coach's decision) is inactive for Sunday's game against the Eagles.,WR
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-22T16:58Z,,,,,,Elliott (knee) is active for Sunday's game against the Eagles.,S
+4360290,Brayden Willis,San Francisco 49ers,Active,2026-11-25T16:55Z,,,,,,Willis went without a target while logging nine snaps on offense and 21 on special teams in Sunday's 35-10 win over the Vikings in Mexico City.,TE
 4040612,Luke Farrell,San Francisco 49ers,Active,2026-11-25T16:51Z,,,,,,Farrell turned his lone target into a seven-yard reception in Sunday's 35-10 win over the Vikings in Mexico City.,TE
 4693644,Ji'Ayir Brown,San Francisco 49ers,Active,2026-11-25T02:17Z,,,,,,Brown recorded four tackles (three solo) and a pick-six during the 49ers' 35-10 win over the Vikings on Sunday in Mexico City.,S
 4039029,Khalid Kareem,San Francisco 49ers,Questionable,2026-11-24T12:39Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DE
@@ -698,7 +699,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241464,Mac Jones,San Francisco 49ers,Active,2026-11-23T00:17Z,,,,,,"Jones (illness) is active for Sunday night's matchup against Minnesota, Brooke Evans of the 49ers' official website reports.",QB
 3043116,Demarcus Robinson,San Francisco 49ers,Active,2026-11-23T00:12Z,,,,,,"Robinson (coach's decision) is inactive for Sunday night's contest against the Vikings, Brooke Evans of the 49ers' official website reports.",WR
 3116097,Luke Gifford,San Francisco 49ers,Active,2026-11-23T00:02Z,,,,,,,LB
-4565200,Upton Stout,San Francisco 49ers,Active,2026-11-23T00:02Z,,,,,,,CB
 3912547,Sam Darnold,Seattle Seahawks,Questionable,2026-11-24T15:31Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Head coach Mike Macdonald said Monday that Darnold (quadriceps/rib) made a ""good bit of progress"" over the Seahawks' Week 11 bye and will start Sunday at San Francisco if he fares well during Wednesday's practice, Brady Henderson of ESPN.com reports.",QB
 2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-11-24T12:39Z,Shoulder,Stinger,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 3129308,Quenton Nelson,Seattle Seahawks,Doubtful,2026-11-24T12:39Z,Knee,Surgery,Not Specified,2026-11-29,DOUBTFUL,doubtful,G
