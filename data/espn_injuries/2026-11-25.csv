@@ -126,7 +126,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035462,Isaiah Simmons,Carolina Panthers,Injured Reserve,2026-11-22T00:57Z,Knee,Not Specified,Not Specified,2026-12-20,IR,The Panthers placed Simmons (knee) on injured reserve Saturday.,S
 3122797,Isaac Yiadom,Chicago Bears,Active,2026-11-25T02:11Z,,,,,,The Bears claimed Yiadom off waivers Tuesday.,CB
 4242402,Elijah Hicks,Chicago Bears,Out,2026-11-25T01:36Z,Concussion,Concussion,Not Specified,2026-12-06,OUT,"Hicks is in the league's concussion protocol and has been ruled out for Thursday's game against the Lions on Thanksgiving Day, Courtney Cronin of ESPN.com reports.",S
-4426386,Roschon Johnson,Chicago Bears,Questionable,2026-11-25T00:44Z,Ankle,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Johnson (ankle) was a nonparticipant at the Bears' walkthrough practice Tuesday.,RB
+4426386,Roschon Johnson,Chicago Bears,Out,2026-11-25T00:44Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,Johnson (ankle) was a nonparticipant at the Bears' walkthrough practice Tuesday.,RB
 5125873,Theo Benedet,Chicago Bears,Active,2026-11-24T22:16Z,,,,,,,OT
 4361093,Kyler Gordon,Chicago Bears,Questionable,2026-11-24T12:39Z,Shoulder,Not Specified,Left,2026-11-26,QUESTIONABLE,questionable,CB
 3916577,Cam Lewis,Chicago Bears,Active,2026-11-24T04:19Z,,,,,,"Lewis recorded seven tackles (five solo), including 1.0 sacks, in Sunday's 21-13 win over the Saints.",CB
@@ -223,7 +223,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426354,George Pickens,Dallas Cowboys,Active,2026-11-22T22:17Z,,,,,,Pickens secured seven of 10 targets for 102 yards and a touchdown in the Cowboys' 51-30 win over the Titans on Sunday.,WR
 4241389,CeeDee Lamb,Dallas Cowboys,Active,2026-11-22T22:11Z,,,,,,Lamb brought 11 of 12 targets for 132 yards and a touchdown in the Cowboys' 51-30 win over the Titans on Sunday.,WR
 2577417,Dak Prescott,Dallas Cowboys,Active,2026-11-22T22:05Z,,,,,,Prescott completed 28 of 33 passes for 325 yards with four touchdowns and no interceptions and added four carries for nine yards and another score in the Cowboys' 51-30 win over the Titans on Sunday.,QB
-4043089,Jalen Thompson,Dallas Cowboys,Injured Reserve,2026-11-22T00:05Z,Hamstring,Not Specified,Not Specified,2026-11-26,IR-R,"Thompson (hamstring) has been downgraded to out for Sunday's game against the Titans, Tommy Yarrish of the Cowboys' official site reports.",S
+4043089,Jalen Thompson,Dallas Cowboys,Injured Reserve,2026-11-22T00:05Z,Hamstring,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,"Thompson (hamstring) has been downgraded to out for Sunday's game against the Titans, Tommy Yarrish of the Cowboys' official site reports.",S
 4603189,Sai'vion Jones,Denver Broncos,Questionable,2026-11-25T02:25Z,Hamstring,Not Specified,Not Specified,2026-11-27,QUESTIONABLE,"Jones (hamstring) didn't participate in Denver's walkthrough Tuesday, Aric DiLalla of the team's official site reports.",DE
 4039059,Brandon Jones,Denver Broncos,Active,2026-11-25T00:55Z,,,,,,"Jones (hamstring) was listed as a full participant at the Broncos' walkthrough practice Tuesday, Aric DiLalla of the team's official practice reports.",S
 4687592,Jonah Elliss,Denver Broncos,Injured Reserve,2026-11-25T00:37Z,Ankle,Not Specified,Not Specified,2026-12-06,IR,"Elliss (ankle) did not participate in Tuesday's practice and is unlikely to be designated to return from injured reserve ahead of Friday's game against the Steelers, Zac Stevens of TheDNVR.com reports.",LB
@@ -774,6 +774,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4429607,Cor'Dale Flott,Tennessee Titans,Questionable,2026-11-22T19:36Z,Neck,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Flott (neck) is questionable to return to Sunday's matchup against Dallas, Jim Wyatt of the Titans' official site reports.",CB
 4240532,Tony Adams,Tennessee Titans,Questionable,2026-11-22T18:52Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Adams (illness) has been ruled out for the rest of Sunday's game against the Cowboys.,S
 4685555,Nicholas Singleton,Tennessee Titans,Active,2026-11-22T16:55Z,,,,,,Singleton (coach's decision) is inactive for Sunday's game against the Cowboys.,RB
+2976212,Stefon Diggs,Washington Commanders,Questionable,2026-11-25T20:20Z,Personal,Not Specified,,2026-11-29,QUESTIONABLE,questionable,WR
 4048228,John Bates,Washington Commanders,Active,2026-11-25T01:34Z,,,,,,Bates didn't garner a target during Monday night's 22-20 win over the Bengals.,TE
 4690923,Ben Sinnott,Washington Commanders,Active,2026-11-25T01:31Z,,,,,,"Sinnott played played 33 snaps (24 on offense, nine on special teams) but didn't show up in the box score otherwise during the Commanders' 22-20 win over the Bengals on Monday.",TE
 3930066,Van Jefferson,Washington Commanders,Active,2026-11-25T01:27Z,,,,,,Jefferson failed to haul in his lone target during the Commanders' 22-20 win over the Bengals on Monday.,WR
@@ -788,7 +789,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360635,Chig Okonkwo,Washington Commanders,Active,2026-11-24T05:14Z,,,,,,Okonkwo brought in four of five targets for 66 yards in the Commanders' 22-20 win over the Bengals on Monday night.,TE
 5081432,Antonio Williams,Washington Commanders,Active,2026-11-24T05:10Z,,,,,,Williams brought in nine of 11 targets for 122 yards in the Commanders' 22-20 win over the Bengals on Monday night.,WR
 4575131,Jacory Croskey-Merritt,Washington Commanders,Active,2026-11-24T05:06Z,,,,,,Croskey-Merritt rushed 13 times for 54 yards and a touchdown and brought in two of three targets for 23 yards in the Commanders' 22-20 win over the Bengals on Monday night.,RB
-2976212,Stefon Diggs,Washington Commanders,Active,2026-11-24T04:52Z,,,,,,Diggs brought in four of six targets for 45 yards in the Commanders' 22-20 win over the Bengals on Monday night.,WR
 4426348,Jayden Daniels,Washington Commanders,Active,2026-11-24T04:45Z,,,,,,Daniels completed 23 of 35 passes for 289 yards with no touchdowns or interceptions and added six carries for 55 yards in the Commanders' 22-20 win over the Bengals on Monday night.,QB
 2576736,Lucas Patrick,Washington Commanders,Active,2026-11-24T00:18Z,,,,,,Patrick (concussion) is active for Monday night's game against the Bengals.,G
 4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-24T00:16Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Robertson (ankle) is inactive for Monday night's contest against the Bengals.,CB
