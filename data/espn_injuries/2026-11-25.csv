@@ -249,6 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4702555,Jonah Coleman,Denver Broncos,Active,2026-11-23T01:33Z,,,,,,Coleman reeled off 111 yards and three touchdowns on 24 carries and hauled in four of five targets for 18 yards during Sunday's 38-24 win against the Raiders.,RB
 4039057,Lil'Jordan Humphrey,Denver Broncos,Active,2026-11-22T20:16Z,,,,,,Humphrey (coach's decision) is inactive for Sunday's game against Las Vegas.,WR
 4241820,Sam Ehlinger,Denver Broncos,Active,2026-11-22T20:12Z,,,,,,Ehlinger (coach's decision) is inactive but will serve as the Broncos' emergency third quarterback against the Raiders on Sunday.,QB
+4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-26T00:56Z,Back,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Wonnum (back) is listed as questionable for Thursday's game against the Bears.,LB
 5103940,Skyler Gill-Howard,Detroit Lions,Injured Reserve,2026-11-25T21:25Z,Knee,Surgery,Not Specified,2027-02-15,IR,ir,DT
 4566092,Ennis Rakestraw Jr.,Detroit Lions,Out,2026-11-25T21:00Z,Shoulder,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 3045463,Chuck Clark,Detroit Lions,Questionable,2026-11-25T00:47Z,Hamstring,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Clark (hamstring) was a limited participant in Tuesday's walkthrough practice.,S
@@ -258,7 +259,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4383429,Jacob Saylors,Detroit Lions,Active,2026-11-24T01:57Z,,,,,,Saylors recorded 29-yard kickoff return during Sunday's 31-21 win over Tampa Bay.,RB
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-11-24T01:50Z,,,,,,TeSlaa failed to catch any of his three targets during Sunday's 31-21 win over the Buccaneers.,WR
 4242392,Brock Wright,Detroit Lions,Active,2026-11-24T01:49Z,,,,,,Wright caught both of two targets for 42 yards during Sunday's 31-21 win versus the Buccaneers.,TE
-4038849,DJ Wonnum,Detroit Lions,Questionable,2026-11-24T01:35Z,Back,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Wonnum (back) did not participate at the Lions' walkthrough practice Monday.,LB
 3139387,D.J. Reed,Detroit Lions,Active,2026-11-24T01:26Z,,,,,,Reed (hip) was considered to be a full participant at the Lions' walkthrough practice Monday.,CB
 4912274,Sione Vaki,Detroit Lions,Active,2026-11-24T01:26Z,,,,,,Vaki took one carry for a loss of one yard and caught his only target for seven yards during Sunday's 31-21 win versus the Buccaneers.,RB
 4689936,Jake Bates,Detroit Lions,Active,2026-11-24T00:26Z,,,,,,Bates made one of two field-goal attempts and all four PATs in Sunday's 31-21 win over the Bucs.,PK
@@ -324,8 +324,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035538,David Montgomery,Houston Texans,Active,2026-11-20T04:36Z,,,,,,Montgomery rushed 26 times for 107 yards and brought in three of four targets for 17 yards in the Texans' 26-3 win over the Colts on Thursday.,RB
 4839498,Keylan Rutledge,Houston Texans,Questionable,2026-11-20T04:23Z,Undisclosed,Stinger,,2026-11-29,QUESTIONABLE,Rutledge (stinger) was deemed questionable to return near the end of Thursday's 26-3 win against Indianapolis and didn't end up re-entering the game.,G
 3043109,Trent Brown,Houston Texans,Active,2026-11-20T02:55Z,,,,,,"Brown (back) has returned to Thursday's game versus the Colts, Aaron Wilson of KPRC 2 Houston reports.",OT
+4427250,Sauce Gardner,Indianapolis Colts,Active,2026-11-26T00:48Z,,,,,,Gardner (calf) was a full participant in Wednesday's practice.,CB
+4037361,Charvarius Ward,Indianapolis Colts,Questionable,2026-11-26T00:44Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Ward (knee) was a limited participant in Wednesday's practice.,CB
 4722908,Drew Ogletree,Indianapolis Colts,Questionable,2026-11-26T00:37Z,Knee,,,2026-11-29,QUESTIONABLE,Ogletree (knee) did not practice Wednesday.,TE
-4427250,Sauce Gardner,Indianapolis Colts,Active,2026-11-26T00:36Z,,,,,,,CB
 4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-11-25T18:36Z,Heel,Not Specified,Left,2027-01-10,IR,"When addressing the press Wednesday, Pierce (heel) noted that the offseason procedure he underwent this past March was done because he was dealing with heel pain that impacted his Achilles, Kevin Bowen of 107.5 The Fan Indianapolis reports.",WR
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-25T15:39Z,,,,,,"Taylor will be joined in the backfield in Sunday's game against the Giants by Anthony Richardson, who was named the Colts' new starting quarterback after Daniel Jones was cut Friday, Mike Chappell of Fox 59 News Indianapolis reports.",RB
 4685324,Caden Curry,Indianapolis Colts,Injured Reserve,2026-11-25T01:36Z,Wrist,Surgery,Not Specified,2027-02-15,IR,The Colts placed Curry (undisclosed) on injured reserve Tuesday.,LB
@@ -334,7 +335,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362580,Bernhard Raimann,Indianapolis Colts,Questionable,2026-11-24T12:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,questionable,OT
 3863182,Jerry Tillery,Indianapolis Colts,Questionable,2026-11-24T12:39Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 4892240,Jalen Travis,Indianapolis Colts,Questionable,2026-11-24T12:39Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,OT
-4037361,Charvarius Ward,Indianapolis Colts,Questionable,2026-11-24T12:39Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,CB
 4362523,Will Mallory,Indianapolis Colts,Questionable,2026-11-24T12:39Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,TE
 4874509,DJ Giddens,Indianapolis Colts,Active,2026-11-24T00:19Z,,,,,,"Giddens will likely move up to the No. 2 RB role for the Colts in the short term, as Seth McGowan is expected to miss time due to a hamstring injury, James Boyd of The Athletic reports.",RB
 4686468,Seth McGowan,Indianapolis Colts,Out,2026-11-23T20:02Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,"Colts head coach Shane Steichen said that McGowan will miss some time after injuring his hamstring in Thursday's 26-3 loss to the Texans, Stephen Holder of ESPN.com reports.",RB
@@ -599,12 +599,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4433970,J.J. McCarthy,New York Giants,Active,2026-11-23T02:57Z,,,,,,McCarthy completed 18 of 38 passes for 173 yards with a touchdown and no interceptions and rushed seven times for 33 yards in the Giants' 23-18 win over the Jaguars on Sunday.,QB
 4696981,Cam Skattebo,New York Giants,Active,2026-11-23T02:32Z,,,,,,Skattebo rushed 14 times for 34 yards and brought in three of seven targets for 14 yards in the Giants' 23-18 win over the Jaguars on Sunday. He also lost a fumble.,RB
 4595348,Malik Nabers,New York Giants,Active,2026-11-23T02:10Z,,,,,,Nabers brought in seven of 12 targets for 55 yards and a touchdown in the Giants' 23-18 win over the Jaguars on Sunday.,WR
+3117255,Harrison Phillips,New York Jets,Questionable,2026-11-26T00:55Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Phillips (ankle) did not participate in Wednesday's practice.,DT
 4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-11-25T22:18Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,"The Jets designated Sweat (knee) for return from injured reserve Wednesday, Eric Allen of the Jets' official site reports.",DT
 4569371,Isaiah Williams,New York Jets,Questionable,2026-11-25T21:09Z,Ribs,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Williams (ribs) was listed as a limited participant on Wednesday's estimated practice report.,WR
 4362094,Joseph Ossai,New York Jets,Questionable,2026-11-25T21:07Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DE
 4243375,Dylan Parham,New York Jets,Questionable,2026-11-25T21:07Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,G
 4683815,Trevin Wallace,New York Jets,Active,2026-11-25T21:07Z,,,,,,,LB
-3117255,Harrison Phillips,New York Jets,Questionable,2026-11-25T21:06Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 4723820,Omar Cooper Jr.,New York Jets,Questionable,2026-11-25T17:05Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,Jets head coach Aaron Glenn said that Cooper (ankle/hip) won't practice Wednesday and is considered day-to-day.,WR
 4361372,Jeremy Ruckert,New York Jets,Active,2026-11-25T16:29Z,,,,,,Ruckert went without a target while logging 16 of the Jets' 60 snaps on offense in Sunday's 27-24 win over the Chargers.,TE
 3125107,Andrew Beck,New York Jets,Active,2026-11-25T16:26Z,,,,,,Beck played all but one of his 13 snaps on special teams in Sunday's 27-24 win over the Chargers.,FB
@@ -649,9 +649,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4428850,Dontayvion Wicks,Philadelphia Eagles,Injured Reserve,2026-11-21T21:09Z,Ankle,Not Specified,Not Specified,2026-12-19,IR,The Eagles placed Wicks (ankle/foot) on injured reserve Saturday.,WR
 4240456,Michael Carter II,Philadelphia Eagles,Active,2026-11-21T01:28Z,,,,,,Carter (abdomen) does not carry an injury designation into Sunday's game against the Steelers.,CB
 4426331,Nolan Smith Jr.,Philadelphia Eagles,Active,2026-11-21T00:20Z,,,,,,Smith (illness) does not carry an injury designation into Sunday's game against Pittsburgh.,LB
+3929846,DeShon Elliott,Pittsburgh Steelers,Questionable,2026-11-26T00:51Z,Knee,,,2026-11-27,QUESTIONABLE,"Elliiott (knee) was a limited participant in Wednesday's practice, Alan Saunders of SteelersNow.com reports.",S
 3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-11-25T21:48Z,,,,,,Rudolph will start Friday's game against the Broncos and could remain atop the depth chart for the rest of the season with the Steelers waiving Aaron Rodgers on Wednesday.,QB
 4035687,Michael Pittman Jr.,Pittsburgh Steelers,Injured Reserve,2026-11-25T20:59Z,Foot,Plantar Fasciitis,Left,2026-11-27,IR-R,"Pittman (foot) was listed as a full participant in Wednesday's practice,Alan Saunders of SteelersNow.com reports.",WR
-3929846,DeShon Elliott,Pittsburgh Steelers,Questionable,2026-11-25T20:52Z,Knee,,,2026-11-27,QUESTIONABLE,questionable,S
 3116689,Cole Holcomb,Pittsburgh Steelers,Questionable,2026-11-25T20:52Z,Heel,,,2026-11-27,QUESTIONABLE,questionable,LB
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-25T02:00Z,Knee,Not Specified,Not Specified,2026-11-27,IR-R,Dunker (knee) logged a full practice Tuesday.,G
 3045373,Jalen Ramsey,Pittsburgh Steelers,Active,2026-11-25T01:42Z,,,,,,Ramsey recorded one solo tackle and a pass defensed during Sunday's 19-16 loss to the Eagles.,CB
@@ -699,6 +699,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3126486,Deebo Samuel Sr.,San Francisco 49ers,Active,2026-11-23T05:01Z,,,,,,"Samuel logged two carries for 27 yards, gathered in three of four targets for 20 yards and returned two kickoffs for 57 yards during Sunday's 35-10 win against the Vikings in Mexico City.",WR
 3040151,George Kittle,San Francisco 49ers,Active,2026-11-23T04:53Z,,,,,,Kittle caught all three of his targets for 34 yards and two touchdowns in Sunday's 35-10 win over the Vikings.,TE
 3117251,Christian McCaffrey,San Francisco 49ers,Active,2026-11-23T04:41Z,,,,,,McCaffrey rushed 12 times for 49 yards and a touchdown while catching both of his targets for 13 yards in Sunday's 35-10 win over the Vikings.,RB
+3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-26T00:47Z,Knee,Surgery,Not Specified,2026-12-07,OUT,"Head coach Mike Macdonald told reporters Wednesday that Nelson (knee) will not play against the 49ers on Sunday, Brady Henderson of ESPN.com reports.",G
+4245171,Abraham Lucas,Seattle Seahawks,Out,2026-11-26T00:44Z,Ankle,Sprain,Not Specified,2026-12-07,OUT,"Lucas (ankle) has been ruled out for Sunday's game against the 49ers, Brady Henderson of ESPN.com reports.",OT
 4569547,Nick Kallerup,Seattle Seahawks,Questionable,2026-11-26T00:28Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,TE
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-26T00:28Z,Elbow,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,QB
 4362851,Ernest Jones IV,Seattle Seahawks,Questionable,2026-11-26T00:27Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
@@ -707,8 +709,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432734,Jalen Milroe,Seattle Seahawks,Questionable,2026-11-26T00:26Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,QB
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-11-25T23:41Z,,,,,,"Darnold (quadriceps) practiced fully Wednesday, John Boyle of the Seahawks' official site reports.",QB
 4430878,Jaxon Smith-Njigba,Seattle Seahawks,Questionable,2026-11-25T23:36Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Smith-Njigba was limited at Wednesday's practice due to an ankle injury, John Boyle of the Seahawks' official site reports.",WR
-4245171,Abraham Lucas,Seattle Seahawks,Out,2026-11-25T20:53Z,Ankle,Sprain,Not Specified,2026-12-07,OUT,out,OT
-3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-25T20:53Z,Knee,Surgery,Not Specified,2026-12-07,OUT,out,G
 2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-11-24T12:39Z,Shoulder,Stinger,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
 4426376,Charles Cross,Seattle Seahawks,Questionable,2026-11-24T12:39Z,Ankle,Sprain,Not Specified,2026-11-29,QUESTIONABLE,questionable,OT
 4429835,George Holani,Seattle Seahawks,Injured Reserve,2026-11-23T23:11Z,Knee - MCL,Sprain,Not Specified,2026-12-25,IR,"The Seahawks placed Holani (knee) on injured reserve Monday, John Boyle of the team's official site reports.",RB
