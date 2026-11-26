@@ -48,5 +48,35 @@
 "at": "2026-11-26T16:53:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0037086": {
+"name": "Grant Calcaterra",
+"team": "PHI",
+"pos": "TE",
+"pre": 0.9466,
+"ruling": "INA",
+"at": "2026-11-26T20:14:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0038041": {
+"name": "Jake Ferguson",
+"team": "DAL",
+"pos": "TE",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-26T20:13:00+00:00",
+"post": 0.0,
+"status": "Inactive (DDD)"
+},
+"00-0040891": {
+"name": "Cole Payton",
+"team": "PHI",
+"pos": "QB",
+"pre": 0.5265,
+"ruling": "INA",
+"at": "2026-11-26T20:14:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
