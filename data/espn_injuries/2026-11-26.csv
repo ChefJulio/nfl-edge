@@ -124,6 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241416,Chuba Hubbard,Carolina Panthers,Active,2026-11-23T00:39Z,,,,,,Hubbard carried the ball 27 times for 120 yards and two touchdowns in Sunday's 35-33 win over the Ravens. He added a two-point conversion.,RB
 3917853,Mike Jackson,Carolina Panthers,Active,2026-11-22T17:31Z,,,,,,"Jackson (groin) is active for Sunday's game against the Ravens, Darin Gantt of the team's official site reports.",CB
 4431588,Ja'Tavion Sanders,Carolina Panthers,Active,2026-11-22T17:25Z,,,,,,"Sanders (coach's decision) is inactive for Sunday's game against Baltimore, Darin Gantt of the team's official site reports.",TE
+4723086,Colston Loveland,Chicago Bears,Out,2026-11-26T18:43Z,Knee,Not Specified,Left,2026-12-06,OUT,out,TE
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-26T17:04Z,,,,,,Jackson (elbow) is active for Thursday's Thanksgiving Day matchup versus the Lions.,LB
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Active,2026-11-26T17:01Z,,,,,,Stevenson (groin) is active to face Detroit on Thursday.,CB
 15168,Case Keenum,Chicago Bears,Out,2026-11-26T16:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Keenum (coach's decision) is inactive and tabbed as the Bears' emergency third quarterback Thursday in Detroit.,QB
@@ -144,7 +145,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17427,Cairo Santos,Chicago Bears,Active,2026-11-24T00:29Z,,,,,,Santos made both of his field-goal attempts and went 1-for-2 on extra-point tries during the Bears' 21-13 win over the Saints on Sunday.,PK
 3948283,Stephen Carlson,Chicago Bears,Active,2026-11-23T16:56Z,,,,,,Carlson played 15 of his 19 snaps on special teams in Sunday's 21-13 win over the Saints.,TE
 4911952,Keyshaun Elliott,Chicago Bears,Active,2026-11-23T15:21Z,,,,,,,LB
-4723086,Colston Loveland,Chicago Bears,Active,2026-11-22T23:14Z,Undisclosed,Not Specified,Not Specified,2026-11-26,QUESTIONABLE,Loveland caught all three of his targets for 29 yards and a touchdown in Sunday's 21-13 win over the Saints.,TE
 4431299,Rome Odunze,Chicago Bears,Active,2026-11-22T22:35Z,,,,,,Odunze caught all four of his targets for 45 yards in Sunday's 21-13 win over the Saints.,WR
 4685278,Luther Burden III,Chicago Bears,Active,2026-11-22T22:24Z,,,,,,Burden caught two of three targets for 10 yards and added three yards on his only carry in Sunday's 21-13 win over New Orleans.,WR
 4431611,Caleb Williams,Chicago Bears,Active,2026-11-22T22:20Z,,,,,,Williams completed 15 of 23 passes for 181 yards and two touchdowns with one interception in Sunday's 21-13 win over the Saints. He added 11 rushing yards on four carries.,QB
@@ -424,13 +424,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4431414,Tim Keenan III,Las Vegas Raiders,Questionable,2026-11-22T23:22Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Keenan (knee) has been ruled out for the rest of Sunday's contest against Denver.,DT
 4432775,Dont'e Thornton Jr.,Las Vegas Raiders,Active,2026-11-22T20:12Z,,,,,,Thornton (coach's decision) is inactive for Sunday's Week 11 tilt against Denver.,WR
 3045172,Folorunso Fatukasi,Las Vegas Raiders,Active,2026-11-22T20:10Z,,,,,,Fatukasi (toe) is active against the Broncos on Sunday.,DT
+4690171,Deane Leonard,Los Angeles Chargers,Injured Reserve,2026-11-26T18:44Z,Groin,,,2026-12-27,IR,ir,CB
 4429190,Akheem Mesidor,Los Angeles Chargers,Questionable,2026-11-26T03:35Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Mesidor (ankle) did not participate in Wednesday's practice.,LB
 4431442,Tuli Tuipulotu,Los Angeles Chargers,Questionable,2026-11-26T02:30Z,Ankle,,,2026-11-29,QUESTIONABLE,Tuipulotu (ankle) did not participate in Wednesday's practice.,LB
 4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-26T02:24Z,Hamstring,,Not Specified,2026-11-29,QUESTIONABLE,Thompson (hamstring) did not participate in Wednesday's practice.,WR
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Questionable,2026-11-26T02:19Z,Knee,,,2026-11-29,QUESTIONABLE,Tomlinson (knee) did not participate in Wednesday's practice.,DT
 4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-26T02:12Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Still (ankle) did not participate in Wednesday's practice.,CB
 4241597,Daiyan Henley,Los Angeles Chargers,Questionable,2026-11-26T02:07Z,Knee,Soreness,Not Specified,2026-11-29,QUESTIONABLE,Henley (knee) did not participate in Wednesday's practice.,LB
-4690171,Deane Leonard,Los Angeles Chargers,Questionable,2026-11-25T23:54Z,Groin,,,2026-11-29,QUESTIONABLE,questionable,CB
 3123076,David Njoku,Los Angeles Chargers,Questionable,2026-11-25T23:45Z,Shoulder,,,2026-11-29,QUESTIONABLE,Njoku (shoulder) did not practice Wednesday.,TE
 4596334,Keaton Mitchell,Los Angeles Chargers,Questionable,2026-11-25T23:44Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Mitchell (knee) did not practice Wednesday.,RB
 4038941,Justin Herbert,Los Angeles Chargers,Questionable,2026-11-25T20:27Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Chargers coach Jim Harbaugh said that Herbert (concussion) won't practice Wednesday, Noah Furtado of The Athletic reports.",QB
@@ -524,6 +524,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360637,Jeshaun Jones,Minnesota Vikings,Active,2026-11-20T22:29Z,,,,,,Jones (shoulder) does not have an injury designation for Sunday's game against the 49ers in Mexico City.,WR
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-20T22:24Z,,,,,,Van Ginkel (quadriceps) does not carry an injury designation into Sunday's game against the 49ers in Mexico City.,LB
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-11-19T22:12Z,,,,,,,LB
+4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-26T18:31Z,,,,,,Stevenson was not listed on the Patriots' practice report Wednesday.,RB
 4428394,Walter Rouse,New England Patriots,Questionable,2026-11-26T03:41Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,Rouse (concussion) did not practice Wednesday.,OL
 4047941,Brenden Schooler,New England Patriots,Active,2026-11-26T03:38Z,,,,,,Schooler (hamstring) was not listed on the Patriots' injury report Wednesday.,S
 4362890,Ben Brown,New England Patriots,Active,2026-11-26T03:36Z,,,,,,Brown (knee) was a full participant in Wednesday's practice.,C
@@ -547,7 +548,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3046439,Hunter Henry,New England Patriots,Active,2026-11-15T19:21Z,,,,,,Henry caught two of three passes for 22 yards during the Patriots' 35-10 loss to the Lions on Sunday in Munich.,TE
 2991662,Mack Hollins,New England Patriots,Active,2026-11-15T18:53Z,,,,,,Hollins caught five of six targets for 48 yards in Sunday's 35-10 loss to the Lions in Munich.,WR
 4431431,Corey Kiner,New England Patriots,Active,2026-11-15T18:47Z,,,,,,Kiner carried the ball 10 times for 25 yards in Sunday's 35-10 loss to Detroit.,RB
-4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-15T18:38Z,,,,,,Stevenson carried the ball six times for four yards and caught his only target for one yard in Sunday's 35-10 loss to the Lions in Munich.,RB
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-29,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
 4429568,Martin Emerson Jr.,New Orleans Saints,Questionable,2026-11-26T01:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Emerson (concussion) was a full practice participant Wednesday, Jeff Nowak of WWL Radio reports.",CB
 4241993,Pete Werner,New Orleans Saints,Questionable,2026-11-26T01:33Z,Hamstring,Not Specified,Left,2026-11-29,QUESTIONABLE,"Werner (hamstring) was a limited participant in Wednesday's practice, Jeff Nowak of WWL Radio reports.",LB
