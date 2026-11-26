@@ -499,7 +499,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4912052,Justin Joly,Miami Dolphins,Active,2026-11-23T15:39Z,,,,,,,TE
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-23T04:22Z,,,,,,Washington caught three of six targets for 30 yards in Sunday's 26-9 loss to the Bills. He rushed two times for 11 yards.,WR
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-23T04:15Z,,,,,,Dulcich caught two of seven targets for 12 yards during Sunday's 26-9 loss to the Bills.,TE
-3917315,Kyler Murray,Minnesota Vikings,Questionable,2026-11-26T19:47Z,Hamstring,Strain,Not Specified,2026-11-29,QUESTIONABLE,Murray (hamstring) was listed as limited on Thursday's injury report.,QB
 4565185,Tai Felton,Minnesota Vikings,Active,2026-11-26T19:42Z,,,,,,Felton (hip) was listed as a full participant on Thursday's injury report.,WR
 4429205,Jordan Addison,Minnesota Vikings,Doubtful,2026-11-26T19:36Z,Thumb,Surgery,Not Specified,2026-11-29,DOUBTFUL,Addison (thumb) was listed as a non-participant on Thursday's injury report.,WR
 4044540,Isaiah Rodgers,Minnesota Vikings,Questionable,2026-11-26T02:33Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Rodgers (quadriceps) did not participate in Wednesday's walkthrough practice.,CB
@@ -508,6 +507,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361985,Christian Darrisaw,Minnesota Vikings,Questionable,2026-11-26T00:15Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,OT
 4568007,Jay Ward,Minnesota Vikings,Active,2026-11-26T00:15Z,,,,,,,S
 4430656,Myles Price,Minnesota Vikings,Questionable,2026-11-25T23:05Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Price was a limited participant in Wednesday's practice due to a knee injury.,WR
+3917315,Kyler Murray,Minnesota Vikings,Questionable,2026-11-25T23:01Z,Hamstring,Strain,Not Specified,2026-11-29,QUESTIONABLE,Murray (hamstring) was a limited participant in Wednesday's walkthrough practice.,QB
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-25T02:50Z,,,,,,Metellus posted five assisted tackles during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,S
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-25T02:44Z,,,,,,Wilson recorded 1.0 sacks during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,LB
 4433959,Ben Yurosek,Minnesota Vikings,Active,2026-11-24T16:53Z,,,,,,Yurosek failed to draw a target while playing 29 of the Vikings' 67 offensive snaps in Sunday's 35-10 loss to the 49ers in Mexico City.,TE
