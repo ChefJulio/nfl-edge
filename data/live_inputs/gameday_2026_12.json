@@ -1,1 +1,32 @@
-{}
+{
+"00-0035700": {
+"name": "Josh Jacobs",
+"team": "GB",
+"pos": "RB",
+"pre": 0.6657,
+"ruling": "INA",
+"at": "2026-11-25T23:53:00+00:00",
+"post": 0.0,
+"status": "Inactive (LLL)"
+},
+"00-0037091": {
+"name": "Bo Melton",
+"team": "GB",
+"pos": "WR",
+"pre": 0.5915,
+"ruling": "ACT",
+"at": "2026-11-25T23:56:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0038090": {
+"name": "Skyy Moore",
+"team": "GB",
+"pos": "WR",
+"pre": 0.7931,
+"ruling": "ACT",
+"at": "2026-11-25T23:56:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+}
+}
