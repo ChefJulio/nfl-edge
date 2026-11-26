@@ -249,7 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4702555,Jonah Coleman,Denver Broncos,Active,2026-11-23T01:33Z,,,,,,Coleman reeled off 111 yards and three touchdowns on 24 carries and hauled in four of five targets for 18 yards during Sunday's 38-24 win against the Raiders.,RB
 4039057,Lil'Jordan Humphrey,Denver Broncos,Active,2026-11-22T20:16Z,,,,,,Humphrey (coach's decision) is inactive for Sunday's game against Las Vegas.,WR
 4241820,Sam Ehlinger,Denver Broncos,Active,2026-11-22T20:12Z,,,,,,Ehlinger (coach's decision) is inactive but will serve as the Broncos' emergency third quarterback against the Raiders on Sunday.,QB
-4241411,Malcolm Rodriguez,Detroit Lions,Questionable,2026-11-26T20:27Z,Ankle,Not Specified,Left,2026-11-26,QUESTIONABLE,Rodriguez suffered an ankle injury during Thursday's game against the Bears.,LB
+4241411,Malcolm Rodriguez,Detroit Lions,Active,2026-11-26T20:45Z,,,,,,,LB
 4429035,Tate Ratledge,Detroit Lions,Active,2026-11-26T19:03Z,,,,,,Ratledge is questionable to return to Thursday's Thanksgiving Day matchup against Chicago due to ankle and knee injuries.,G
 4038849,DJ Wonnum,Detroit Lions,Out,2026-11-26T16:51Z,Back,Not Specified,Not Specified,2026-12-06,INACTIVE,Wonnum (back) is inactive for Thursday's Week 12 battle against the Bears.,LB
 3045463,Chuck Clark,Detroit Lions,Out,2026-11-26T16:46Z,Hamstring,Not Specified,Not Specified,2026-12-06,INACTIVE,Clark (hamstring) is inactive for Thursday's clash against Chicago.,S
@@ -549,6 +549,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 2991662,Mack Hollins,New England Patriots,Active,2026-11-15T18:53Z,,,,,,Hollins caught five of six targets for 48 yards in Sunday's 35-10 loss to the Lions in Munich.,WR
 4431431,Corey Kiner,New England Patriots,Active,2026-11-15T18:47Z,,,,,,Kiner carried the ball 10 times for 25 yards in Sunday's 35-10 loss to Detroit.,RB
 3915525,Dre'Mont Jones,New England Patriots,Questionable,2026-11-15T17:32Z,Undisclosed,Cramps,Not Specified,2026-11-29,QUESTIONABLE,Jones (cramps) is questionable to return to Sunday's game against the Lions in Munich.,DE
+3917331,Erik McCoy,New Orleans Saints,Active,2026-11-26T20:50Z,,,,,,,C
 3929645,Juwan Johnson,New Orleans Saints,Questionable,2026-11-26T20:05Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Coach Kellen Moore said Thursday that Johnson (hamstring/wrist) is considered day-to-day ahead of Sunday's game against the Bengals, Katherine Terrell of ESPN reports.",TE
 4429568,Martin Emerson Jr.,New Orleans Saints,Questionable,2026-11-26T01:39Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Emerson (concussion) was a full practice participant Wednesday, Jeff Nowak of WWL Radio reports.",CB
 4241993,Pete Werner,New Orleans Saints,Questionable,2026-11-26T01:33Z,Hamstring,Not Specified,Left,2026-11-29,QUESTIONABLE,"Werner (hamstring) was a limited participant in Wednesday's practice, Jeff Nowak of WWL Radio reports.",LB
@@ -557,7 +558,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683813,Jonas Sanker,New Orleans Saints,Active,2026-11-25T02:52Z,,,,,,Sanker recorded seven tackles (four solo) including 1.0 sacks during Sunday's 21-13 loss at Chicago.,S
 4683215,Danny Stutsman,New Orleans Saints,Active,2026-11-25T02:33Z,,,,,,Stutsman recorded nine tackles (three solo) and an interception during Sunday's 21-13 loss at Chicago.,LB
 4702559,Oscar Delp,New Orleans Saints,Active,2026-11-24T17:02Z,,,,,,Delp hauled in his lone target for a six-yard reception in Sunday's 21-13 loss to the Bears.,TE
-3917331,Erik McCoy,New Orleans Saints,Questionable,2026-11-24T12:39Z,Biceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,C
 4606711,Taliese Fuaga,New Orleans Saints,Questionable,2026-11-24T12:39Z,Knee,Sprain,Left,2026-11-29,QUESTIONABLE,questionable,OT
 3124890,Kaden Elliss,New Orleans Saints,Active,2026-11-24T05:11Z,,,,,,Elliss recorded five tackles (two solo) in Sunday's 21-13 loss to the Bears.,LB
 4879276,Bryce Lance,New Orleans Saints,Active,2026-11-24T03:20Z,,,,,,Lance failed to catch his only target and added 47 yards on kickoff returns during Sunday's 21-13 loss to the Bears.,WR
@@ -774,10 +774,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4871023,Carnell Tate,Tennessee Titans,Active,2026-11-22T23:27Z,,,,,,Tate brought in two of five targets for 58 yards and a touchdown in the Titans' 51-30 loss to the Cowboys on Sunday.,WR
 3916148,Tony Pollard,Tennessee Titans,Active,2026-11-22T22:32Z,,,,,,Pollard rushed 21 times for 110 yards and failed to bring in his only target in the Titans' 51-30 loss to the Cowboys on Sunday.,RB
 4240920,Dan Moore Jr.,Tennessee Titans,Questionable,2026-11-22T20:34Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Moore (knee) is questionable to return to Sunday's game against the Cowboys.,OT
+2976212,Stefon Diggs,Washington Commanders,Active,2026-11-26T20:42Z,,,,,,Diggs (personal) was removed from the Commanders' injury report Thursday.,WR
 4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-26T20:35Z,Foot,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Burks (foot) was listed as limited on Thursday's injury report.,WR
 4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-26T02:29Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Robertson (ankle) did not participate in Wednesday's practice.,CB
 3929865,Charles Omenihu,Washington Commanders,Questionable,2026-11-26T00:12Z,Ribs,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DE
-2976212,Stefon Diggs,Washington Commanders,Questionable,2026-11-25T20:25Z,,,,,,"Diggs was absent from Wednesday's practice and was excused, Ben Standig of The Team 980 reports.",WR
 4048228,John Bates,Washington Commanders,Active,2026-11-25T01:34Z,,,,,,Bates didn't garner a target during Monday night's 22-20 win over the Bengals.,TE
 4690923,Ben Sinnott,Washington Commanders,Active,2026-11-25T01:31Z,,,,,,"Sinnott played played 33 snaps (24 on offense, nine on special teams) but didn't show up in the box score otherwise during the Commanders' 22-20 win over the Bengals on Monday.",TE
 3930066,Van Jefferson,Washington Commanders,Active,2026-11-25T01:27Z,,,,,,Jefferson failed to haul in his lone target during the Commanders' 22-20 win over the Bengals on Monday.,WR
