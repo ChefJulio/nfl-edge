@@ -74,6 +74,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-23T00:21Z,,,,,,Hill carried the ball six times for 69 yards and a touchdown and caught four of five targets for 27 yards in Sunday's 35-33 loss to the Panthers.,RB
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-23T00:13Z,,,,,,Brissett completed 24 of 37 passes for 276 yards and a touchdown with an interception in Sunday's 35-33 loss to the Panthers. He added seven rushing yards on two carries.,QB
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
+4635008,Keon Coleman,Buffalo Bills,Active,2026-11-27T15:15Z,,,,,,Coleman didn't catch his only target in Thursday's 13-10 win over the Chiefs.,WR
+3930086,Dawson Knox,Buffalo Bills,Active,2026-11-27T15:12Z,,,,,,Knox didn't catch his only target in Thursday's 13-10 win over the Chiefs.,TE
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-11-27T05:43Z,,,,,,Shakir brought in three of six targets for 33 yards in the Bills' 13-10 in over the Chiefs on Thursday.,WR
 3915416,DJ Moore,Buffalo Bills,Active,2026-11-27T05:32Z,,,,,,Moore hauled in two of six targets for 15 yards in the Bills' 13-10 win over the Chiefs on Thursday.,WR
 4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-27T05:27Z,,,,,,Kincaid brought in both targets for 13 yards in the Bills' 13-10 loss to the Chiefs on Thursday.,TE
@@ -97,8 +99,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-24T01:42Z,,,,,,Johnson rushed once for two yards and caught seven of his eight targets for 55 yards in the Bills' 26-9 win over the Dolphins on Sunday.,RB
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-23T16:44Z,,,,,,Latu recorded a 30-yard reception on four targets in Sunday's 26-9 win over the Dolphins.,TE
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-23T05:10Z,,,,,,Bass went 4-for-5 on field-goal tries and made both of his PATs during Sunday's 26-9 win over the Dolphins.,PK
-4635008,Keon Coleman,Buffalo Bills,Active,2026-11-23T04:49Z,,,,,,Coleman caught two of four targets for 17 yards during Sunday's 26-9 win over Miami.,WR
-4429501,Ray Davis,Buffalo Bills,Active,2026-11-23T03:48Z,,,,,,Davis rushed one time for three yards and caught a six-yard pass on two targets in Sunday's 26-9 win over the Dolphins.,RB
 3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-27T00:23Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Okereke (foot) was listed as a non-participant in Carolina's practice estimate Thursday, Mike Kaye of ESPN.com reports.",LB
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-26T22:20Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Evans (Achilles) was listed as a DNP on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-26T22:18Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Tremble (knee) was listed as a limited participant on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
@@ -124,6 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874515,Sam Hecht,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,C
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-23T00:55Z,,,,,,Young completed 22 of 30 passes for 254 yards and two touchdowns with one interception in Sunday's 35-33 win over Baltimore.,QB
+4723086,Colston Loveland,Chicago Bears,Questionable,2026-11-27T15:38Z,Knee,Not Specified,Left,2026-12-06,QUESTIONABLE,"Loveland (knee) is scheduled to undergo an MRI on Friday on the knee injury he sustained during Thursday's 39-35 win over the Bears, Ian Rapoport of ESPN and NFL Network reports.",TE
 3948283,Stephen Carlson,Chicago Bears,Active,2026-11-27T01:39Z,,,,,,Carlson caught two of his four targets for 30 yards during Chicago's win over the Lions on Thursday.,TE
 2973405,Kalif Raymond,Chicago Bears,Active,2026-11-27T01:35Z,,,,,,Raymond caught three of his five targets for 20 yards during Chicago's win over the Lions on Thursday.,WR
 17427,Cairo Santos,Chicago Bears,Active,2026-11-27T01:27Z,,,,,,Santos converted his only field-goal attempt and all four of his extra-point tries during Chicago's 39-35 win over the Detroit on Thursday.,PK
@@ -133,7 +134,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4608686,Kyle Monangai,Chicago Bears,Active,2026-11-26T23:33Z,,,,,,Monangai carried the ball eight times for 15 yards and two touchdowns and caught one of two targets for 14 yards in Thursday's 39-35 win over the Lions.,RB
 4259545,D'Andre Swift,Chicago Bears,Active,2026-11-26T23:27Z,,,,,,Swift carried the ball nine times for 65 yards and a touchdown and caught seven of eight targets for 97 yards in Thursday's 39-35 win over the Lions.,RB
 4431611,Caleb Williams,Chicago Bears,Questionable,2026-11-26T22:41Z,Abdomen,Bruise,Not Specified,2026-12-06,QUESTIONABLE,"Williams said after Thursday's 39-35 win in Detroit that he's ""fine"" and likely just has ""a bruise on his abdomen,"" Jason Lieser of the Chicago Sun-Times reports.",QB
-4723086,Colston Loveland,Chicago Bears,Questionable,2026-11-26T18:45Z,Knee,Not Specified,Left,2026-12-06,QUESTIONABLE,Loveland (knee) has been ruled out from returning to Thursday's game in Detroit.,TE
 4241007,D'Marco Jackson,Chicago Bears,Active,2026-11-26T17:04Z,,,,,,Jackson (elbow) is active for Thursday's Thanksgiving Day matchup versus the Lions.,LB
 4426374,Tyrique Stevenson Sr.,Chicago Bears,Active,2026-11-26T17:01Z,,,,,,Stevenson (groin) is active to face Detroit on Thursday.,CB
 15168,Case Keenum,Chicago Bears,Out,2026-11-26T16:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Keenum (coach's decision) is inactive and tabbed as the Bears' emergency third quarterback Thursday in Detroit.,QB
@@ -349,9 +349,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4061956,Ashton Dulin,Indianapolis Colts,Active,2026-11-21T01:51Z,,,,,,Dulin caught two of his four targets for 30 yards and assisted on two tackles on kick coverage during the Colts' 26-3 loss to the Texans on Thursday night.,WR
 4683151,Deion Burks,Indianapolis Colts,Active,2026-11-21T01:48Z,,,,,,"Burks was targeted three times for zero catches, had one kick return for 10 yards and made one tackle on kick coverage during the Colts' 26-3 loss to the Texans on Thursday night.",WR
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-21T01:45Z,,,,,,Shrader went 1-for-3 on field-goal attempts during the Colts' 26-3 loss to the Texans on Thursday.,PK
+4432620,Parker Washington,Jacksonville Jaguars,Out,2026-11-27T15:44Z,Shoulder,Not Specified,Not Specified,2026-12-06,OUT,"Washington (shoulder) will be out for Sunday's game against the Titans and is considered week-to-week moving forward, Demetrius Harvey of the Florida Times-Union reports.",WR
 4573319,Danny Striggow,Jacksonville Jaguars,Active,2026-11-27T02:02Z,,,,,,"Striggow (concussion) was listed as a full participant during Jacksonville's practice estimate Thursday, Ryan O'Halloran of The Florida Times-Union reports.",DE
 4882093,Bhayshul Tuten,Jacksonville Jaguars,Questionable,2026-11-26T20:35Z,Ankle,Not Specified,Right,2026-11-29,QUESTIONABLE,"Tuten (ankle/foot) didn't practice Thursday, Ryan O'Halloran of The Florida Times-Union reports.",RB
-4432620,Parker Washington,Jacksonville Jaguars,Questionable,2026-11-26T20:29Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Washington (shoulder) was listed as a limited participant in Thursday's practice, Ryan O'Halloran of The Florida Times-Union reports.",WR
 3863820,Patrick Mekari,Jacksonville Jaguars,Injured Reserve,2026-11-26T02:46Z,Back,Surgery,Not Specified,2026-11-29,IR-R,The Jaguars designated Mekari (back) to return from injured reserve Wednesday.,G
 4426448,Jarrian Jones,Jacksonville Jaguars,Active,2026-11-26T01:13Z,,,,,,Jones (chest) was a full participant in Wednesday's practice.,CB
 3916433,Jakobi Meyers,Jacksonville Jaguars,Questionable,2026-11-25T21:19Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Meyers was a limited participant in Wednesday's practice due to an ankle injury.,WR
@@ -474,9 +474,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242154,Kam Curl,Los Angeles Rams,Active,2026-11-24T21:08Z,,,,,,"Curl has no injury designation for Wednesday night's matchup against the Packers, Stu Jackson of the Rams' official site reports.",S
 3122132,Myles Garrett,Los Angeles Rams,Active,2026-11-24T21:01Z,,,,,,"Rams head coach Sean McVay said Tuesday that Garrett's absence from Monday's practice was a rest day and had nothing to do with his knee injury, Stu Jackson of the Rams' official site reports.",DE
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-23T19:35Z,Ankle,Surgery,Not Specified,2027-02-15,IR,"Rams head coach Sean McVay said Monday that Ferguson (hamstring) won't be activated from injured reserve this season and will require surgery to address the ankle injury he aggravated in Week 3, Stu Jackson of the team's official site reports.",TE
+4360488,JuJu Brents,Miami Dolphins,Out,2026-11-27T15:40Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 4567225,Jaylin Simpson,Miami Dolphins,Active,2026-11-26T03:23Z,,,,,,"Simpson (knee) was a full participant in Wednesday's practice, David Furones reports.",S
 4430681,Jared Wayne,Miami Dolphins,Questionable,2026-11-26T01:21Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Wayne (quadriceps) didn't practice Wednesday, David Furones of the South Florida Sun Sentinel reports.",WR
-4360488,JuJu Brents,Miami Dolphins,Questionable,2026-11-26T01:16Z,Neck,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Brents (neck) did not participate in Wednesday's practice, David Furones of the South Florida Sun Sentinel reports.",CB
 4685637,Jackson Woodard,Miami Dolphins,Questionable,2026-11-25T21:30Z,Hand,,,2026-11-29,QUESTIONABLE,questionable,LB
 4433974,Rodney McGraw,Miami Dolphins,Questionable,2026-11-25T21:30Z,Shoulder,,,2026-11-29,QUESTIONABLE,questionable,DE
 4271632,Austin Jackson,Miami Dolphins,Questionable,2026-11-25T21:29Z,Elbow,,,2026-11-29,QUESTIONABLE,questionable,OT
