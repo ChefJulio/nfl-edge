@@ -98,5 +98,35 @@
 "at": "2026-11-26T23:53:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0036637": {
+"name": "Noah Gray",
+"team": "KC",
+"pos": "TE",
+"pre": 0.9751,
+"ruling": "ACT",
+"at": "2026-11-27T00:01:00+00:00",
+"post": 0.974,
+"status": "Active (DFF)"
+},
+"00-0038134": {
+"name": "Kenneth Walker III",
+"team": "KC",
+"pos": "RB",
+"pre": 0.0,
+"ruling": "INA",
+"at": "2026-11-27T00:01:00+00:00",
+"post": 0.0,
+"status": "Inactive (DLD)"
+},
+"00-0040906": {
+"name": "Garrett Nussmeier",
+"team": "KC",
+"pos": "QB",
+"pre": 0.0969,
+"ruling": "INA",
+"at": "2026-11-27T00:01:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
