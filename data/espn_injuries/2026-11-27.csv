@@ -1,10 +1,10 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+11394,Josh Johnson,Arizona Cardinals,Active,2026-11-27T17:40Z,,,,,,"Coach Mike LaFleur has ruled out Carson Beck (back) for Sunday's game against the Commanders, which sets the stage for Johnson to start the contest, Darren Urban of the Cardinals' official site reports.",QB
+4430841,Carson Beck,Arizona Cardinals,Out,2026-11-27T17:36Z,Back,Spasms,Not Specified,2026-12-06,OUT,"Beck (back) will not play Sunday against the Commanders, coach Mike LaFleur said Friday, Josh Weinfuss of ESPN.com reports.",QB
 4709695,Karson Sharar,Arizona Cardinals,Questionable,2026-11-26T20:31Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
 4239944,Hunter Long,Arizona Cardinals,Questionable,2026-11-26T20:30Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,TE
-4430841,Carson Beck,Arizona Cardinals,Questionable,2026-11-26T20:11Z,Back,Spasms,Not Specified,2026-11-29,QUESTIONABLE,"Beck (back) was listed as a non-participant on Thursday's injury report, Darren Urban of the Cardinals' official site reports.",QB
 4428512,Kedon Slovis,Arizona Cardinals,Active,2026-11-25T21:42Z,,,,,,"Slovis was claimed off waivers by the Cardinals on Wednesday, Josh Weinfuss of ESPN reports.",QB
 4870808,Jeremiyah Love,Arizona Cardinals,Injured Reserve,2026-11-25T19:50Z,Ankle,Sprain,Right,2026-12-06,IR,"Head coach Mike LaFleur said Wednesday that the Cardinals will evaluate Love (ankle) again Monday to hone in on a return date for the running back, Bo Brack of GoPHNX.com reports.",RB
-11394,Josh Johnson,Arizona Cardinals,Active,2026-11-25T19:27Z,,,,,,"Head coach Mike LaFleur said Wednesday that Johnson is preparing to start Sunday's game versus the Commanders due to Carson Beck's back injury, Dani Sureck of the Cardinals' official site reports.",QB
 4249739,Jack Gibbens,Arizona Cardinals,Active,2026-11-25T02:56Z,,,,,,Gibbens registered 10 total tackles (six solo) during Sunday's 34-7 loss to the Chiefs.,LB
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-25T02:46Z,,,,,,Baker recorded six total tackles (five solo) during Sunday's 34-7 loss to Kansas City.,S
 4040983,Mack Wilson Sr.,Arizona Cardinals,Active,2026-11-25T02:41Z,,,,,,Wilson recorded eight total tackles (four solo) during Sunday's 34-7 loss to the Chiefs.,LB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874515,Sam Hecht,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,C
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-23T00:55Z,,,,,,Young completed 22 of 30 passes for 254 yards and two touchdowns with one interception in Sunday's 35-33 win over Baltimore.,QB
-4723086,Colston Loveland,Chicago Bears,Doubtful,2026-11-27T15:38Z,Knee,Not Specified,Left,2026-12-06,DOUBTFUL,"Loveland (knee) is scheduled to undergo an MRI on Friday on the knee injury he sustained during Thursday's 39-35 win over the Lions, Ian Rapoport of ESPN and NFL Network reports.",TE
+4723086,Colston Loveland,Chicago Bears,Doubtful,2026-11-27T17:22Z,Knee,Not Specified,Left,2026-12-06,DOUBTFUL,"The knee injury that Loveland sustained during Thursday's 39-35 win over the Lions is expected to land him on IR, Adam Schefter of ESPN reports.",TE
 3948283,Stephen Carlson,Chicago Bears,Active,2026-11-27T01:39Z,,,,,,Carlson caught two of his four targets for 30 yards during Chicago's win over the Lions on Thursday.,TE
 2973405,Kalif Raymond,Chicago Bears,Active,2026-11-27T01:35Z,,,,,,Raymond caught three of his five targets for 20 yards during Chicago's win over the Lions on Thursday.,WR
 17427,Cairo Santos,Chicago Bears,Active,2026-11-27T01:27Z,,,,,,Santos converted his only field-goal attempt and all four of his extra-point tries during Chicago's 39-35 win over the Detroit on Thursday.,PK
@@ -749,9 +749,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-23T00:37Z,,,,,,Egbuka brought in two of five targets for 18 yards in the Buccaneers' 31-21 loss to the Lions on Sunday.,WR
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Active,2026-11-23T00:01Z,,,,,,Mayfield completed 20 of 33 passes for 187 yards with two touchdowns and no interceptions and rushed six times for 36 yards in the Buccaneers' 31-21 loss to the Lions on Sunday. He also committed a fumble that stayed with Tampa Bay.,QB
 4596448,Bucky Irving,Tampa Bay Buccaneers,Active,2026-11-22T23:02Z,,,,,,Irving rushed 18 times for 68 yards and a touchdown and brought in three of four targets for 32 yards in the Buccaneers' 31-21 loss to the Lions on Sunday.,RB
+4429607,Cor'Dale Flott,Tennessee Titans,Out,2026-11-27T17:25Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,out,CB
+4035663,Terrell Burgess,Tennessee Titans,Out,2026-11-27T17:25Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,out,S
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-26T23:05Z,,,,,,Franklin-Myers (back) was a full participant in Thursday's practice.,DE
 4573318,Dorian Mausi,Tennessee Titans,Questionable,2026-11-26T21:08Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,LB
-4429607,Cor'Dale Flott,Tennessee Titans,Questionable,2026-11-26T01:44Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,"Flott (neck) did not participate in Wednesday's practice, Turron Davenport of ESPN.com reports.",CB
 4240532,Tony Adams,Tennessee Titans,Active,2026-11-26T01:34Z,,,,,,"Adams (illness) was a full participant in Wednesday's practice, Turron Davenport of ESPN.com reports.",S
 4039160,Kylen Granson,Tennessee Titans,Active,2026-11-25T17:31Z,,,,,,Granson logged all 16 of his snaps on special teams in Sunday's 51-30 loss to the Cowboys.,TE
 4360978,David Martin-Robinson,Tennessee Titans,Active,2026-11-25T17:27Z,,,,,,Martin-Robinson played all but one of his 24 snaps on special teams in Sunday's 51-30 loss to the Cowboys.,TE
@@ -773,7 +774,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-23T01:41Z,,,,,,Ridley caught five of six targets for 68 yards and a touchdown during Sunday's 51-30 loss to the Cowboys.,WR
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-22T23:38Z,,,,,,Ward completed 21 of 30 passes for 248 yards with two touchdowns and no interceptions while rushing twice for three yards and another score in the Titans' 51-30 loss to the Cowboys on Sunday. He also lost a fumble.,QB
 4871023,Carnell Tate,Tennessee Titans,Active,2026-11-22T23:27Z,,,,,,Tate brought in two of five targets for 58 yards and a touchdown in the Titans' 51-30 loss to the Cowboys on Sunday.,WR
-3916148,Tony Pollard,Tennessee Titans,Active,2026-11-22T22:32Z,,,,,,Pollard rushed 21 times for 110 yards and failed to bring in his only target in the Titans' 51-30 loss to the Cowboys on Sunday.,RB
 2976212,Stefon Diggs,Washington Commanders,Active,2026-11-26T20:42Z,,,,,,Diggs (personal) was removed from the Commanders' injury report Thursday.,WR
 4567156,Treylon Burks,Washington Commanders,Questionable,2026-11-26T20:35Z,Foot,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Burks (foot) was listed as limited on Thursday's injury report.,WR
 4239694,Amik Robertson,Washington Commanders,Questionable,2026-11-26T02:29Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Robertson (ankle) did not participate in Wednesday's practice.,CB
