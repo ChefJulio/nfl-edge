@@ -124,6 +124,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874515,Sam Hecht,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,C
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-23T00:55Z,,,,,,Young completed 22 of 30 passes for 254 yards and two touchdowns with one interception in Sunday's 35-33 win over Baltimore.,QB
+3948283,Stephen Carlson,Chicago Bears,Active,2026-11-27T01:39Z,,,,,,Carlson caught two of his four targets for 30 yards during Chicago's win over the Lions on Thursday.,TE
+2973405,Kalif Raymond,Chicago Bears,Active,2026-11-27T01:35Z,,,,,,Raymond caught three of his five targets for 20 yards during Chicago's win over the Lions on Thursday.,WR
 17427,Cairo Santos,Chicago Bears,Active,2026-11-27T01:27Z,,,,,,Santos converted his only field-goal attempt and all four of his extra-point tries during Chicago's win over the Detroit on Thursday.,PK
 4685504,Sam Roush,Chicago Bears,Active,2026-11-26T23:56Z,,,,,,Roush caught all five of his targets for 31 yards in Thursday's 39-35 win over the Lions.,TE
 4431299,Rome Odunze,Chicago Bears,Active,2026-11-26T23:52Z,,,,,,Odunze caught six of nine targets for 87 yards and two touchdowns in Thursday's 39-35 win over the Lions.,WR
@@ -147,8 +149,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4954445,Dillon Thieneman,Chicago Bears,Active,2026-11-24T04:14Z,,,,,,Thieneman recorded seven tackles (three solo) and an interception in Sunday's 21-13 win over the Saints.,S
 4035369,Jeffery Simmons,Chicago Bears,Active,2026-11-24T04:08Z,,,,,,"Simmons recorded four tackles (three solo), including 3.0 sacks, in Sunday's 21-13 win over the Saints.",DT
 4869748,Zavion Thomas,Chicago Bears,Active,2026-11-24T01:35Z,,,,,,Thomas brought in two of three targets for 56 yards and added a 30-yard carry during the Bears' 21-13 win over the Saints on Sunday.,WR
-2973405,Kalif Raymond,Chicago Bears,Active,2026-11-24T01:24Z,,,,,,Raymond caught one of four passes for 14 yards during Sunday's 21-13 win over the Saints.,WR
-3948283,Stephen Carlson,Chicago Bears,Active,2026-11-23T16:56Z,,,,,,Carlson played 15 of his 19 snaps on special teams in Sunday's 21-13 win over the Saints.,TE
 4401811,Kyle Dugger,Cincinnati Bengals,Active,2026-11-26T03:40Z,,,,,,Dugger (quadriceps) was not listed on the Bengals' injury report Wednesday.,S
 3125082,Dalton Risner,Cincinnati Bengals,Questionable,2026-11-26T03:07Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Risner (knee) is considered day-to-day, Mike Petraglia of CLNSCincy.com reported Wednesday.",G
 5085189,Jack Endries,Cincinnati Bengals,Active,2026-11-25T01:28Z,,,,,,Endries caught four of five targets for 33 yards during Monday night's 22-20 loss to the Commanders.,TE
@@ -249,6 +249,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426338,Bo Nix,Denver Broncos,Active,2026-11-23T02:01Z,,,,,,"Nix completed 19 of 35 passes for 225 yards, one touchdown and one interception and notched six carries for five yards during Sunday's 38-24 victory against the Raiders.",QB
 4372016,Jaylen Waddle,Denver Broncos,Active,2026-11-23T01:52Z,,,,,,Waddle secured three of six targets for 61 yards during Sunday's 38-24 win versus the Raiders.,WR
 4702555,Jonah Coleman,Denver Broncos,Active,2026-11-23T01:33Z,,,,,,Coleman reeled off 111 yards and three touchdowns on 24 carries and hauled in four of five targets for 18 yards during Sunday's 38-24 win against the Raiders.,RB
+4912274,Sione Vaki,Detroit Lions,Active,2026-11-27T01:46Z,,,,,,Vaki carried the ball six times for 19 yards and hauled in two of his three targets for a loss of four yards during Detroit's loss to Chicago on Thursday.,RB
 4689936,Jake Bates,Detroit Lions,Active,2026-11-27T01:12Z,,,,,,Bates made both of his field-goal attempts and three of his four extra-point tries during Detroit's loss to the Bears on Thursday.,PK
 4430027,Sam LaPorta,Detroit Lions,Active,2026-11-26T23:17Z,,,,,,LaPorta caught four of five targets for 44 yards and a touchdown in Thursday's 39-35 loss to the Bears.,TE
 4426388,Jameson Williams,Detroit Lions,Active,2026-11-26T23:12Z,,,,,,Williams caught six of nine targets for 68 yards in Thursday's 39-35 loss to the Bears. He added 12 yards on his lone carry.,WR
@@ -269,7 +270,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5123663,Isaac TeSlaa,Detroit Lions,Active,2026-11-24T01:50Z,,,,,,TeSlaa failed to catch any of his three targets during Sunday's 31-21 win over the Buccaneers.,WR
 4242392,Brock Wright,Detroit Lions,Active,2026-11-24T01:49Z,,,,,,Wright caught both of two targets for 42 yards during Sunday's 31-21 win versus the Buccaneers.,TE
 3139387,D.J. Reed,Detroit Lions,Active,2026-11-24T01:26Z,,,,,,Reed (hip) was considered to be a full participant at the Lions' walkthrough practice Monday.,CB
-4912274,Sione Vaki,Detroit Lions,Active,2026-11-24T01:26Z,,,,,,Vaki took one carry for a loss of one yard and caught his only target for seven yards during Sunday's 31-21 win versus the Buccaneers.,RB
 4586333,Mekhi Wingo,Detroit Lions,Active,2026-11-23T15:27Z,,,,,,,DT
 4038432,Amen Ogbongbemiga,Detroit Lions,Active,2026-11-23T15:27Z,,,,,,,LB
 4027919,Khalil Dorsey,Detroit Lions,Active,2026-11-22T19:14Z,,,,,,"Dorsey (wrist) has re-entered Sunday's matchup against Tampa Bay, Justin Rogers of DetroitFootball.net reports.",CB
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-23T04:31Z,,,,,,Mitchell caught two passes for 30 yards on three targets in Sunday's 27-24 win over the Chargers.,WR
 4685247,Braelon Allen,New York Jets,Active,2026-11-23T01:06Z,,,,,,Allen rushed 16 times for 75 yards while catching his lone target for nine yards in Sunday's 27-24 win over the Chargers.,RB
 15864,Geno Smith,New York Jets,Active,2026-11-23T00:56Z,,,,,,Smith completed 17 of 21 passes for 176 yards and three touchdowns in Sunday's 27-24 win over the Chargers. He also rushed once for four yards.,QB
+4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-27T01:42Z,,,,,,Smith caught 11 of 14 targets for 200 yards and two touchdowns in Thursday's 39-38 win over the Cowboys.,WR
 4429731,Gabe Hall,Philadelphia Eagles,Questionable,2026-11-27T00:46Z,Wrist,,,2026-11-26,QUESTIONABLE,Hall (shoulder) is questionable to return to the Eagles' matchup against the Cowboys on Sunday.,DT
 3139368,Marcus Epps,Philadelphia Eagles,Out,2026-11-27T00:13Z,Foot,,,2026-12-06,OUT,"Epps (foot) has been ruled out for the remainder of Philadelphia's matchup versus the Cowboys on Thursday, Mike Kaye of ESPN.com reports.",S
 3121023,Dallas Goedert,Philadelphia Eagles,Questionable,2026-11-26T23:03Z,Shoulder,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,Goedert (shoulder) has been ruled out of Thursday's contest at Dallas.,TE
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-23T05:05Z,,,,,,Elliott went 4-for-4 on field-goal attempts and made his lone PAT in Sunday's 19-16 win over the Steelers.,PK
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-23T01:41Z,,,,,,Lemon caught one of three targets for three yards in Sunday's 19-16 win over the Steelers.,WR
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-23T01:37Z,,,,,,Milton completed 11 of 21 passes for 141 yards while rushing five times for seven yards in Sunday's 19-16 win over the Steelers.,QB
-4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-22T22:23Z,,,,,,Smith (hamstring) caught five of 12 targets for 41 yards in Sunday's 19-16 win over the Steelers.,WR
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-26T22:48Z,,,,,,"Elliott (knee) does not carry an injury designation into Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",S
 4037333,Alex Highsmith,Pittsburgh Steelers,Out,2026-11-26T22:46Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Highsmith (ankle) has been ruled out for Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",LB
 4035656,Ben Skowronek,Pittsburgh Steelers,Injured Reserve,2026-11-26T22:43Z,Calf,Not Specified,Not Specified,2026-12-27,IR,"The Steelers placed Skowronek (calf) on injured reserve Thursday, Teresa Varley of the team's official site reports.",WR
