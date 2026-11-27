@@ -74,11 +74,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-23T00:21Z,,,,,,Hill carried the ball six times for 69 yards and a touchdown and caught four of five targets for 27 yards in Sunday's 35-33 loss to the Panthers.,RB
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-23T00:13Z,,,,,,Brissett completed 24 of 37 passes for 276 yards and a touchdown with an interception in Sunday's 35-33 loss to the Panthers. He added seven rushing yards on two carries.,QB
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
+4373678,Khalil Shakir,Buffalo Bills,Active,2026-11-27T05:43Z,,,,,,Shakir brought in three of six targets for 33 yards in the Bills' 13-10 in over the Chiefs on Thursday.,WR
+3915416,DJ Moore,Buffalo Bills,Active,2026-11-27T05:32Z,,,,,,Moore hauled in two of six targets for 15 yards in the Bills' 13-10 win over the Chiefs on Thursday.,WR
+4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-27T05:27Z,,,,,,Kincaid brought in both targets for 13 yards in the Bills' 13-10 loss to the Chiefs on Thursday.,TE
 3918298,Josh Allen,Buffalo Bills,Active,2026-11-27T04:58Z,,,,,,Allen completed 10 of 21 passes for 81 yards with no touchdowns and two interceptions and added seven carries for 43 yards in the Bills' 13-10 win over the Chiefs on Thursday.,QB
 4379399,James Cook III,Buffalo Bills,Active,2026-11-27T04:49Z,,,,,,Cook rushed 32 times for 117 yards and a touchdown and brought in his only target for eight yards in the Bills' 13-10 win over the Chiefs on Thursday.,RB
 4684527,T.J. Sanders,Buffalo Bills,Active,2026-11-26T23:58Z,,,,,,Sanders (shoulder) is active for Thursday's game against Kansas City.,DT
 4568624,Dorian Williams,Buffalo Bills,Active,2026-11-26T23:56Z,,,,,,Williams (calf) is active for Thursday's game against the Chiefs.,LB
-4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-26T23:55Z,,,,,,Kincaid (thumb/ankle) is listed as active for Thursday night's game against the Chiefs.,TE
 4379778,Christian Benford,Buffalo Bills,Out,2026-11-26T23:54Z,Groin,Not Specified,Not Specified,2026-12-06,INACTIVE,Benford (groin) is inactive for Thursday's game against the Chiefs.,CB
 5076951,Jalon Kilgore,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,S
 4869533,Jude Bowry,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,OT
@@ -97,8 +99,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-23T05:10Z,,,,,,Bass went 4-for-5 on field-goal tries and made both of his PATs during Sunday's 26-9 win over the Dolphins.,PK
 4635008,Keon Coleman,Buffalo Bills,Active,2026-11-23T04:49Z,,,,,,Coleman caught two of four targets for 17 yards during Sunday's 26-9 win over Miami.,WR
 4429501,Ray Davis,Buffalo Bills,Active,2026-11-23T03:48Z,,,,,,Davis rushed one time for three yards and caught a six-yard pass on two targets in Sunday's 26-9 win over the Dolphins.,RB
-3930086,Dawson Knox,Buffalo Bills,Active,2026-11-23T01:58Z,,,,,,Knox caught two of three targets for 31 yards in Sunday's 26-9 win over the Dolphins.,TE
-4373678,Khalil Shakir,Buffalo Bills,Active,2026-11-22T23:56Z,,,,,,Shakir caught five of nine targets for 101 yards while rushing twice for two yards in Sunday's 26-9 win over the Dolphins.,WR
 3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-27T00:23Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Okereke (foot) was listed as a non-participant in Carolina's practice estimate Thursday, Mike Kaye of ESPN.com reports.",LB
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-26T22:20Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Evans (Achilles) was listed as a DNP on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-26T22:18Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Tremble (knee) was listed as a limited participant on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
@@ -374,6 +374,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-23T03:18Z,,,,,,Strange caught all three of his targets for 16 yards during Sunday's 23-18 loss to the Giants.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-23T03:11Z,,,,,,Rodriguez rushed four times for 28 yards in Sunday's 23-18 loss to the Giants. He added one catch for 13 yards on one target.,RB
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-23T02:40Z,,,,,,Thomas caught one pass for an 18-yard touchdown on three targets in Sunday's 23-18 loss to the Giants.,WR
+4688813,Josh Downs,Kansas City Chiefs,Active,2026-11-27T05:35Z,,,,,,Downs secured one of four targets for 13 yards in the Chiefs' 13-10 loss to the Bills on Thursday.,WR
 4683062,Xavier Worthy,Kansas City Chiefs,Active,2026-11-27T05:29Z,,,,,,Worthy didn't corral any of his three targets during Thursday's 13-10 loss at Buffalo.,WR
 4428331,Rashee Rice,Kansas City Chiefs,Active,2026-11-27T05:22Z,,,,,,Rice brought in two of five targets for 19 yards in the Chiefs' 13-10 loss to the Bills on Thursday.,WR
 4242459,Trey Smith,Kansas City Chiefs,Questionable,2026-11-27T05:22Z,Ankle,Sprain,Not Specified,2026-12-03,QUESTIONABLE,"Head coach Andy Reid said Smith sustained an ankle sprain during Thursday's 13-10 loss in Buffalo, Charles Goldman of AtoZSports.com reports.",G
@@ -398,7 +399,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4426659,George Karlaftis,Kansas City Chiefs,Active,2026-11-24T03:32Z,,,,,,"Karlaftis recorded four total tackles (three solo), including 2.5 sacks, and a forced fumble during Sunday's 34-7 win over the Cardinals.",DE
 4912218,Cyrus Allen,Kansas City Chiefs,Active,2026-11-24T02:04Z,,,,,,Allen caught two of four targets for 41 yards during Sunday's 34-7 win over the Cardinals.,WR
 4685489,Jaydn Ott,Kansas City Chiefs,Active,2026-11-24T01:56Z,,,,,,Ott logged five rushing attempts for 12 yards and logged one tackle on kick coverage in the Chiefs' 34-7 win over the Cardinals on Sunday.,RB
-3055899,Harrison Butker,Kansas City Chiefs,Active,2026-11-23T05:41Z,,,,,,Butker made both of his field-goal attempts while going 4-for-4 on extra-point tries during Sunday's 34-7 win over the Cardinals.,PK
 4429109,Tonka Hemingway,Las Vegas Raiders,Questionable,2026-11-27T00:36Z,Upper Body,Stinger,Not Specified,2026-11-29,QUESTIONABLE,"Hemingway (upper body) was listed as a non-participant in Las Vegas' practice estimate Thursday, Sam Warren of The Athletic reports.",DT
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-26T22:23Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Bowers (ankle) remained a limited participant in Thursday's practice, Sam Warren of The Athletic reports.",TE
 2972342,Adam Butler,Las Vegas Raiders,Questionable,2026-11-26T03:34Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Butler (concussion) did not participate in Wednesday's practice, Ryan McFadden of ESPN.com reports.",DT
@@ -631,7 +631,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4870795,Makai Lemon,Philadelphia Eagles,Active,2026-11-27T01:57Z,,,,,,Lemon caught five of six targets for 51 yards and a touchdown in Thursday's 39-38 win over the Cowboys.,WR
 4431545,Will Shipley,Philadelphia Eagles,Active,2026-11-27T01:52Z,,,,,,Shipley carried the ball 10 times for 46 yards and failed to catch his only target in Thursday's 39-38 win over the Cowboys.,RB
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-27T01:48Z,,,,,,Milton completed 21 of 31 passes for 331 yards and three touchdowns with one interception in Thursday's 39-38 win over the Cowboys. He added 15 yards and a TD on three carries.,QB
-4429731,Gabe Hall,Philadelphia Eagles,Questionable,2026-11-27T00:46Z,Wrist,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,Hall (shoulder) is questionable to return to the Eagles' matchup against the Cowboys on Sunday.,DT
+4429731,Gabe Hall,Philadelphia Eagles,Questionable,2026-11-27T00:46Z,Wrist,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,Hall (wrist) is questionable to return to the Eagles' matchup against the Cowboys on Sunday.,DT
 3139368,Marcus Epps,Philadelphia Eagles,Questionable,2026-11-27T00:13Z,Foot,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,"Epps (foot) has been ruled out for the remainder of Philadelphia's matchup versus the Cowboys on Thursday, Mike Kaye of ESPN.com reports.",S
 3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-26T22:49Z,Neck,Stinger,Not Specified,2026-12-06,QUESTIONABLE,Barkley suffered a stinger during Thursday's game in Dallas.,RB
 4682618,Cooper DeJean,Philadelphia Eagles,Questionable,2026-11-26T22:08Z,Concussion,Concussion,Not Specified,2026-12-06,QUESTIONABLE,DeJean has entered the league's concussion protocol and has been ruled out for the rest of Thursday's game against the Cowboys.,CB
