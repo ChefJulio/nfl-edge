@@ -128,5 +128,75 @@
 "at": "2026-11-27T00:01:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0035406": {
+"name": "Lil'Jordan Humphrey",
+"team": "DEN",
+"pos": "WR",
+"pre": 0.2754,
+"ruling": "INA",
+"at": "2026-11-27T18:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0036879": {
+"name": "Sam Ehlinger",
+"team": "DEN",
+"pos": "QB",
+"pre": 0.0947,
+"ruling": "INA",
+"at": "2026-11-27T18:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0037085": {
+"name": "Tyler Badie",
+"team": "DEN",
+"pos": "RB",
+"pre": 0.7074,
+"ruling": "ACT",
+"at": "2026-11-27T18:44:00+00:00",
+"post": 0.974,
+"status": "Active (FFF)"
+},
+"00-0041133": {
+"name": "Dallen Bentley",
+"team": "DEN",
+"pos": "TE",
+"pre": 0.1323,
+"ruling": "INA",
+"at": "2026-11-27T18:39:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041397": {
+"name": "Kaden Wetjen",
+"team": "PIT",
+"pos": "WR",
+"pre": 0.7156,
+"ruling": "INA",
+"at": "2026-11-27T18:42:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041490": {
+"name": "Eli Heidenreich",
+"team": "PIT",
+"pos": "RB",
+"pre": 0.1751,
+"ruling": "INA",
+"at": "2026-11-27T18:42:00+00:00",
+"post": 0.0,
+"status": "Inactive"
+},
+"00-0041565": {
+"name": "Drew Allar",
+"team": "PIT",
+"pos": "QB",
+"pre": 0.0931,
+"ruling": "INA",
+"at": "2026-11-27T18:42:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
