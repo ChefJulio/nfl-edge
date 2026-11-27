@@ -699,6 +699,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,OT
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,QB
 15818,Keenan Allen,San Francisco 49ers,Active,2026-11-23T05:13Z,,,,,,Allen totaled three catches (on four targets) for 38 yards during Sunday's 35-10 victory against the Vikings in Mexico City.,WR
+3115312,Jarran Reed,Seattle Seahawks,Out,2026-11-27T22:22Z,Toe,Not Specified,Not Specified,2026-12-07,OUT,out,DT
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-11-27T22:00Z,,,,,,"Darnold (quadriceps) doesn't have a designation for Sunday's game at San Francisco, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",QB
 4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-27T21:53Z,,,,,,"Smith-Njigba (ankle) doesn't have a designation for Sunday's contest in San Francisco, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",WR
 4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-11-27T02:20Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Bradford (knee) was listed as a limited participant in Seattle's practice estimate Thursday, Bob Condotta of The Seattle Times reports.",G
@@ -723,7 +724,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-11-16T05:27Z,,,,,,Shaheed caught one pass for eight yards on two targets in Sunday's 21-13 win over the Raiders.,WR
 4685512,Jadarian Price,Seattle Seahawks,Active,2026-11-16T01:55Z,,,,,,Price posted nine carries for 36 yards and one touchdown and gathered in his only target for eight yards during Sunday's 21-13 victory at Las Vegas.,RB
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-11-16T01:48Z,,,,,,Charbonnet churned out 94 yards on 20 carries during Sunday's 21-13 win in Las Vegas.,RB
-3115312,Jarran Reed,Seattle Seahawks,Questionable,2026-11-15T22:20Z,Toe,Not Specified,Not Specified,2026-12-07,OUT,Reed is doubtful to return to Sunday's game against Las Vegas due to a toe injury.,DT
 4430834,Jalen McMillan,Tampa Bay Buccaneers,Injured Reserve,2026-11-27T20:51Z,Knee - PCL,Sprain,Left,2026-11-30,IR-R,McMillan (knee/calf) was limited at Friday's practice.,WR
 4608810,Tez Johnson,Tampa Bay Buccaneers,Questionable,2026-11-27T20:42Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,WR
 4429511,SirVocea Dennis,Tampa Bay Buccaneers,Questionable,2026-11-27T20:42Z,Back,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
