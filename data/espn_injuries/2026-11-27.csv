@@ -424,15 +424,16 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-23T02:09Z,,,,,,"Mendoza was 18-for-37 passing for 267 yards, three touchdowns and one interception and had four carries for 22 yards during Sunday's 38-24 loss in Denver.",QB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-23T01:44Z,,,,,,Jeanty tallied 11 carries for 79 yards and gathered in five of eight targets for 90 yards and one touchdown during Sunday's 38-24 loss at Denver.,RB
 4603186,Jack Bech,Las Vegas Raiders,Active,2026-11-23T01:31Z,,,,,,Bech caught eight of nine targets for 88 yards and a touchdown during Sunday's 38-24 loss to the Broncos.,WR
+4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-27T22:30Z,Hamstring,,Not Specified,2026-11-29,DOUBTFUL,doubtful,WR
+4429190,Akheem Mesidor,Los Angeles Chargers,Doubtful,2026-11-27T22:30Z,Ankle,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,LB
+4429020,DJ Uiagalelei,Los Angeles Chargers,Active,2026-11-27T22:29Z,,,,,,"Uiagalelei will be the Chargers' starting quarterback against the Patriots on Sunday due to the absence of Justin Herbert (concussion), Mike Garafolo of NFL Network reports.",QB
+4038941,Justin Herbert,Los Angeles Chargers,Out,2026-11-27T22:24Z,Concussion,Concussion,Not Specified,2026-12-06,OUT,Herbert (concussion) has been ruled out for Sunday's game against the Patriots.,QB
+3123076,David Njoku,Los Angeles Chargers,Questionable,2026-11-27T22:23Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Njoku (shoulder) is listed as questionable for Sunday's game against New England.,TE
 4596334,Keaton Mitchell,Los Angeles Chargers,Out,2026-11-27T22:20Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,Mitchell (knee) has been ruled out for Sunday's game against the Patriots.,RB
 4241597,Daiyan Henley,Los Angeles Chargers,Out,2026-11-27T22:19Z,Knee,Soreness,Not Specified,2026-12-06,OUT,out,LB
-4038941,Justin Herbert,Los Angeles Chargers,Out,2026-11-27T22:19Z,Concussion,Concussion,Not Specified,2026-12-06,OUT,out,QB
-3123076,David Njoku,Los Angeles Chargers,Questionable,2026-11-26T21:33Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Njoku (shoulder) was listed as a non-participant in Thursday's practice.,TE
 4690171,Deane Leonard,Los Angeles Chargers,Injured Reserve,2026-11-26T19:00Z,Groin,,,2026-12-27,IR,The Chargers placed Leonard (groin) on injured reserve Thursday.,CB
 3886812,Jake Browning,Los Angeles Chargers,Active,2026-11-26T18:51Z,,,,,,The Chargers signed Browning to their active roster Thursday.,QB
-4429190,Akheem Mesidor,Los Angeles Chargers,Questionable,2026-11-26T03:35Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Mesidor (ankle) did not participate in Wednesday's practice.,LB
 4431442,Tuli Tuipulotu,Los Angeles Chargers,Questionable,2026-11-26T02:30Z,Ankle,,,2026-11-29,QUESTIONABLE,Tuipulotu (ankle) did not participate in Wednesday's practice.,LB
-4685553,Brenen Thompson,Los Angeles Chargers,Questionable,2026-11-26T02:24Z,Hamstring,,Not Specified,2026-11-29,QUESTIONABLE,Thompson (hamstring) did not participate in Wednesday's practice.,WR
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Questionable,2026-11-26T02:19Z,Knee,,,2026-11-29,QUESTIONABLE,Tomlinson (knee) did not participate in Wednesday's practice.,DT
 4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-26T02:12Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Still (ankle) did not participate in Wednesday's practice.,CB
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-24T15:18Z,,,,,,Gadsden went without a target while taking the field for 23 of the Chargers' 60 snaps on offense in Sunday's 27-24 loss to the Jets.,TE
@@ -448,7 +449,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4612826,Ladd McConkey,Los Angeles Chargers,Active,2026-11-23T01:20Z,,,,,,McConkey caught five of eight targets for 37 yards and two touchdowns in Sunday's 27-24 loss to the Jets.,WR
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-23T01:15Z,,,,,,Hampton carried the ball 14 times for 89 yards and caught his only target for four yards in Sunday's 27-24 loss to the Jets.,RB
 4411189,Trey Pipkins III,Los Angeles Chargers,Active,2026-11-22T20:07Z,,,,,,Pipkins (knee) is active for Sunday's matchup against the Jets.,OT
-4574105,Isas Waxter,Los Angeles Chargers,Active,2026-11-22T19:52Z,,,,,,Waxter (ankle) is active for Sunday's game against the Jets.,CB
 4426553,Davis Allen,Los Angeles Rams,Doubtful,2026-11-27T20:01Z,Ankle,Sprain,Not Specified,2026-12-03,DOUBTFUL,"Allen is dealing with a high-ankle sprain, according to sources, Ian Rapoport of NFL Network reports Friday.",TE
 2573401,Tyler Higbee,Los Angeles Rams,Questionable,2026-11-27T19:53Z,Chest,Bruise,Not Specified,2026-12-03,QUESTIONABLE,"Higbee (chest) is considered week-to-week, though it is too early to tell if he may be available Thursday, Dec. 3 against the Chiefs, Adam Schefter of ESPN reports Friday.",TE
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-26T17:31Z,,,,,,McManus made all four of his field-goal tries and both of his point-after attempts Thursday in a 26-13 victory over Green Bay.,PK
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-23T04:31Z,,,,,,Mitchell caught two passes for 30 yards on three targets in Sunday's 27-24 win over the Chargers.,WR
 4685247,Braelon Allen,New York Jets,Active,2026-11-23T01:06Z,,,,,,Allen rushed 16 times for 75 yards while catching his lone target for nine yards in Sunday's 27-24 win over the Chargers.,RB
 15864,Geno Smith,New York Jets,Active,2026-11-23T00:56Z,,,,,,Smith completed 17 of 21 passes for 176 yards and three touchdowns in Sunday's 27-24 win over the Chargers. He also rushed once for four yards.,QB
+4372414,Elijah Moore,Philadelphia Eagles,Active,2026-11-27T22:33Z,,,,,,Moore caught three of five passes for 57 yards during the Eagles' 39-38 win over the Cowboys on Thursday.,WR
 4715355,Darius Cooper,Philadelphia Eagles,Active,2026-11-27T02:48Z,,,,,,Cooper caught one of his two targets for 14 yards during the Eagles' win over the Cowboys on Thursday.,WR
 4241478,DeVonta Smith,Philadelphia Eagles,Questionable,2026-11-27T02:39Z,Back,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,"Smith (back) was seen limping badly in the locker room after Thursday's 39-38 win over the Cowboys, Martin Frank of the Delaware News Journal reports.",WR
 3050478,Jake Elliott,Philadelphia Eagles,Active,2026-11-27T02:33Z,,,,,,Elliott converted both of his field-goal attempts and all three of his extra-point attempts during the Eagles' 39-38 win over the Cowboys on Thursday.,PK
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-24T03:35Z,,,,,,Trotter logged 13 tackles (nine solo) during Philadelphia's win over the Steelers on Sunday.,LB
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-24T02:59Z,,,,,,Blue returned his lone kickoff for 23 yards but fumbled the ball in the process during the Eagles' 19-16 win over the Steelers on Sunday.,RB
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-24T02:56Z,,,,,,Stowers didn't log any offensive snaps in Sunday's 19-16 win over the Steelers.,TE
-4689651,Mac McWilliams,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,CB
 4567979,Brandin Echols,Pittsburgh Steelers,Questionable,2026-11-27T22:06Z,Quadriceps,,,2026-12-06,QUESTIONABLE,"Echols (quadriceps) has been ruled out for the rest of Friday's game against the Broncos, Alan Saunders of SteelersNow.com reports.",CB
 4431590,Jack Sawyer,Pittsburgh Steelers,Questionable,2026-11-27T22:03Z,Knee,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,"Sawyer (knee) has been ruled out for the rest of Friday's game against the Broncos, Burt Lauten of the Steelers' official site reports.",LB
 3116689,Cole Holcomb,Pittsburgh Steelers,Out,2026-11-27T19:24Z,Heel,Not Specified,Not Specified,2026-12-06,INACTIVE,Holcomb (heel) is inactive Friday against the Broncos.,LB
@@ -674,9 +674,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T21:08Z,,,,,,"Metcalf won't receive a suspension after he was ejected from Sunday's 19-16 loss to the Eagles, but the NFL is still reviewing discipline for the receiver that could include a fine, Adam Schefter of ESPN reports.",WR
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
-4361741,Brock Purdy,San Francisco 49ers,Out,2026-11-27T22:23Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,out,QB
-4431466,Jordan Watkins,San Francisco 49ers,Questionable,2026-11-26T22:29Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Watkins (groin) was estimated as a 'DNP' on Thursday's injury report, Matt Maiocco of NBC Sports Bay Area reports.",WR
-16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-26T22:08Z,Achilles,Tendinitis,Right,2026-11-29,QUESTIONABLE,"Evans (Achilles) was listed as limited on Thursday's practice report, Matt Maiocco of NBC Sports Bay Area reports.",WR
+16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-27T22:32Z,Achilles,Tendinitis,Right,2026-11-29,QUESTIONABLE,"Evans (Achilles) is listed as questionable for Sunday's contest against the Seahawks, Matt Maiocco of NBC Sports Bay Area reports.",WR
+4361741,Brock Purdy,San Francisco 49ers,Out,2026-11-27T22:25Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Head coach Kyle Shanahan said Friday that Purdy (ankle) has been ruled out for Sunday's game versus the Seahawks, Jennifer Lee Chan of NBC Sports Bay Area reports.",QB
+4431466,Jordan Watkins,San Francisco 49ers,Questionable,2026-11-26T22:29Z,Groin,Not Specified,Not Specified,2026-12-06,OUT,"Watkins (groin) was estimated as a 'DNP' on Thursday's injury report, Matt Maiocco of NBC Sports Bay Area reports.",WR
 3920814,Austen Pleasants,San Francisco 49ers,Injured Reserve,2026-11-26T03:11Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,"The 49ers designated Pleasants (knee) to return from injured reserve Wednesday, Matt Maiocco of NBC Sports Bay Area reports.",OT
 3916075,Colton McKivitz,San Francisco 49ers,Injured Reserve,2026-11-26T03:03Z,Ankle,Surgery,Left,2027-02-15,IR,McKivitz (ankle) was placed on the 49ers' injured reserve list Wednesday.,OT
 4242488,Deommodore Lenoir,San Francisco 49ers,Questionable,2026-11-26T02:42Z,Foot,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Lenoir (foot) was a limited participant in Wednesday's practice.,CB
