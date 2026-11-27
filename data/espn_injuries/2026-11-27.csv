@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-23T00:21Z,,,,,,Hill carried the ball six times for 69 yards and a touchdown and caught four of five targets for 27 yards in Sunday's 35-33 loss to the Panthers.,RB
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-23T00:13Z,,,,,,Brissett completed 24 of 37 passes for 276 yards and a touchdown with an interception in Sunday's 35-33 loss to the Panthers. He added seven rushing yards on two carries.,QB
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
+3915411,Ty Johnson,Buffalo Bills,Active,2026-11-27T22:54Z,,,,,,Johnson grabbed both of his targets for 12 yards during the Bills' 13-10 win over the Chiefs on Thursday.,RB
 4635008,Keon Coleman,Buffalo Bills,Active,2026-11-27T15:15Z,,,,,,Coleman didn't catch his only target in Thursday's 13-10 win over the Chiefs.,WR
 3930086,Dawson Knox,Buffalo Bills,Active,2026-11-27T15:12Z,,,,,,Knox didn't catch his only target in Thursday's 13-10 win over the Chiefs.,TE
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-11-27T05:43Z,,,,,,Shakir brought in three of six targets for 33 yards in the Bills' 13-10 in over the Chiefs on Thursday.,WR
@@ -96,7 +97,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-24T03:39Z,,,,,,Hooker logged two solo tackles and one pass defensed in the Bills' 26-9 win over the Dolphins on Sunday.,S
 4259166,Terrel Bernard,Buffalo Bills,Active,2026-11-24T03:36Z,,,,,,Bernard logged two tackles (one solo) in the Bills' 26-9 win over the Dolphins on Sunday.,LB
 4241476,Tyrell Shavers,Buffalo Bills,Active,2026-11-24T01:48Z,,,,,,Shavers failed to bring in either of his two targets and logged one tackle on kick coverage in the Bills' 26-9 win over the Dolphins on Sunday.,WR
-3915411,Ty Johnson,Buffalo Bills,Active,2026-11-24T01:42Z,,,,,,Johnson rushed once for two yards and caught seven of his eight targets for 55 yards in the Bills' 26-9 win over the Dolphins on Sunday.,RB
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-23T16:44Z,,,,,,Latu recorded a 30-yard reception on four targets in Sunday's 26-9 win over the Dolphins.,TE
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-23T05:10Z,,,,,,Bass went 4-for-5 on field-goal tries and made both of his PATs during Sunday's 26-9 win over the Dolphins.,PK
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-27T20:57Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Evans (Achilles) was a limited participant at practice Friday.,TE
@@ -674,9 +674,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T21:08Z,,,,,,"Metcalf won't receive a suspension after he was ejected from Sunday's 19-16 loss to the Eagles, but the NFL is still reviewing discipline for the receiver that could include a fine, Adam Schefter of ESPN reports.",WR
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
+4431466,Jordan Watkins,San Francisco 49ers,Out,2026-11-27T23:00Z,Groin,Not Specified,Not Specified,2026-12-06,OUT,Watkins (groin) has been ruled out for Sunday's game against the Seahawks.,WR
 4242488,Deommodore Lenoir,San Francisco 49ers,Active,2026-11-27T22:55Z,,,,,,,CB
 4565779,Carver Willis,San Francisco 49ers,Active,2026-11-27T22:55Z,,,,,,,OT
-4431466,Jordan Watkins,San Francisco 49ers,Out,2026-11-27T22:44Z,Groin,Not Specified,Not Specified,2026-12-06,OUT,out,WR
 4241464,Mac Jones,San Francisco 49ers,Active,2026-11-27T22:40Z,,,,,,Head coach Kyle Shanahan announced Jones will start in place of Brock Purdy (ankle) on Sunday against the Seahawks.,QB
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-27T22:32Z,Achilles,Tendinitis,Right,2026-11-29,QUESTIONABLE,"Evans (Achilles) is listed as questionable for Sunday's contest against the Seahawks, Matt Maiocco of NBC Sports Bay Area reports.",WR
 4361741,Brock Purdy,San Francisco 49ers,Out,2026-11-27T22:25Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Head coach Kyle Shanahan said Friday that Purdy (ankle) has been ruled out for Sunday's game versus the Seahawks, Jennifer Lee Chan of NBC Sports Bay Area reports.",QB
@@ -699,21 +699,21 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034949,Eddy Pineiro,San Francisco 49ers,Active,2026-11-24T00:33Z,,,,,,Pineiro made all five of his PATs in Sunday night's 35-10 win over the Vikings.,PK
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,OT
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,QB
+2971622,Leonard Williams,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,DT
+4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,LB
+3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,LB
+3924327,Drew Lock,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,QB
+4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,G
+4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,LB
+4432734,Jalen Milroe,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,QB
+16802,DeMarcus Lawrence,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,LB
 3115312,Jarran Reed,Seattle Seahawks,Out,2026-11-27T22:22Z,Toe,Not Specified,Not Specified,2026-12-07,OUT,out,DT
 3912547,Sam Darnold,Seattle Seahawks,Active,2026-11-27T22:00Z,,,,,,"Darnold (quadriceps) doesn't have a designation for Sunday's game at San Francisco, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",QB
 4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-27T21:53Z,,,,,,"Smith-Njigba (ankle) doesn't have a designation for Sunday's contest in San Francisco, Gregg Bell of Sports Radio 93.3 KJR Seattle reports.",WR
-4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-11-27T02:20Z,,,,,,"Bradford (knee) was listed as a limited participant in Seattle's practice estimate Thursday, Bob Condotta of The Seattle Times reports.",G
 4426376,Charles Cross,Seattle Seahawks,Active,2026-11-27T02:15Z,,,,,,"Cross (ankle) was listed as a full participant in Seattle's practice estimate Thursday, Bob Condotta of The Seattle Times reports.",OT
-3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-26T22:32Z,,,,,,"Lock (elbow) was a limited participant in Thursday's practice, Bob Condotta of The Seattle Times reports.",QB
-3120358,Uchenna Nwosu,Seattle Seahawks,Questionable,2026-11-26T22:23Z,,,,,,questionable,LB
-4364623,Patrick O'Connell,Seattle Seahawks,Questionable,2026-11-26T22:23Z,,,,,,questionable,LB
 4569547,Nick Kallerup,Seattle Seahawks,Active,2026-11-26T22:22Z,,,,,,,TE
-4362851,Ernest Jones IV,Seattle Seahawks,Questionable,2026-11-26T02:38Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Jones (knee) was a limited participant in Wednesday's practice, John Boyle of the Seahawks' official site reports.",LB
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-26T00:47Z,Knee,Surgery,Not Specified,2026-12-07,OUT,"Head coach Mike Macdonald told reporters Wednesday that Nelson (knee) will not play against the 49ers on Sunday, Brady Henderson of ESPN.com reports.",G
 4245171,Abraham Lucas,Seattle Seahawks,Out,2026-11-26T00:44Z,Ankle,Sprain,Not Specified,2026-12-07,OUT,"Lucas (ankle) has been ruled out for Sunday's game against the 49ers, Brady Henderson of ESPN.com reports.",OT
-16802,DeMarcus Lawrence,Seattle Seahawks,Questionable,2026-11-26T00:26Z,,,,,,questionable,LB
-4432734,Jalen Milroe,Seattle Seahawks,Questionable,2026-11-26T00:26Z,,,,,,questionable,QB
-2971622,Leonard Williams,Seattle Seahawks,Questionable,2026-11-24T12:39Z,,,,,,questionable,DT
 4429835,George Holani,Seattle Seahawks,Injured Reserve,2026-11-23T23:11Z,Knee - MCL,Sprain,Not Specified,2026-12-25,IR,"The Seahawks placed Holani (knee) on injured reserve Monday, John Boyle of the team's official site reports.",RB
 4575431,Devon Witherspoon,Seattle Seahawks,Active,2026-11-19T03:07Z,,,,,,"Witherspoon logged four solo tackles, including 2.0 sacks, in the Seahawks' 21-13 win over the Raiders on Sunday.",CB
 2473037,Jason Myers,Seattle Seahawks,Active,2026-11-17T04:01Z,,,,,,Myers missed his sole field-goal attempt and made three PATs in the Seahawks' 21-13 win over the Raiders on Sunday.,PK
