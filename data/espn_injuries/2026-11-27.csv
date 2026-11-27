@@ -179,10 +179,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3115336,Derek Barnett,Cleveland Browns,Out,2026-11-27T18:26Z,Hamstring,,,2026-12-06,OUT,out,DE
 4362018,Blake Whiteheart,Cleveland Browns,Active,2026-11-27T00:31Z,,,,,,"Whiteheart was listed as full participant in Cleveland's practice estimate Thursday, Sam Warren of The Athletic reports.",TE
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-26T22:24Z,,,,,,"Fannin (groin) was listed as a full practice participant on Thursday's injury report, Sam Warren of The Athletic reports.",TE
-3110565,Quincy Williams,Cleveland Browns,Questionable,2026-11-26T02:05Z,Knee,,,2026-11-29,QUESTIONABLE,"Williams (knee) was a limited participant in Wednesday's practice, Ryan McFadden of ESPN.com reports.",LB
+3110565,Quincy Williams,Cleveland Browns,Questionable,2026-11-26T02:05Z,,,,,,"Williams (knee) was a limited participant in Wednesday's practice, Ryan McFadden of ESPN.com reports.",LB
 4427963,Isaiah McGuire,Cleveland Browns,Questionable,2026-11-26T01:58Z,Calf,,,2026-11-29,QUESTIONABLE,"McGuire (calf) did not participate in Wednesday's practice, Ryan McFadden of ESPN.com reports.",DE
-4569620,Ronnie Hickman,Cleveland Browns,Questionable,2026-11-26T01:52Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,"Hickman (concussion) logged a full practice Wednesday, Ryan McFadden of ESPN.com reports.",S
-3115485,Elgton Jenkins,Cleveland Browns,Questionable,2026-11-25T22:39Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,C
+4569620,Ronnie Hickman,Cleveland Browns,Questionable,2026-11-26T01:52Z,,,,,,"Hickman (concussion) logged a full practice Wednesday, Ryan McFadden of ESPN.com reports.",S
+3115485,Elgton Jenkins,Cleveland Browns,Questionable,2026-11-25T22:39Z,,,,,,questionable,C
 4597310,Austin Barber,Cleveland Browns,Questionable,2026-11-25T22:38Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,OT
 4379397,Tyson Campbell,Cleveland Browns,Active,2026-11-19T02:56Z,,,,,,"Campbell logged five tackles (one solo) and three passes defensed, including one interception, in the Browns' 27-24 win over the Texans on Sunday.",CB
 4876017,Carson Schwesinger,Cleveland Browns,Active,2026-11-19T02:49Z,,,,,,Schwesinger logged 13 tackles (eight solo) in the Browns' 27-24 win over the Texans on Sunday.,LB
@@ -649,6 +649,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-24T02:59Z,,,,,,Blue returned his lone kickoff for 23 yards but fumbled the ball in the process during the Eagles' 19-16 win over the Steelers on Sunday.,RB
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-24T02:56Z,,,,,,Stowers didn't log any offensive snaps in Sunday's 19-16 win over the Steelers.,TE
 4689651,Mac McWilliams,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,CB
+4431590,Jack Sawyer,Pittsburgh Steelers,Questionable,2026-11-27T21:43Z,Knee,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,questionable,LB
 3116689,Cole Holcomb,Pittsburgh Steelers,Out,2026-11-27T19:24Z,Heel,Not Specified,Not Specified,2026-12-06,INACTIVE,Holcomb (heel) is inactive Friday against the Broncos.,LB
 5081338,Kaden Wetjen,Pittsburgh Steelers,Out,2026-11-27T19:21Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Wetjen (coach's decision) is inactive Friday against the Broncos.,WR
 4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-27T19:18Z,,,,,,"Howard is active and will work as Mason Rudolph's backup Friday against the Broncos, Brain Batko of the Steelers' official site reports.",QB
@@ -673,7 +674,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
 4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
 4361411,Pat Freiermuth,Pittsburgh Steelers,Active,2026-11-23T04:02Z,,,,,,Freiermuth caught all five of his targets for 39 yards during Sunday's 19-16 loss to the Eagles.,TE
-4038815,Rico Dowdle,Pittsburgh Steelers,Active,2026-11-22T23:11Z,,,,,,Dowdle rushed five times for 15 yards and caught four of five targets for 19 yards in Sunday's 19-16 loss to the Eagles.,RB
 4361741,Brock Purdy,San Francisco 49ers,Questionable,2026-11-27T21:14Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Purdy (ankle) wasn't spotted during the portion of Friday's practice open to the media, Matt Barrows of The Athletic reports.",QB
 4431466,Jordan Watkins,San Francisco 49ers,Questionable,2026-11-26T22:29Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Watkins (groin) was estimated as a 'DNP' on Thursday's injury report, Matt Maiocco of NBC Sports Bay Area reports.",WR
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-26T22:08Z,Achilles,Tendinitis,Right,2026-11-29,QUESTIONABLE,"Evans (Achilles) was listed as limited on Thursday's practice report, Matt Maiocco of NBC Sports Bay Area reports.",WR
@@ -699,13 +699,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,OT
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,QB
 15818,Keenan Allen,San Francisco 49ers,Active,2026-11-23T05:13Z,,,,,,Allen totaled three catches (on four targets) for 38 yards during Sunday's 35-10 victory against the Vikings in Mexico City.,WR
+4430878,Jaxon Smith-Njigba,Seattle Seahawks,Active,2026-11-27T21:49Z,,,,,,,WR
 4429211,Anthony Bradford,Seattle Seahawks,Questionable,2026-11-27T02:20Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Bradford (knee) was listed as a limited participant in Seattle's practice estimate Thursday, Bob Condotta of The Seattle Times reports.",G
 4426376,Charles Cross,Seattle Seahawks,Active,2026-11-27T02:15Z,,,,,,"Cross (ankle) was listed as a full participant in Seattle's practice estimate Thursday, Bob Condotta of The Seattle Times reports.",OT
 3924327,Drew Lock,Seattle Seahawks,Questionable,2026-11-26T22:32Z,Elbow,Not Specified,Right,2026-11-29,QUESTIONABLE,"Lock (elbow) was a limited participant in Thursday's practice, Bob Condotta of The Seattle Times reports.",QB
 3120358,Uchenna Nwosu,Seattle Seahawks,Questionable,2026-11-26T22:23Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
 4364623,Patrick O'Connell,Seattle Seahawks,Questionable,2026-11-26T22:23Z,Toe,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
 4569547,Nick Kallerup,Seattle Seahawks,Active,2026-11-26T22:22Z,,,,,,,TE
-4430878,Jaxon Smith-Njigba,Seattle Seahawks,Questionable,2026-11-26T22:14Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Smith-Njigba (ankle) was listed as limited on Thursday's injury report, Bob Condotta of The Seattle Times reports.",WR
 4362851,Ernest Jones IV,Seattle Seahawks,Questionable,2026-11-26T02:38Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Jones (knee) was a limited participant in Wednesday's practice, John Boyle of the Seahawks' official site reports.",LB
 3129308,Quenton Nelson,Seattle Seahawks,Out,2026-11-26T00:47Z,Knee,Surgery,Not Specified,2026-12-07,OUT,"Head coach Mike Macdonald told reporters Wednesday that Nelson (knee) will not play against the 49ers on Sunday, Brady Henderson of ESPN.com reports.",G
 4245171,Abraham Lucas,Seattle Seahawks,Out,2026-11-26T00:44Z,Ankle,Sprain,Not Specified,2026-12-07,OUT,"Lucas (ankle) has been ruled out for Sunday's game against the 49ers, Brady Henderson of ESPN.com reports.",OT
