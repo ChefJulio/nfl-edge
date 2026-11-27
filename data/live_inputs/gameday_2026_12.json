@@ -78,5 +78,25 @@
 "at": "2026-11-26T20:14:00+00:00",
 "post": 0.0,
 "status": "Inactive"
+},
+"00-0038933": {
+"name": "Dalton Kincaid",
+"team": "BUF",
+"pos": "TE",
+"pre": 0.7304,
+"ruling": "ACT",
+"at": "2026-11-26T23:55:00+00:00",
+"post": 0.974,
+"status": "Active (LLL)"
+},
+"00-0041443": {
+"name": "Skyler Bell",
+"team": "BUF",
+"pos": "WR",
+"pre": 0.1731,
+"ruling": "INA",
+"at": "2026-11-26T23:53:00+00:00",
+"post": 0.0,
+"status": "Inactive"
 }
 }
