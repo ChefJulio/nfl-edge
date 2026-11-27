@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-23T00:21Z,,,,,,Hill carried the ball six times for 69 yards and a touchdown and caught four of five targets for 27 yards in Sunday's 35-33 loss to the Panthers.,RB
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-23T00:13Z,,,,,,Brissett completed 24 of 37 passes for 276 yards and a touchdown with an interception in Sunday's 35-33 loss to the Panthers. He added seven rushing yards on two carries.,QB
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
+4684527,T.J. Sanders,Buffalo Bills,Active,2026-11-26T23:58Z,,,,,,Sanders (shoulder) is active for Thursday's game against Kansas City.,DT
 4568624,Dorian Williams,Buffalo Bills,Active,2026-11-26T23:56Z,,,,,,Williams (calf) is active for Thursday's game against the Chiefs.,LB
 4385690,Dalton Kincaid,Buffalo Bills,Active,2026-11-26T23:55Z,,,,,,Kincaid (thumb/ankle) is listed as active for Thursday night's game against the Chiefs.,TE
 4379778,Christian Benford,Buffalo Bills,Out,2026-11-26T23:54Z,Groin,Not Specified,Not Specified,2026-12-06,INACTIVE,Benford (groin) is inactive for Thursday's game against the Chiefs.,CB
@@ -81,7 +82,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4869533,Jude Bowry,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,OT
 3915487,Mike Danna,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,DE
 3127294,Greg Gaines,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,DT
-4684527,T.J. Sanders,Buffalo Bills,Active,2026-11-26T23:53Z,,,,,,,DT
 4428696,O'Cyrus Torrence,Buffalo Bills,Active,2026-11-26T23:53Z,,,,,,,G
 4683153,Skyler Bell,Buffalo Bills,Out,2026-11-26T23:53Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,WR
 4362506,Greg Rousseau,Buffalo Bills,Active,2026-11-25T00:57Z,,,,,,Rousseau (back) was a full participant in Tuesday's walkthrough practice.,LB
@@ -99,6 +99,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4373678,Khalil Shakir,Buffalo Bills,Active,2026-11-22T23:56Z,,,,,,Shakir caught five of nine targets for 101 yards while rushing twice for two yards in Sunday's 26-9 win over the Dolphins.,WR
 3915416,DJ Moore,Buffalo Bills,Active,2026-11-22T21:31Z,,,,,,Moore caught eight of 10 targets for 91 yards and a touchdown in Sunday's 26-9 win over the Dolphins.,WR
 4379399,James Cook III,Buffalo Bills,Active,2026-11-22T21:26Z,,,,,,Cook rushed 22 times for 89 yards and a touchdown while catching two of three targets for three yards in Sunday's 26-9 win over the Dolphins.,RB
+3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-27T00:23Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Okereke (foot) was listed as a non-participant in Carolina's practice estimate Thursday, Mike Kaye of ESPN.com reports.",LB
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-26T22:20Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Evans (Achilles) was listed as a DNP on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-26T22:18Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Tremble (knee) was listed as a limited participant on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-26T22:16Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,"Brooks (groin) was estimated as a full practice participant on Thursday's report, Mike Kaye of ESPN.com reports.",RB
@@ -111,7 +112,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4714157,Thomas Incoom,Carolina Panthers,Injured Reserve,2026-11-26T02:55Z,Calf,Not Specified,Not Specified,2026-11-30,IR-R,"The Panthers designated Incoom (calf) to return from injured reserve Wednesday, Mike Kaye of ESPN.com reports.",LB
 4035232,Tyrel Dodson,Carolina Panthers,Active,2026-11-25T02:33Z,,,,,,"Dodson tallied eight tackles (five solo), an interception and a fumble recovery during Carolina's win over the Ravens on Sunday,",LB
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-25T02:01Z,Hamstring,Not Specified,Not Specified,2027-02-15,IR,"Christensen (hamstring) reverted to season-ending injured reserve after his 21-day practice window closed Tuesday, Mike Kaye of ESPN.com reports.",G
-3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-24T12:39Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4243256,Devin Lloyd,Carolina Panthers,Active,2026-11-24T05:07Z,,,,,,Lloyd recorded four tackles (two solo) in Sunday's 35-33 win over the Ravens.,LB
 4430034,Xavier Legette,Carolina Panthers,Active,2026-11-24T03:24Z,,,,,,Legette did not play an offensive snap in Sunday's 35-33 win over the Ravens.,WR
 4567096,John Metchie III,Carolina Panthers,Active,2026-11-24T02:40Z,,,,,,Metchie caught one of three targets for 19 yards during the Panthers' 35-33 win over the Ravens on Sunday.,WR
@@ -374,17 +374,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430539,Brenton Strange,Jacksonville Jaguars,Active,2026-11-23T03:18Z,,,,,,Strange caught all three of his targets for 16 yards during Sunday's 23-18 loss to the Giants.,TE
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-23T03:11Z,,,,,,Rodriguez rushed four times for 28 yards in Sunday's 23-18 loss to the Giants. He added one catch for 13 yards on one target.,RB
 4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-23T02:40Z,,,,,,Thomas caught one pass for an 18-yard touchdown on three targets in Sunday's 23-18 loss to the Giants.,WR
-4602984,Diego Pounds,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,,,,INACTIVE,inactive,OT
-5278708,Melvin Smith Jr.,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,,,,INACTIVE,inactive,CB
+4567747,Garrett Nussmeier,Kansas City Chiefs,Out,2026-11-27T00:05Z,Coach's Decision,Not Specified,Not Specified,2026-12-03,INACTIVE,Nussmeier (coach's decision) is inactive but will serve as the Chiefs' emergency third quarterback against the Bills on Thursday.,QB
+4871063,Peter Woods,Kansas City Chiefs,Active,2026-11-27T00:05Z,,,,,,Woods (neck) is active for Thursday's game against the Bills.,DT
+4240472,Noah Gray,Kansas City Chiefs,Active,2026-11-27T00:02Z,,,,,,Gray (ribs) is active for Thursday's game against the Bills.,TE
+4602984,Diego Pounds,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,Not Specified,Not Specified,2026-12-03,INACTIVE,inactive,OT
+5278708,Melvin Smith Jr.,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,Not Specified,Not Specified,2026-12-03,INACTIVE,inactive,CB
 4567048,Kenneth Walker III,Kansas City Chiefs,Out,2026-11-27T00:01Z,Groin,Soreness,Not Specified,2026-12-03,INACTIVE,inactive,RB
-4567747,Garrett Nussmeier,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,,,,INACTIVE,inactive,QB
-4573152,Marcus Harris,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,,,,INACTIVE,inactive,DT
-4240472,Noah Gray,Kansas City Chiefs,Active,2026-11-27T00:01Z,,,,,,,TE
+4573152,Marcus Harris,Kansas City Chiefs,Out,2026-11-27T00:01Z,Coach's Decision,Not Specified,Not Specified,2026-12-03,INACTIVE,inactive,DT
 4379401,John FitzPatrick,Kansas City Chiefs,Active,2026-11-26T23:32Z,,,,,,"The Chiefs elevated FitzPatrick from the practice squad to the active roster ahead of Thursday's game against the Bills, Aaron Wilson of KPRC 2 Houston reports.",TE
 4605841,Nate Carter,Kansas City Chiefs,Active,2026-11-26T23:27Z,,,,,,"The Chiefs elevated Carter from the practice squad to the active roster ahead of Thursday's game against the Bills, Aaron Wilson of KPRC 2 Houston reports.",RB
-4871063,Peter Woods,Kansas City Chiefs,Active,2026-11-26T02:59Z,,,,,,Woods (neck) is listed as questionable for Thursday night's game against the Bills.,DT
 4242459,Trey Smith,Kansas City Chiefs,Active,2026-11-26T02:57Z,,,,,,Smith (concussion) does not have any injury designation ahead of Thursday night's game against the Bills.,G
-4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-11-26T02:54Z,Knee,Not Specified,Not Specified,2026-12-03,OUT,Norman-Lott (knee) has been ruled out ahead of Thursday night's game against the Bills.,DT
+4591008,Omarr Norman-Lott,Kansas City Chiefs,Out,2026-11-26T02:54Z,Knee,Not Specified,Not Specified,2026-12-03,INACTIVE,Norman-Lott (knee) has been ruled out ahead of Thursday night's game against the Bills.,DT
 4043041,Jaylon Moore,Kansas City Chiefs,Out,2026-11-26T02:51Z,Ankle,Not Specified,Right,2026-12-03,INACTIVE,Moore (ankle) has been ruled out ahead of Thursday night's game against the Bills.,OT
 4832955,Emmett Johnson,Kansas City Chiefs,Active,2026-11-25T17:16Z,,,,,,"With Kenneth Walker (groin) ruled out for Thursday night's game against the Bills,  Johnson is once again set to lead the Chiefs' backfield.",RB
 4372070,Ben VanSumeren,Kansas City Chiefs,Injured Reserve,2026-11-24T21:28Z,Knee,Sprain,Not Specified,2026-12-27,IR,The Chiefs placed VanSumeren (knee) on the reserve/injured list Tuesday.,FB
@@ -624,6 +624,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4597500,Adonai Mitchell,New York Jets,Active,2026-11-23T04:31Z,,,,,,Mitchell caught two passes for 30 yards on three targets in Sunday's 27-24 win over the Chargers.,WR
 4685247,Braelon Allen,New York Jets,Active,2026-11-23T01:06Z,,,,,,Allen rushed 16 times for 75 yards while catching his lone target for nine yards in Sunday's 27-24 win over the Chargers.,RB
 15864,Geno Smith,New York Jets,Active,2026-11-23T00:56Z,,,,,,Smith completed 17 of 21 passes for 176 yards and three touchdowns in Sunday's 27-24 win over the Chargers. He also rushed once for four yards.,QB
+3139368,Marcus Epps,Philadelphia Eagles,Out,2026-11-27T00:13Z,Foot,,,2026-12-06,OUT,"Epps (foot) has been ruled out for the remainder of Philadelphia's matchup versus the Cowboys on Thursday, Mike Kaye of ESPN.com reports.",S
 3121023,Dallas Goedert,Philadelphia Eagles,Out,2026-11-26T23:03Z,Shoulder,Not Specified,Not Specified,2026-12-06,OUT,Goedert (shoulder) has been ruled out of Thursday's contest at Dallas.,TE
 3929630,Saquon Barkley,Philadelphia Eagles,Questionable,2026-11-26T22:49Z,Neck,Stinger,Not Specified,2026-11-26,QUESTIONABLE,Barkley suffered a stinger during Thursday's game in Dallas.,RB
 4682618,Cooper DeJean,Philadelphia Eagles,Questionable,2026-11-26T22:08Z,Concussion,Concussion,Not Specified,2026-12-06,QUESTIONABLE,DeJean has entered the league's concussion protocol and has been ruled out for the rest of Thursday's game against the Cowboys.,CB
@@ -648,7 +649,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360698,Joe Milton,Philadelphia Eagles,Active,2026-11-23T01:37Z,,,,,,Milton completed 11 of 21 passes for 141 yards while rushing five times for seven yards in Sunday's 19-16 win over the Steelers.,QB
 4241478,DeVonta Smith,Philadelphia Eagles,Active,2026-11-22T22:23Z,,,,,,Smith (hamstring) caught five of 12 targets for 41 yards in Sunday's 19-16 win over the Steelers.,WR
 4685759,Jalen Carter,Philadelphia Eagles,Active,2026-11-22T16:37Z,,,,,,Carter (quadriceps) is active for Sunday's game against the Steelers.,DT
-3917657,Zack Baun,Philadelphia Eagles,Injured Reserve,2026-11-22T00:14Z,Back,Not Specified,Not Specified,2026-12-19,IR,Baun (back) was placed on the Eagles' injured reserve Saturday.,LB
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-26T22:48Z,,,,,,"Elliott (knee) does not carry an injury designation into Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",S
 4037333,Alex Highsmith,Pittsburgh Steelers,Out,2026-11-26T22:46Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Highsmith (ankle) has been ruled out for Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",LB
 4035656,Ben Skowronek,Pittsburgh Steelers,Injured Reserve,2026-11-26T22:43Z,Calf,Not Specified,Not Specified,2026-12-27,IR,"The Steelers placed Skowronek (calf) on injured reserve Thursday, Teresa Varley of the team's official site reports.",WR
