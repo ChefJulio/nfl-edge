@@ -49,13 +49,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430807,Bijan Robinson,Atlanta Falcons,Active,2026-11-15T22:00Z,,,,,,Robinson rushed 16 times for 71 yards and a touchdown and brought in four of five targets for six yards in the Chiefs' 35-13 win over the Falcons on Sunday.,RB
 3128303,Josh Woods,Atlanta Falcons,Active,2026-11-15T16:34Z,,,,,,,LB
 4429014,Gervon Dexter Sr.,Atlanta Falcons,Active,2026-11-15T16:34Z,,,,,,,DT
+3043078,Derrick Henry,Baltimore Ravens,Active,2026-11-27T21:01Z,,,,,,"Henry (concussion) doesn't have an injury designation for Sunday's game against the Texans, per Adam Caplan of SiriusXM NFL Radio.",RB
 4035245,Nnamdi Madubuike,Baltimore Ravens,Out,2026-11-27T19:46Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,out,DT
 4832793,Olaivavega Ioane,Baltimore Ravens,Out,2026-11-27T19:45Z,Hand,Not Specified,Not Specified,2026-12-13,OUT,out,G
 4683188,Mike Green,Baltimore Ravens,Active,2026-11-26T23:52Z,,,,,,Green (knee) was a full participant in Thursday's practice.,LB
 3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-26T23:14Z,Knee,Not Specified,Left,2026-12-13,OUT,"Hawkins (knee) was a limited participant in Thursday's practice, Jonas Shaffer of TheBaltimoreBanner.com reports.",S
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-26T22:03Z,,,,,,"Bateman (groin) was a full participant in Thursday's practice, Jonas Shaffer of TheBaltimoreBanner.com reports.",WR
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-26T21:59Z,,,,,,Flowers (ankle) was listed as a full participant in Thursday's practice.,WR
-3043078,Derrick Henry,Baltimore Ravens,Active,2026-11-26T21:50Z,,,,,,Henry (concussion) was listed as a full participant in Thursday's practice.,RB
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-26T21:38Z,,,,,,,DT
 4035479,John Simpson,Baltimore Ravens,Active,2026-11-26T21:38Z,,,,,,,G
 3052101,Chidobe Awuzie,Baltimore Ravens,Questionable,2026-11-26T21:37Z,Back,,,2026-11-29,QUESTIONABLE,questionable,CB
@@ -99,12 +99,12 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-24T01:42Z,,,,,,Johnson rushed once for two yards and caught seven of his eight targets for 55 yards in the Bills' 26-9 win over the Dolphins on Sunday.,RB
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-23T16:44Z,,,,,,Latu recorded a 30-yard reception on four targets in Sunday's 26-9 win over the Dolphins.,TE
 3917232,Tyler Bass,Buffalo Bills,Active,2026-11-23T05:10Z,,,,,,Bass went 4-for-5 on field-goal tries and made both of his PATs during Sunday's 26-9 win over the Dolphins.,PK
+4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-27T20:57Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Evans (Achilles) was a limited participant at practice Friday.,TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-27T20:51Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Tremble (knee) remained a limited participant at practice Friday.,TE
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-27T20:49Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,Brooks (groin) practiced without limitations Friday.,RB
 2576925,Darren Waller,Carolina Panthers,Questionable,2026-11-27T20:26Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Waller (knee) practiced in a limited fashion Friday.,TE
 4685472,Tetairoa McMillan,Carolina Panthers,Questionable,2026-11-27T18:33Z,Foot,Soreness,Not Specified,2026-11-30,QUESTIONABLE,"McMillan (foot) was not in uniform for the team stretch portion of Friday's practice, but he did suit up afterward, Joe Person of The Athletic reports.",WR
 3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-27T00:23Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Okereke (foot) was listed as a non-participant in Carolina's practice estimate Thursday, Mike Kaye of ESPN.com reports.",LB
-4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-26T22:20Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Evans (Achilles) was listed as a DNP on Thursday's estimated practice report, Mike Kaye of ESPN.com reports.",TE
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-26T21:36Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4034948,Feleipe Franks,Carolina Panthers,Questionable,2026-11-26T21:36Z,Wrist,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,TE
 4875592,Jackson Kuwatch,Carolina Panthers,Questionable,2026-11-26T21:35Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
@@ -575,7 +575,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4605498,Decamerion Richardson,New Orleans Saints,Active,2026-11-22T16:39Z,,,,,,,CB
 4566088,Jaylan Ford,New Orleans Saints,Active,2026-11-16T19:32Z,,,,,,,LB
 4725996,Abdul Carter,New York Giants,Questionable,2026-11-26T23:09Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Carter (calf/illness) did not participate in Thursday's practice, Pat Leonard of the New York Daily News reports.",LB
-4361050,Isaiah Likely,New York Giants,Questionable,2026-11-26T21:09Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Likely (groin) was listed as limited on Thursday's practice report, Dan Salomone of the Giants' official site reports.",TE
+4361050,Isaiah Likely,New York Giants,Active,2026-11-26T21:09Z,,,,,,"Likely (groin) was listed as limited on Thursday's practice report, Dan Salomone of the Giants' official site reports.",TE
 4431321,Dru Phillips,New York Giants,Questionable,2026-11-26T01:22Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Phillips (illness) did not participate in Wednesday's practice, Dan Salomone of the Giants' official site reports.",CB
 4950400,Arvell Reese,New York Giants,Questionable,2026-11-26T01:13Z,Back,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Reese (back) was a limited participant in Wednesday's practice, Dan Salomone of the Giants' official site reports.",LB
 16837,Shelby Harris,New York Giants,Questionable,2026-11-25T21:14Z,Illness,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,DT
