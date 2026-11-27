@@ -224,13 +224,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-23T17:24Z,,,,,,Mitchell recorded two receptions for 40 yards on two targets in Sunday's 51-30 win over the Titans.,TE
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-23T04:09Z,,,,,,Flournoy caught just one pass for 11 yards on one target in Sunday's 51-30 win over the Titans.,WR
 3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-11-23T02:34Z,,,,,,Turpin failed to reel in his only target while rushing twice for 41 yards and a touchdown during Sunday's 51-30 win over the Titans. He added 121 yards as a kick returner and logged a 13-yard punt return.,WR
+4241820,Sam Ehlinger,Denver Broncos,Out,2026-11-27T18:59Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Ehlinger (coach's decision) is inactive for Friday's game against the Steelers but will work as Denver's emergency third QB.,QB
 4362748,Tyler Badie,Denver Broncos,Active,2026-11-27T18:44Z,,,,,,Badie (thumb) is active Friday against the Steelers.,RB
 4039007,Taylor Rapp,Denver Broncos,Out,2026-11-27T18:39Z,Quadriceps,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,S
-5085625,Gavin Ortega,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,,,,INACTIVE,inactive,OT
+5085625,Gavin Ortega,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,OT
 4868598,Kage Casey,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,OT
-4241820,Sam Ehlinger,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,QB
 4039057,Lil'Jordan Humphrey,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,WR
-5159802,Dallen Bentley,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,,,,INACTIVE,inactive,TE
+5159802,Dallen Bentley,Denver Broncos,Out,2026-11-27T18:39Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,TE
 4603189,Sai'vion Jones,Denver Broncos,Injured Reserve,2026-11-27T02:24Z,Hamstring,Not Specified,Not Specified,2026-12-25,IR,The Broncos placed Jones (hamstring) on injured reserve Thursday.,DE
 4391845,Cody Schrader,Denver Broncos,Active,2026-11-26T23:22Z,,,,,,"The Broncos signed Schrader off the practice squad to the active roster Thursday, Aric DiLalla of the team's official site reports.",RB
 4432208,Caleb Lohner,Denver Broncos,Injured Reserve,2026-11-26T23:03Z,Foot,Surgery,Not Specified,2026-12-06,IR-R,Lohner (foot) has been ruled out for Friday's game against the Steelers.,TE
@@ -649,13 +649,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-24T02:59Z,,,,,,Blue returned his lone kickoff for 23 yards but fumbled the ball in the process during the Eagles' 19-16 win over the Steelers on Sunday.,RB
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-24T02:56Z,,,,,,Stowers didn't log any offensive snaps in Sunday's 19-16 win over the Steelers.,TE
 4689651,Mac McWilliams,Philadelphia Eagles,Active,2026-11-23T15:49Z,,,,,,,CB
-5081338,Kaden Wetjen,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,,,,INACTIVE,inactive,WR
-4431533,Gabriel Rubio,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,,,,INACTIVE,inactive,DE
-3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,,,,INACTIVE,inactive,CB
-5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,,,,INACTIVE,inactive,RB
+5081338,Kaden Wetjen,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,WR
+4431533,Gabriel Rubio,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,DE
+3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,CB
+5081508,Eli Heidenreich,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,RB
 4714771,Drew Allar,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,QB
 4429164,Nick Herbig,Pittsburgh Steelers,Active,2026-11-27T01:57Z,,,,,,"Herbig (hip) will play in Pittsburgh's matchup versus Denver on Friday,",LB
-3116689,Cole Holcomb,Pittsburgh Steelers,Out,2026-11-27T01:54Z,Heel,Not Specified,Not Specified,2026-11-27,INACTIVE,Holcomb (heel) is questionable for Pittsburgh's matchup versus the Broncos on Friday.,LB
+3116689,Cole Holcomb,Pittsburgh Steelers,Out,2026-11-27T01:54Z,Heel,Not Specified,Not Specified,2026-12-06,INACTIVE,Holcomb (heel) is questionable for Pittsburgh's matchup versus the Broncos on Friday.,LB
 4431258,Gennings Dunker,Pittsburgh Steelers,Injured Reserve,2026-11-27T01:50Z,Knee,Not Specified,Not Specified,2026-12-06,IR-R,"Dunker (knee) has been ruled out for Pittsburgh's matchup versus the Broncos on Friday,",G
 3929846,DeShon Elliott,Pittsburgh Steelers,Active,2026-11-26T22:48Z,,,,,,"Elliott (knee) does not carry an injury designation into Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",S
 4037333,Alex Highsmith,Pittsburgh Steelers,Out,2026-11-26T22:46Z,Ankle,Not Specified,Not Specified,2026-12-06,INACTIVE,"Highsmith (ankle) has been ruled out for Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",LB
