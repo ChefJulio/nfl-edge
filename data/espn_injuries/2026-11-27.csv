@@ -1,10 +1,10 @@
 espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,comment,pos
+4239944,Hunter Long,Arizona Cardinals,Questionable,2026-11-28T00:53Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Long (ankle) is questionable for Sunday's game against the Commanders, Bo Brack of GoPHNX.com reports.",TE
 4870808,Jeremiyah Love,Arizona Cardinals,Injured Reserve,2026-11-27T18:12Z,Ankle,Sprain,Right,2026-12-06,IR,"Head coach Mike LaFleur said Friday that he has no update on Love (ankle), who is eligible to come off injured reserve following Sunday's game against the Commanders, Bo Brack of GoPHNX.com reports.",RB
 4367199,Jon Gaines II,Arizona Cardinals,Out,2026-11-27T18:01Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,out,G
 11394,Josh Johnson,Arizona Cardinals,Active,2026-11-27T17:40Z,,,,,,"Coach Mike LaFleur has ruled out Carson Beck (back) for Sunday's game against the Commanders, which sets the stage for Johnson to start the contest, Darren Urban of the Cardinals' official site reports.",QB
 4430841,Carson Beck,Arizona Cardinals,Out,2026-11-27T17:36Z,Back,Spasms,Not Specified,2026-12-06,OUT,"Beck (back) will not play Sunday against the Commanders, coach Mike LaFleur said Friday, Josh Weinfuss of ESPN.com reports.",QB
 4709695,Karson Sharar,Arizona Cardinals,Questionable,2026-11-26T20:31Z,Groin,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,LB
-4239944,Hunter Long,Arizona Cardinals,Questionable,2026-11-26T20:30Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,TE
 4428512,Kedon Slovis,Arizona Cardinals,Active,2026-11-25T21:42Z,,,,,,"Slovis was claimed off waivers by the Cardinals on Wednesday, Josh Weinfuss of ESPN reports.",QB
 4249739,Jack Gibbens,Arizona Cardinals,Active,2026-11-25T02:56Z,,,,,,Gibbens registered 10 total tackles (six solo) during Sunday's 34-7 loss to the Chiefs.,LB
 3127287,Budda Baker,Arizona Cardinals,Active,2026-11-25T02:46Z,,,,,,Baker recorded six total tackles (five solo) during Sunday's 34-7 loss to Kansas City.,S
@@ -24,15 +24,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4373626,Tyler Allgeier,Arizona Cardinals,Active,2026-11-22T23:47Z,,,,,,Allgeier carried the ball seven times for 23 yards in Sunday's 34-7 loss to Kansas City.,RB
 4361307,Trey McBride,Arizona Cardinals,Active,2026-11-22T23:39Z,,,,,,McBride caught nine of 14 targets for 54 yards in Sunday's 34-7 loss to Kansas City. He added four yards on his only carry.,TE
 4429071,Cody Simon,Arizona Cardinals,Questionable,2026-11-22T20:06Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Simon (calf) is questionable to return to Sunday's game against the Chiefs.,LB
+4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-27T23:45Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Bowman (hamstring) has been ruled out for Sunday's game against the Vikings, Will McFadden of the Falcons' official site reports.",CB
+4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-27T23:42Z,,,,,,"Daniels (Achilles) does not carry an injury designation into Sunday's game against the Vikings, Will McFadden of the Falcons' official site reports.",LB
 4870612,Zachariah Branch,Atlanta Falcons,Out,2026-11-27T19:39Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Branch (hamstring) has been ruled out for Sunday's game at Minnesota, Will McFadden of the Falcons' official site reports.",WR
-4361409,Jahan Dotson,Atlanta Falcons,Out,2026-11-27T19:03Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Dotson (hamstring) has been ruled out for Sunday's game at Minnesota, Will McFadden of the Falcons' official site reports.",WR
 3043168,Za'Darius Smith,Atlanta Falcons,Active,2026-11-27T18:40Z,,,,,,,DE
 4361510,Cameron Thomas,Atlanta Falcons,Active,2026-11-27T18:40Z,,,,,,,DE
 4567111,DeMarcco Hellams,Atlanta Falcons,Out,2026-11-27T18:27Z,Foot,Not Specified,Not Specified,2026-12-06,OUT,out,S
 4568510,Matthew Bergeron,Atlanta Falcons,Out,2026-11-27T18:27Z,Back,Not Specified,Not Specified,2026-12-06,OUT,out,G
-4431194,Billy Bowman Jr.,Atlanta Falcons,Out,2026-11-27T18:27Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,out,CB
+4361409,Jahan Dotson,Atlanta Falcons,Out,2026-11-27T17:51Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Dotson (hamstring) wasn't spotted at practice Friday, Daniel Flick of the Atlanta Journal-Constitution reports.",WR
 5081394,James Pearce Jr.,Atlanta Falcons,Active,2026-11-26T18:54Z,,,,,,"Pearce (back) practiced in full Thursday, Tori McElhaney of the Falcons' official site reports.",LB
-4595343,Kendal Daniels,Atlanta Falcons,Active,2026-11-26T18:46Z,,,,,,"Daniels (Achilles) was limited during Thursday's practice, Tori McElhaney of the Falcons' official site reports.",LB
 4037626,Divine Deablo,Atlanta Falcons,Active,2026-11-26T01:25Z,,,,,,"Deablo (forearm) was not listed on Wednesday's injury report, Will McFadden of the Falcons' official site reports.",LB
 3917914,Olamide Zaccheaus,Atlanta Falcons,Active,2026-11-18T02:27Z,,,,,,Zaccheaus caught two of his four targets for 17 yards and returned five punts for 81 yards during Atlanta's loss Sunday versus the Chiefs.,WR
 4035886,Khalil Herbert,Atlanta Falcons,Active,2026-11-18T02:23Z,,,,,,Herbert caught two of his three targets for seven yards during Sunday's 35-13 loss versus the Chiefs. He also returned six kickoffs for 168 yards.,RB
@@ -49,17 +49,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4430807,Bijan Robinson,Atlanta Falcons,Active,2026-11-15T22:00Z,,,,,,Robinson rushed 16 times for 71 yards and a touchdown and brought in four of five targets for six yards in the Chiefs' 35-13 win over the Falcons on Sunday.,RB
 3128303,Josh Woods,Atlanta Falcons,Active,2026-11-15T16:34Z,,,,,,,LB
 4429014,Gervon Dexter Sr.,Atlanta Falcons,Active,2026-11-15T16:34Z,,,,,,,DT
+3126356,Marlon Humphrey,Baltimore Ravens,Active,2026-11-28T00:04Z,,,,,,"Head coach Jesse Minter told reporters Friday that Humphrey (personal) will be available for Sunday's game against the Texans, Jeff Zrebiec of The Athletic reports.",CB
+4035245,Nnamdi Madubuike,Baltimore Ravens,Out,2026-11-28T00:01Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,"Madubuike (hamstring) has been ruled out for Sunday's game against Houston, Ryan Mink of the Ravens' official site reports.",DT
+3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-27T23:54Z,Knee,Not Specified,Left,2026-12-13,OUT,"Hawkins (knee) has been ruled out for Sunday's game against the Texans, Ryan Mink of the Ravens' official site reports.",S
 3052101,Chidobe Awuzie,Baltimore Ravens,Active,2026-11-27T21:20Z,,,,,,,CB
 3043078,Derrick Henry,Baltimore Ravens,Active,2026-11-27T21:01Z,,,,,,"Henry (concussion) doesn't have an injury designation for Sunday's game against the Texans, per Adam Caplan of SiriusXM NFL Radio.",RB
-4035245,Nnamdi Madubuike,Baltimore Ravens,Out,2026-11-27T19:46Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,out,DT
 4832793,Olaivavega Ioane,Baltimore Ravens,Out,2026-11-27T19:45Z,Hand,Not Specified,Not Specified,2026-12-13,OUT,out,G
 4683188,Mike Green,Baltimore Ravens,Active,2026-11-26T23:52Z,,,,,,Green (knee) was a full participant in Thursday's practice.,LB
-3858276,Jaylinn Hawkins,Baltimore Ravens,Out,2026-11-26T23:14Z,Knee,Not Specified,Left,2026-12-13,OUT,"Hawkins (knee) was a limited participant in Thursday's practice, Jonas Shaffer of TheBaltimoreBanner.com reports.",S
 4360939,Rashod Bateman,Baltimore Ravens,Active,2026-11-26T22:03Z,,,,,,"Bateman (groin) was a full participant in Thursday's practice, Jonas Shaffer of TheBaltimoreBanner.com reports.",WR
 4429615,Zay Flowers,Baltimore Ravens,Active,2026-11-26T21:59Z,,,,,,Flowers (ankle) was listed as a full participant in Thursday's practice.,WR
 4565311,Aeneas Peebles,Baltimore Ravens,Active,2026-11-26T21:38Z,,,,,,,DT
 4035479,John Simpson,Baltimore Ravens,Active,2026-11-26T21:38Z,,,,,,,G
-3126356,Marlon Humphrey,Baltimore Ravens,Active,2026-11-26T02:21Z,,,,,,"Humphrey (personal) was back at practice Wednesday and was a full participant, Quentin Corpuel of the Ravens' official site reports.",CB
 4362139,Travis Jones,Baltimore Ravens,Active,2026-11-25T02:42Z,,,,,,Jones recorded eight tackles (five solo) including 1.0 sacks during Sunday's 35-33 loss at Carolina.,DT
 4430831,Trenton Simpson,Baltimore Ravens,Active,2026-11-25T02:36Z,,,,,,Simpson recorded 10 total tackles (five solo) during Sunday's 35-33 loss to the Panthers.,LB
 4575517,Kyle Hamilton,Baltimore Ravens,Active,2026-11-25T02:31Z,,,,,,Hamilton recorded eight total tackles (five solo) during Sunday's 35-33 loss to the Panthers.,S
@@ -74,6 +74,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4038441,Justice Hill,Baltimore Ravens,Active,2026-11-23T00:21Z,,,,,,Hill carried the ball six times for 69 yards and a touchdown and caught four of five targets for 27 yards in Sunday's 35-33 loss to the Panthers.,RB
 2578570,Jacoby Brissett,Baltimore Ravens,Active,2026-11-23T00:13Z,,,,,,Brissett completed 24 of 37 passes for 276 yards and a touchdown with an interception in Sunday's 35-33 loss to the Panthers. He added seven rushing yards on two carries.,QB
 4430876,Roger Rosengarten,Baltimore Ravens,Active,2026-11-22T20:30Z,,,,,,,OT
+4429501,Ray Davis,Buffalo Bills,Active,2026-11-27T23:05Z,,,,,,"Davis turned four carries into six yards, failed to haul in his lone target and returned three kickoffs for 71 yards during Buffalo's 13-10 win over Kansas City on Thursday.",RB
 3915411,Ty Johnson,Buffalo Bills,Active,2026-11-27T22:54Z,,,,,,Johnson grabbed both of his targets for 12 yards during the Bills' 13-10 win over the Chiefs on Thursday.,RB
 4635008,Keon Coleman,Buffalo Bills,Active,2026-11-27T15:15Z,,,,,,Coleman didn't catch his only target in Thursday's 13-10 win over the Chiefs.,WR
 3930086,Dawson Knox,Buffalo Bills,Active,2026-11-27T15:12Z,,,,,,Knox didn't catch his only target in Thursday's 13-10 win over the Chiefs.,TE
@@ -98,15 +99,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4259166,Terrel Bernard,Buffalo Bills,Active,2026-11-24T03:36Z,,,,,,Bernard logged two tackles (one solo) in the Bills' 26-9 win over the Dolphins on Sunday.,LB
 4241476,Tyrell Shavers,Buffalo Bills,Active,2026-11-24T01:48Z,,,,,,Shavers failed to bring in either of his two targets and logged one tackle on kick coverage in the Bills' 26-9 win over the Dolphins on Sunday.,WR
 4688552,Keleki Latu,Buffalo Bills,Active,2026-11-23T16:44Z,,,,,,Latu recorded a 30-yard reception on four targets in Sunday's 26-9 win over the Dolphins.,TE
-3917232,Tyler Bass,Buffalo Bills,Active,2026-11-23T05:10Z,,,,,,Bass went 4-for-5 on field-goal tries and made both of his PATs during Sunday's 26-9 win over the Dolphins.,PK
+4034948,Feleipe Franks,Carolina Panthers,Questionable,2026-11-28T00:14Z,Wrist,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Franks (wrist) was a limited participant at practice Friday.,TE
+3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-28T00:11Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Okereke (foot) did not participate at practice Friday.,LB
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-27T20:57Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Evans (Achilles) was a limited participant at practice Friday.,TE
 4372780,Tommy Tremble,Carolina Panthers,Questionable,2026-11-27T20:51Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Tremble (knee) remained a limited participant at practice Friday.,TE
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-27T20:49Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,Brooks (groin) practiced without limitations Friday.,RB
 2576925,Darren Waller,Carolina Panthers,Questionable,2026-11-27T20:26Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Waller (knee) practiced in a limited fashion Friday.,TE
 4685472,Tetairoa McMillan,Carolina Panthers,Questionable,2026-11-27T18:33Z,Foot,Soreness,Not Specified,2026-11-30,QUESTIONABLE,"McMillan (foot) was not in uniform for the team stretch portion of Friday's practice, but he did suit up afterward, Joe Person of The Athletic reports.",WR
-3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-27T00:23Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Okereke (foot) was listed as a non-participant in Carolina's practice estimate Thursday, Mike Kaye of ESPN.com reports.",LB
 4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-26T21:36Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
-4034948,Feleipe Franks,Carolina Panthers,Questionable,2026-11-26T21:36Z,Wrist,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,TE
 4875592,Jackson Kuwatch,Carolina Panthers,Questionable,2026-11-26T21:35Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4036063,Patrick Jones II,Carolina Panthers,Questionable,2026-11-26T21:35Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4714157,Thomas Incoom,Carolina Panthers,Injured Reserve,2026-11-26T02:55Z,Calf,Not Specified,Not Specified,2026-11-30,IR-R,"The Panthers designated Incoom (calf) to return from injured reserve Wednesday, Mike Kaye of ESPN.com reports.",LB
@@ -124,7 +124,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4874515,Sam Hecht,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,C
 4239934,AJ Dillon,Carolina Panthers,Active,2026-11-23T15:21Z,,,,,,,RB
 4685720,Bryce Young,Carolina Panthers,Active,2026-11-23T00:55Z,,,,,,Young completed 22 of 30 passes for 254 yards and two touchdowns with one interception in Sunday's 35-33 win over Baltimore.,QB
-4685504,Sam Roush,Chicago Bears,Active,2026-11-27T19:32Z,,,,,,"Roush is likely to work as Chicago's top tight end for the next few weeks, as ESPN's Courtney Cronin and Adam Schefter report that Colston Loveland (knee) is considered week-to-week.",TE
+4685504,Sam Roush,Chicago Bears,Active,2026-11-27T19:32Z,,,,,,"Roush is likely to work as Chicago's top tight end for the next few weeks, as Courtney Cronin and Adam Schefter of ESPN report that Colston Loveland (knee) is considered week-to-week.",TE
 4723086,Colston Loveland,Chicago Bears,Doubtful,2026-11-27T18:04Z,Knee,Not Specified,Left,2026-12-06,DOUBTFUL,"Loveland (knee) is slated to get a second opinion on his knee injury and won't be placed on injured reserve for now, though he is considered week-to-week, Adam Schefter of ESPN reports.",TE
 3948283,Stephen Carlson,Chicago Bears,Active,2026-11-27T01:39Z,,,,,,Carlson caught two of his four targets for 30 yards during Chicago's win over the Lions on Thursday.,TE
 2973405,Kalif Raymond,Chicago Bears,Active,2026-11-27T01:35Z,,,,,,Raymond caught three of his five targets for 20 yards during Chicago's win over the Lions on Thursday.,WR
@@ -150,7 +150,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4035369,Jeffery Simmons,Chicago Bears,Active,2026-11-24T04:08Z,,,,,,"Simmons recorded four tackles (three solo), including 3.0 sacks, in Sunday's 21-13 win over the Saints.",DT
 4869748,Zavion Thomas,Chicago Bears,Active,2026-11-24T01:35Z,,,,,,Thomas brought in two of three targets for 56 yards and added a 30-yard carry during the Bears' 21-13 win over the Saints on Sunday.,WR
 4368003,Andrei Iosivas,Cincinnati Bengals,Injured Reserve,2026-11-27T21:34Z,Thumb,Surgery,Left,2026-11-29,IR-R,Iosivas (thumb) is questionable for Sunday's game against the Saints.,WR
-4239993,Tee Higgins,Cincinnati Bengals,Questionable,2026-11-27T20:21Z,Hamstring,,,2026-11-29,QUESTIONABLE,"After not practicing Friday, Higgins (hamstring) is listed as questionable for Sunday's game against the Saints, Katherine Terrell of ESPN reports.",WR
+4239993,Tee Higgins,Cincinnati Bengals,Questionable,2026-11-27T20:21Z,Hamstring,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"After not practicing Friday, Higgins (hamstring) is listed as questionable for Sunday's game against the Saints, Katherine Terrell of ESPN.com reports.",WR
 3125082,Dalton Risner,Cincinnati Bengals,Out,2026-11-27T19:28Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,out,G
 4401811,Kyle Dugger,Cincinnati Bengals,Active,2026-11-26T03:40Z,,,,,,Dugger (quadriceps) was not listed on the Bengals' injury report Wednesday.,S
 5085189,Jack Endries,Cincinnati Bengals,Active,2026-11-25T01:28Z,,,,,,Endries caught four of five targets for 33 yards during Monday night's 22-20 loss to the Commanders.,TE
@@ -174,13 +174,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4646773,Dylan Fairchild,Cincinnati Bengals,Active,2026-11-23T23:47Z,,,,,,,G
 3051746,Oren Burks,Cincinnati Bengals,Injured Reserve,2026-11-21T19:53Z,Groin,Not Specified,Not Specified,2026-12-20,IR,The Bengals placed Burks (groin) on injured reserve Saturday.,LB
 11252,Joe Flacco,Cincinnati Bengals,Active,2026-11-18T15:36Z,,,,,,"Flacco took the field for the Bengals' final possession of Sunday's 38-18 win over the Steelers, attempting no passes while handing off to running back Tahj Brooks on all three of his snaps.",QB
+4427963,Isaiah McGuire,Cleveland Browns,Active,2026-11-28T00:59Z,,,,,,"McGuire (calf) doesn't have an injury designation for Sunday night's game against the Raiders, Scott Petrak of the Elyria Chronicle-Telegram reports.",DE
+4569620,Ronnie Hickman,Cleveland Browns,Active,2026-11-28T00:58Z,,,,,,"Hickman (concussion) does not carry an official injury designation ahead of Sunday's game versus the Raiders, Scott Petrak of the Elyria Chronicle-Telegram reports.",S
+3110565,Quincy Williams,Cleveland Browns,Active,2026-11-28T00:56Z,,,,,,"Williams (knee) doesn't have an injury designation for Sunday night's game against the Raiders, Scott Petrak of the Elyria Chronicle-Telegram reports.",LB
 3115485,Elgton Jenkins,Cleveland Browns,Active,2026-11-27T21:52Z,,,,,,,C
-4427963,Isaiah McGuire,Cleveland Browns,Active,2026-11-27T21:52Z,,,,,,,DE
-4569620,Ronnie Hickman,Cleveland Browns,Active,2026-11-27T21:51Z,,,,,,,S
-3110565,Quincy Williams,Cleveland Browns,Active,2026-11-27T21:50Z,,,,,,,LB
-4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-27T18:36Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Boston (quadriceps) will be listed as questionable for Sunday's game against the Raiders, Scott Petrak of the Elyria Chronicle-Telegram reports.",WR
 4601080,Raheim Sanders,Cleveland Browns,Injured Reserve,2026-11-27T18:31Z,Hip,Not Specified,Not Specified,2026-11-29,IR-R,"Sanders (hip) is questionable for Sunday's game against the Raiders, Mary Kay Cabot of the Cleveland Plain Dealer reports.",RB
 3115336,Derek Barnett,Cleveland Browns,Out,2026-11-27T18:26Z,Hamstring,,,2026-12-06,OUT,out,DE
+4832800,Denzel Boston,Cleveland Browns,Questionable,2026-11-27T17:13Z,Quadriceps,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Boston (quadriceps) wasn't present for Friday's practice, Mary Kay Cabot of the Cleveland Plain Dealerreports.",WR
 4362018,Blake Whiteheart,Cleveland Browns,Active,2026-11-27T00:31Z,,,,,,"Whiteheart was listed as full participant in Cleveland's practice estimate Thursday, Sam Warren of The Athletic reports.",TE
 5083076,Harold Fannin Jr.,Cleveland Browns,Active,2026-11-26T22:24Z,,,,,,"Fannin (groin) was listed as a full practice participant on Thursday's injury report, Sam Warren of The Athletic reports.",TE
 4597310,Austin Barber,Cleveland Browns,Questionable,2026-11-25T22:38Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,OT
@@ -199,8 +199,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241463,Jerry Jeudy,Cleveland Browns,Active,2026-11-16T01:53Z,,,,,,Jeudy recorded two catches on four targets for 74 yards in a 27-24 victory over the Texans on Sunday.,WR
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-16T01:18Z,,,,,,Concepcion caught three of eight targets for 21 yards in Sunday's 27-24 win over Houston. He also gained six yards on one carry.,WR
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-16T00:06Z,,,,,,Watson completed 25 of 40 passes for 312 yards with no touchdowns and one interception while adding eight rushes for 49 yards and a score in the Browns' 27-24 win over the Texans on Sunday. He also committed a fumble that remained with Cleveland.,QB
+4040982,Quinnen Williams,Dallas Cowboys,Questionable,2026-11-27T23:24Z,Back,Spasms,Not Specified,2026-12-07,QUESTIONABLE,"Head coach Brian Schottenheimer said Friday that Williams has been diagnosed with a back strain and spasms following Thursday's 39-38 loss to the Eagles, Calvin Watkins of The Dallas Morning News reports.",DT
 4372519,Jashaun Corbin,Dallas Cowboys,Active,2026-11-27T22:37Z,,,,,,Corbin turned five carries into 21 yards during the Cowboys' 39-38 loss to the Eagles on Thursday.,RB
-4040982,Quinnen Williams,Dallas Cowboys,Questionable,2026-11-27T03:11Z,Back,Spasms,Not Specified,2026-12-07,QUESTIONABLE,"Williams injured his back during the fourth quarter of Thursday's 39-38 loss to the Eagles, but the veteran defensive lineman will have extra time to rest before the Cowboys' Week 13 tilt against the Seahawks on Monday, Dec. 7, Nick Harris of the Fort Worth Star-Telegram reports.",DT
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-27T02:44Z,,,,,,Spann-Ford caught his lone target for 15 yards during Dallas' loss to the Eagles on Thursday.,TE
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-27T02:39Z,,,,,,Aubrey converted one of his two field-goal attempts and all five of his extra-point tries during Dallas' 39-38 loss to the Eagles on Thursday.,PK
 4426354,George Pickens,Dallas Cowboys,Active,2026-11-27T02:20Z,,,,,,Pickens caught five of nine targets for 67 yards in Thursday's 39-38 loss to the Eagles.,WR
@@ -224,6 +224,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4361988,James Mitchell,Dallas Cowboys,Active,2026-11-23T17:24Z,,,,,,Mitchell recorded two receptions for 40 yards on two targets in Sunday's 51-30 win over the Titans.,TE
 5083754,Ryan Flournoy,Dallas Cowboys,Active,2026-11-23T04:09Z,,,,,,Flournoy caught just one pass for 11 yards on one target in Sunday's 51-30 win over the Titans.,WR
 3676833,KaVontae Turpin,Dallas Cowboys,Active,2026-11-23T02:34Z,,,,,,Turpin failed to reel in his only target while rushing twice for 41 yards and a touchdown during Sunday's 51-30 win over the Titans. He added 121 yards as a kick returner and logged a 13-yard punt return.,WR
+4600981,Pat Bryant,Denver Broncos,Active,2026-11-27T23:39Z,,,,,,Bryant caught four of seven targets for 42 yards in Friday's 27-5 loss to the Steelers.,WR
+3128429,Courtland Sutton,Denver Broncos,Active,2026-11-27T23:31Z,,,,,,Sutton caught one of eight targets for four yards in Friday's 27-5 loss to the Steelers.,WR
+4426338,Bo Nix,Denver Broncos,Active,2026-11-27T23:31Z,,,,,,"Nix completed 22 of 40 passes for 169 yards, no touchdowns and two interceptions in Friday's 27-5 loss to the Steelers. He also rushed once for seven yards and lost a fumble.",QB
+4372016,Jaylen Waddle,Denver Broncos,Active,2026-11-27T23:30Z,,,,,,Waddle caught five of eight targets for 53 yards in Friday's 27-5 loss to the Steelers.,WR
+4702555,Jonah Coleman,Denver Broncos,Active,2026-11-27T23:29Z,,,,,,Coleman rushed 15 times for 26 yards and caught eight of 10 targets for 46 yards in Friday's 27-5 loss to the Steelers.,RB
 4241820,Sam Ehlinger,Denver Broncos,Out,2026-11-27T18:59Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Ehlinger (coach's decision) is inactive for Friday's game against the Steelers but will work as Denver's emergency third QB.,QB
 4362748,Tyler Badie,Denver Broncos,Active,2026-11-27T18:44Z,,,,,,Badie (thumb) is active Friday against the Steelers.,RB
 4039007,Taylor Rapp,Denver Broncos,Out,2026-11-27T18:39Z,Quadriceps,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,S
@@ -244,11 +249,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4686472,Marvin Mims Jr.,Denver Broncos,Active,2026-11-24T02:21Z,,,,,,Mims caught one of two targets for 36 yards and also added an 11-yard rush and 22 yards as a punt returner during Sunday's 38-24 win over the Raiders.,WR
 2985659,Wil Lutz,Denver Broncos,Active,2026-11-24T00:29Z,,,,,,Lutz made his lone field-goal attempt and all five PATs in Sunday's 38-24 win over the Raiders.,PK
 4383440,Nate Adkins,Denver Broncos,Active,2026-11-23T17:28Z,,,,,,Adkins recorded a three-yard reception on two targets in Sunday's 38-24 win over the Raiders.,TE
-4261090,Jordan Jackson,Denver Broncos,Active,2026-11-23T15:27Z,,,,,,,DT
-4600981,Pat Bryant,Denver Broncos,Active,2026-11-23T03:46Z,,,,,,Bryant caught three passes for 32 yards on four targets in Sunday's 38-24 win over the Raiders.,WR
-3128429,Courtland Sutton,Denver Broncos,Active,2026-11-23T02:32Z,,,,,,Sutton didn't corral either of his two targets during Sunday's 38-24 victory versus the Raiders.,WR
-3051876,Evan Engram,Denver Broncos,Active,2026-11-23T02:15Z,,,,,,Engram caught six of eight targets for 74 yards in Sunday's 38-24 win over the Raiders.,TE
-4426338,Bo Nix,Denver Broncos,Active,2026-11-23T02:01Z,,,,,,"Nix completed 19 of 35 passes for 225 yards, one touchdown and one interception and notched six carries for five yards during Sunday's 38-24 victory against the Raiders.",QB
 4912274,Sione Vaki,Detroit Lions,Active,2026-11-27T01:46Z,,,,,,Vaki carried the ball six times for 19 yards and hauled in two of his three targets for minus-4 yards during Detroit's loss to Chicago on Thursday.,RB
 4689936,Jake Bates,Detroit Lions,Active,2026-11-27T01:12Z,,,,,,Bates made both of his field-goal attempts and three of his four extra-point tries during Detroit's 39-35 loss to the Bears on Thursday.,PK
 4430027,Sam LaPorta,Detroit Lions,Active,2026-11-26T23:17Z,,,,,,LaPorta caught four of five targets for 44 yards and a touchdown in Thursday's 39-35 loss to the Bears.,TE
@@ -299,15 +299,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 5076652,Brandon Cisse,Green Bay Packers,Active,2026-11-24T00:13Z,,,,,,Cisse (ribs) practiced fully Monday.,CB
 4428085,Luke Musgrave,Green Bay Packers,Out,2026-11-22T14:06Z,Neck,Not Specified,Not Specified,2027-02-15,PUP-R,"Packers head coach Matt LaFleur said Saturday that he doesn't anticipate Musgrove (neck) returning from the PUP list this season, according to NFL reporter Jason B. Hirschhorn.",TE
 4428863,Evan Williams,Green Bay Packers,Active,2026-11-19T02:35Z,,,,,,Williams logged eight tackles (two solo) and a pass defense during the Packers' 30-10 loss to the Vikings in Week 10.,S
-4035538,David Montgomery,Houston Texans,Active,2026-11-27T22:16Z,,,,,,"Montgomery operated as the Texans' RB1 against the Colts in Week 11, but he could see a dip in touches on offense due to the impending return of Woody Marks (concussion) for Sunday's game against the Ravens.",RB
+2976560,Danielle Hunter,Houston Texans,Out,2026-11-28T00:47Z,Hamstring,Strain,Not Specified,2026-12-06,OUT,Hunter (hamstring) has been ruled out for Sunday's game against the Ravens.,DE
+4362504,Brevin Jordan,Houston Texans,Out,2026-11-28T00:42Z,Foot,Not Specified,Not Specified,2026-12-06,OUT,Jordan (foot) has been ruled out for Sunday's game against the Ravens.,TE
+2970204,Sheldon Rankins,Houston Texans,Active,2026-11-28T00:42Z,,,,,,Rankins (ankle) does not carry an injury designation into Sunday's game against the Ravens.,DT
+4035538,David Montgomery,Houston Texans,Active,2026-11-27T22:16Z,,,,,,"Montgomery operated as the Texans' RB1 against the Colts in Week 11, but he could see a dip in touches due to the impending return of Woody Marks (concussion) for Sunday's game against the Ravens.",RB
 3117256,Dalton Schultz,Houston Texans,Active,2026-11-27T21:50Z,,,,,,Schultz (illness) doesn't have an injury designation for Sunday's game against the Ravens.,TE
 4429022,Kayshon Boutte,Houston Texans,Out,2026-11-27T21:37Z,Hip,Not Specified,Not Specified,2026-12-06,OUT,Boutte (hip) has been ruled out for Sunday's game against the Ravens.,WR
 4429059,Woody Marks,Houston Texans,Active,2026-11-27T21:13Z,,,,,,Marks (concussion) doesn't carry an injury designation for Sunday's game against the Ravens.,RB
 4839498,Keylan Rutledge,Houston Texans,Out,2026-11-27T20:56Z,Undisclosed,Stinger,,2026-12-06,OUT,out,G
 4241250,Jake Hummel,Houston Texans,Questionable,2026-11-27T20:56Z,Abdomen,,,2026-11-29,QUESTIONABLE,questionable,LB
-4362504,Brevin Jordan,Houston Texans,Out,2026-11-27T20:56Z,Foot,Not Specified,Not Specified,2026-12-06,OUT,out,TE
-2976560,Danielle Hunter,Houston Texans,Out,2026-11-27T20:55Z,Hamstring,Strain,Not Specified,2026-12-06,OUT,out,DE
-2970204,Sheldon Rankins,Houston Texans,Active,2026-11-27T20:55Z,,,,,,,DT
 4432708,Marvin Harrison Jr.,Houston Texans,Active,2026-11-26T22:10Z,,,,,,Harrison (hamstring) was a full participant in Thursday's practice.,WR
 4360189,Logan Hall,Houston Texans,Active,2026-11-26T21:43Z,,,,,,,DE
 3045474,Wyatt Teller,Houston Texans,Questionable,2026-11-24T12:39Z,Back,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,G
@@ -324,15 +324,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4366031,Tank Dell,Houston Texans,Active,2026-11-20T05:09Z,,,,,,Dell secured three of four targets for 27 yards in the Texans' 26-3 win over the Colts on Thursday.,WR
 4432577,C.J. Stroud,Houston Texans,Active,2026-11-20T04:52Z,,,,,,Stroud completed 21 of 26 passes for 194 yards with three touchdowns and one interception and rushed six times for 27 yards in the Texans' 26-3 win over the Colts on Thursday.,QB
 4258173,Nico Collins,Houston Texans,Active,2026-11-20T04:41Z,,,,,,Collins secured three of five targets for 58 yards and a touchdown in the Texans' 26-3 win over the Colts on Thursday.,WR
+4361196,Cam Taylor-Britt,Indianapolis Colts,Injured Reserve,2026-11-28T00:40Z,Groin,Not Specified,Not Specified,2026-11-29,IR-R,Taylor-Britt (groin) is questionable for Sunday's game against the Giants.,CB
+4722908,Drew Ogletree,Indianapolis Colts,Questionable,2026-11-28T00:35Z,Knee,,,2026-11-29,QUESTIONABLE,Ogletree (knee) is officially listed as questionable for Sunday's game versus the Giants.,TE
+4362523,Will Mallory,Indianapolis Colts,Out,2026-11-27T23:36Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,Mallory (hamstring) has been ruled out for Sunday's game against the Giants.,TE
+4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-27T23:34Z,Knee,Not Specified,Not Specified,2026-12-13,OUT,Ward (knee) has been ruled out for Sunday's game against the Giants.,CB
 4686468,Seth McGowan,Indianapolis Colts,Out,2026-11-27T18:33Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,McGowan (hamstring) has been ruled out for Sunday's game against the Giants.,RB
 3863182,Jerry Tillery,Indianapolis Colts,Out,2026-11-27T18:29Z,Calf,Not Specified,Not Specified,2026-12-13,OUT,out,DT
 4892240,Jalen Travis,Indianapolis Colts,Out,2026-11-27T18:29Z,Knee,Not Specified,Not Specified,2026-12-13,OUT,out,OT
-4037361,Charvarius Ward,Indianapolis Colts,Out,2026-11-27T18:29Z,Knee,Not Specified,Not Specified,2026-12-13,OUT,out,CB
-4362523,Will Mallory,Indianapolis Colts,Out,2026-11-27T18:29Z,Hamstring,Not Specified,Not Specified,2026-12-13,OUT,out,TE
 4362580,Bernhard Raimann,Indianapolis Colts,Active,2026-11-27T18:22Z,,,,,,,OT
-4722908,Drew Ogletree,Indianapolis Colts,Questionable,2026-11-26T22:51Z,Knee,,,2026-11-29,QUESTIONABLE,Ogletree (knee) was a full participant in Thursday's practice.,TE
 4685324,Caden Curry,Indianapolis Colts,Injured Reserve,2026-11-26T02:48Z,Wrist,Surgery,Not Specified,2027-02-15,IR,"Curry underwent surgery to repair a ligament tear in his wrist earlier this week and will be sidelined for the rest of the 2026 season, Jake Arthur of Roundtable.io reports.",LB
-4361196,Cam Taylor-Britt,Indianapolis Colts,Injured Reserve,2026-11-26T01:04Z,Groin,Not Specified,Not Specified,2026-11-29,IR-R,"The Colts designated Taylor-Britt (groin) to return from injured reserve Wednesday, Abby Halpin of the team's official site reports.",CB
 4427250,Sauce Gardner,Indianapolis Colts,Active,2026-11-26T00:48Z,,,,,,Gardner (calf) was a full participant in Wednesday's practice.,CB
 4360078,Alec Pierce,Indianapolis Colts,Injured Reserve,2026-11-25T18:36Z,Heel,Not Specified,Left,2027-01-10,IR,"When addressing the press Wednesday, Pierce (heel) noted that the offseason procedure he underwent this past March was done because he was dealing with heel pain that impacted his Achilles, Kevin Bowen of 107.5 The Fan Indianapolis reports.",WR
 4242335,Jonathan Taylor,Indianapolis Colts,Active,2026-11-25T15:39Z,,,,,,"Taylor will be joined in the backfield in Sunday's game against the Giants by Anthony Richardson, who was named the Colts' new starting quarterback after Daniel Jones was cut Friday, Mike Chappell of Fox 59 News Indianapolis reports.",RB
@@ -350,15 +350,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4683151,Deion Burks,Indianapolis Colts,Active,2026-11-21T01:48Z,,,,,,"Burks was targeted three times for zero catches, had one kick return for 10 yards and made one tackle on kick coverage during the Colts' 26-3 loss to the Texans on Thursday night.",WR
 4571557,Spencer Shrader,Indianapolis Colts,Active,2026-11-21T01:45Z,,,,,,Shrader went 1-for-3 on field-goal attempts during the Colts' 26-3 loss to the Texans on Thursday.,PK
 4362619,Chris Rodriguez Jr.,Jacksonville Jaguars,Active,2026-11-27T22:11Z,,,,,,"With Bhayshul Tuten (ankle/foot) ruled out, Rodriguez is slated to operate as the Jaguars' top backfield option for Sunday's AFC South tilt against the Titans, Michael DiRocco of ESPN.com reports.",RB
-4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-27T21:26Z,,,,,,"Thomas could handle a larger role Sunday against the Titans, Demetrius Harvey of the Florida Times-Union reports that Parker Washington (shoulder) won't suit up.",WR
-4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-27T21:21Z,,,,,,"Cameron is in line to handle a larger role Sunday against the Titans, Demetrius Harvey of the Florida Times-Union reports that Parker Washington (shoulder) won't suit up.",WR
+4432773,Brian Thomas Jr.,Jacksonville Jaguars,Active,2026-11-27T21:26Z,,,,,,"Thomas could handle a larger role Sunday against the Titans, as Demetrius Harvey of the Florida Times-Union reports that Parker Washington (shoulder) won't suit up.",WR
+4879194,Josh Cameron,Jacksonville Jaguars,Active,2026-11-27T21:21Z,,,,,,"Cameron is in line to handle a larger role Sunday against the Titans, as Demetrius Harvey of the Florida Times-Union reports that Parker Washington (shoulder) won't suit up.",WR
 4430481,Jonah Monheim,Jacksonville Jaguars,Active,2026-11-27T21:17Z,,,,,,,C
 4242554,Walker Little,Jacksonville Jaguars,Active,2026-11-27T21:17Z,,,,,,,OT
 4334300,Dennis Gardeck,Jacksonville Jaguars,Active,2026-11-27T21:17Z,,,,,,,LB
 4035791,Cole Van Lanen,Jacksonville Jaguars,Active,2026-11-27T21:17Z,,,,,,,OT
 3134316,Matt Dickerson,Jacksonville Jaguars,Active,2026-11-27T21:16Z,,,,,,,DE
 3916433,Jakobi Meyers,Jacksonville Jaguars,Active,2026-11-27T21:06Z,,,,,,"Meyers (ankle) doesn't have an injury designation for Sunday's game against the Titans, Ryan O'Halloran of the Florida Times-Union reports.",WR
-4882093,Bhayshul Tuten,Jacksonville Jaguars,Out,2026-11-27T21:02Z,Ankle,Not Specified,Right,2026-12-06,OUT,"Tuten (ankle) has been ruled out for Sunday's game against the Titans, Ryan O'Halloran of The Florida Times-Union reports.",RB
+4882093,Bhayshul Tuten,Jacksonville Jaguars,Out,2026-11-27T17:16Z,Ankle,Not Specified,Right,2026-12-06,OUT,"Tuten (ankle) wasn't spotted at Friday's practice, Demetrius Harvey of the Florida Times-Union reports.",RB
 4685415,Travis Hunter,Jacksonville Jaguars,Active,2026-11-27T16:32Z,,,,,,"Head coach Liam Coen said Friday that it will be tough to pivot to an increased role for Hunter at wide receiver on short notice after Parker Washington (shoulder) was ruled out for Sunday's game against the Titans, Demetrius Harvey of the Florida Times-Union reports.",WR
 4432620,Parker Washington,Jacksonville Jaguars,Out,2026-11-27T15:44Z,Shoulder,Not Specified,Not Specified,2026-12-06,OUT,"Washington (shoulder) will be out for Sunday's game against the Titans and is considered week-to-week moving forward, Demetrius Harvey of the Florida Times-Union reports.",WR
 4573319,Danny Striggow,Jacksonville Jaguars,Active,2026-11-27T02:02Z,,,,,,"Striggow (concussion) was listed as a full participant during Jacksonville's practice estimate Thursday, Ryan O'Halloran of The Florida Times-Union reports.",DE
@@ -449,8 +449,8 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4612826,Ladd McConkey,Los Angeles Chargers,Active,2026-11-23T01:20Z,,,,,,McConkey caught five of eight targets for 37 yards and two touchdowns in Sunday's 27-24 loss to the Jets.,WR
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-23T01:15Z,,,,,,Hampton carried the ball 14 times for 89 yards and caught his only target for four yards in Sunday's 27-24 loss to the Jets.,RB
 4411189,Trey Pipkins III,Los Angeles Chargers,Active,2026-11-22T20:07Z,,,,,,Pipkins (knee) is active for Sunday's matchup against the Jets.,OT
-4426553,Davis Allen,Los Angeles Rams,Doubtful,2026-11-27T20:01Z,Ankle,Sprain,Not Specified,2026-12-03,DOUBTFUL,"Allen is dealing with a high-ankle sprain, according to sources, Ian Rapoport of NFL Network reports Friday.",TE
-2573401,Tyler Higbee,Los Angeles Rams,Questionable,2026-11-27T19:53Z,Chest,Bruise,Not Specified,2026-12-03,QUESTIONABLE,"Higbee (chest) is considered week-to-week, though it is too early to tell if he may be available Thursday, Dec. 3 against the Chiefs, Adam Schefter of ESPN reports Friday.",TE
+4426553,Davis Allen,Los Angeles Rams,Doubtful,2026-11-27T20:01Z,Ankle,Sprain,Not Specified,2026-12-03,DOUBTFUL,"Allen is dealing with a high-ankle sprain, according to sources, Ian Rapoport of NFL Network reports.",TE
+2573401,Tyler Higbee,Los Angeles Rams,Questionable,2026-11-27T19:53Z,Chest,Bruise,Not Specified,2026-12-03,QUESTIONABLE,"Higbee (chest) is considered week-to-week, though it's too early to tell if he may be available Thursday, Dec. 3, against the Chiefs, Adam Schefter of ESPN reports Friday.",TE
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-26T17:31Z,,,,,,McManus made all four of his field-goal tries and both of his point-after attempts Thursday in a 26-13 victory over Green Bay.,PK
 4605951,CJ Daniels,Los Angeles Rams,Active,2026-11-26T17:25Z,,,,,,Daniels did not draw a target or log a touch Wednesday in a 26-13 win against the Packers.,WR
 4360797,Tutu Atwell,Los Angeles Rams,Active,2026-11-26T17:18Z,,,,,,Atwell didn't log a touch or target Wednesday in a 26-13 victory over Green Bay.,WR
@@ -474,13 +474,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4242154,Kam Curl,Los Angeles Rams,Active,2026-11-24T21:08Z,,,,,,"Curl has no injury designation for Wednesday night's matchup against the Packers, Stu Jackson of the Rams' official site reports.",S
 3122132,Myles Garrett,Los Angeles Rams,Active,2026-11-24T21:01Z,,,,,,"Rams head coach Sean McVay said Tuesday that Garrett's absence from Monday's practice was a rest day and had nothing to do with his knee injury, Stu Jackson of the Rams' official site reports.",DE
 4570037,Terrance Ferguson,Los Angeles Rams,Injured Reserve,2026-11-23T19:35Z,Ankle,Surgery,Not Specified,2027-02-15,IR,"Rams head coach Sean McVay said Monday that Ferguson (hamstring) won't be activated from injured reserve this season and will require surgery to address the ankle injury he aggravated in Week 3, Stu Jackson of the team's official site reports.",TE
+4431664,Dante Trader Jr.,Miami Dolphins,Active,2026-11-28T00:52Z,,,,,,Trader (shoulder/groin) does not carry an official injury designation ahead of Sunday's game versus the Jets.,S
+4430681,Jared Wayne,Miami Dolphins,Out,2026-11-28T00:50Z,Quadriceps,Not Specified,Not Specified,2026-12-06,OUT,Wayne (quadriceps) has been ruled out for Sunday's game against the Jets.,WR
+4360488,JuJu Brents,Miami Dolphins,Out,2026-11-27T23:09Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,"Brents (neck/shoulder) has been ruled out for Sunday's game against the Jets, Barry Jackson of the Miami Herald reports.",CB
 2977680,Bradley Pinion,Miami Dolphins,Out,2026-11-27T21:28Z,Groin,Not Specified,Right,2026-12-06,OUT,out,P
-4430681,Jared Wayne,Miami Dolphins,Out,2026-11-27T21:28Z,Quadriceps,Not Specified,Not Specified,2026-12-06,OUT,out,WR
 4271632,Austin Jackson,Miami Dolphins,Active,2026-11-27T21:27Z,,,,,,,OT
-4431664,Dante Trader Jr.,Miami Dolphins,Active,2026-11-27T21:27Z,,,,,,,S
 4433974,Rodney McGraw,Miami Dolphins,Active,2026-11-27T21:27Z,,,,,,,DE
 4685637,Jackson Woodard,Miami Dolphins,Active,2026-11-27T21:26Z,,,,,,,LB
-4360488,JuJu Brents,Miami Dolphins,Out,2026-11-27T15:40Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 4567225,Jaylin Simpson,Miami Dolphins,Active,2026-11-26T03:23Z,,,,,,"Simpson (knee) was a full participant in Wednesday's practice, David Furones reports.",S
 3932335,Zayne Anderson,Miami Dolphins,Active,2026-11-25T02:08Z,,,,,,"Anderson recorded 12 total tackles (eight solo), including 1.0 sacks, and also intercepted a pass during Sunday's 26-9 loss to the Bills.",S
 4880236,Will Kacmarek,Miami Dolphins,Active,2026-11-24T16:49Z,,,,,,Kacmarek went without a target while logging 21 of 57 snaps on offense in Sunday's 26-9 loss to the Bills.,TE
@@ -499,14 +499,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4912052,Justin Joly,Miami Dolphins,Active,2026-11-23T15:39Z,,,,,,,TE
 4569603,Malik Washington,Miami Dolphins,Active,2026-11-23T04:22Z,,,,,,Washington caught three of six targets for 30 yards in Sunday's 26-9 loss to the Bills. He rushed two times for 11 yards.,WR
 4367209,Greg Dulcich,Miami Dolphins,Active,2026-11-23T04:15Z,,,,,,Dulcich caught two of seven targets for 12 yards during Sunday's 26-9 loss to the Bills.,TE
+14945,Harrison Smith,Minnesota Vikings,Questionable,2026-11-28T00:21Z,Thigh,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Smith (thigh) is listed as questionable for Sunday's game against the Falcons, Emily Leiker of The Minnesota Star Tribune reports.",S
+4044540,Isaiah Rodgers,Minnesota Vikings,Out,2026-11-28T00:07Z,Quadriceps,Not Specified,Not Specified,2026-12-06,OUT,Rodgers (quadriceps) is officially out for Sunday's game versus Atlanta.,CB
 4430656,Myles Price,Minnesota Vikings,Active,2026-11-27T22:01Z,,,,,,"Price (knee/groin) doesn't have an injury designation for Sunday's game against the Falcons, Emily Leiker of the Minnesota Star Tribune reports.",WR
 3917315,Kyler Murray,Minnesota Vikings,Active,2026-11-27T21:54Z,,,,,,"Murray (hamstring) doesn't carry an injury designation into Sunday's game against the Falcons, Emily Leiker of the Minnesota Star Tribune reports.",QB
 4360277,Jalen Redmond,Minnesota Vikings,Active,2026-11-27T20:36Z,,,,,,,DT
 4565185,Tai Felton,Minnesota Vikings,Active,2026-11-27T20:27Z,,,,,,"Felton is poised to maintain an expanded role Sunday against the Falcons, as Craig Peters of the Vikings' official site reports that Jordan Addison (thumb) will remain sidelined.",WR
-4044540,Isaiah Rodgers,Minnesota Vikings,Out,2026-11-27T20:12Z,Quadriceps,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 4361985,Christian Darrisaw,Minnesota Vikings,Out,2026-11-27T20:11Z,Shoulder,Not Specified,Not Specified,2026-12-06,OUT,out,OT
 4429205,Jordan Addison,Minnesota Vikings,Out,2026-11-27T20:02Z,Thumb,Surgery,Not Specified,2026-12-06,OUT,"Addison (thumb) has been ruled out for Sunday's game against the Falcons, Dane Mizutani of the St. Paul Pioneer Press reports.",WR
-14945,Harrison Smith,Minnesota Vikings,Questionable,2026-11-26T22:58Z,Thigh,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Smith (thigh) was a limited participant in Thursday's practice.,S
 4568007,Jay Ward,Minnesota Vikings,Active,2026-11-26T00:15Z,,,,,,,S
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-25T02:50Z,,,,,,Metellus posted five assisted tackles during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,S
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-25T02:44Z,,,,,,Wilson recorded 1.0 sacks during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,LB
@@ -524,17 +524,17 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4360637,Jeshaun Jones,Minnesota Vikings,Active,2026-11-20T22:29Z,,,,,,Jones (shoulder) does not have an injury designation for Sunday's game against the 49ers in Mexico City.,WR
 3133487,Andrew Van Ginkel,Minnesota Vikings,Active,2026-11-20T22:24Z,,,,,,Van Ginkel (quadriceps) does not carry an injury designation into Sunday's game against the 49ers in Mexico City.,LB
 16772,Kyle Van Noy,Minnesota Vikings,Active,2026-11-19T22:12Z,,,,,,,LB
-3129446,Robert Spillane,New England Patriots,Active,2026-11-27T21:23Z,,,,,,,LB
-4427095,DeMario Douglas,New England Patriots,Active,2026-11-27T20:18Z,,,,,,"Douglas is set to maintain a prominent role Sunday against the Chargers, as A.J. Brown (hamstring) and Romeo Doubs (shoulder) won't play.",WR
-2991662,Mack Hollins,New England Patriots,Active,2026-11-27T20:16Z,,,,,,"Hollins is set to work in a starting role Sunday against the Chargers, as A.J. Brown (hamstring) and Romeo Doubs (shoulder) won't play.",WR
+3129446,Robert Spillane,New England Patriots,Active,2026-11-28T00:48Z,,,,,,Spillane (illness) doesn't have an injury designation for Sunday's game against the Chargers.,LB
+4039505,Reggie Gilliam,New England Patriots,Questionable,2026-11-28T00:46Z,Knee,,,2026-11-29,QUESTIONABLE,Gilliam (knee) is questionable for Sunday's game against the Chargers.,FB
+3916923,Carlton Davis III,New England Patriots,Out,2026-11-27T23:29Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,"Davis (knee) has been ruled out for Sunday's game against the Chargers, Evan Lazar of the Patriots' official site reports.",CB
+4427095,DeMario Douglas,New England Patriots,Active,2026-11-27T20:18Z,,,,,,"Douglas is set to maintain a prominent role Sunday against the Chargers, as A.J. Brown (hamstring) and Romeo Doubs (shoulder, IR) won't play.",WR
+2991662,Mack Hollins,New England Patriots,Active,2026-11-27T20:16Z,,,,,,"Hollins is set to work in a starting role Sunday against the Chargers, as A.J. Brown (hamstring) and Romeo Doubs (shoulder, IR) won't play.",WR
 4361432,Romeo Doubs,New England Patriots,Injured Reserve,2026-11-27T19:43Z,Shoulder,Not Specified,Not Specified,2026-11-29,IR-R,"Doubs (shoulder), who remains on injured reserve, has been ruled out for Sunday's game against the Chargers.",WR
-3916923,Carlton Davis III,New England Patriots,Out,2026-11-27T18:21Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 4047646,A.J. Brown,New England Patriots,Out,2026-11-27T18:18Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Brown (hamstring) has been ruled out for Sunday's game against the Chargers, Doug Kyed of the Boston Herald reports.",WR
 4569173,Rhamondre Stevenson,New England Patriots,Active,2026-11-26T18:31Z,,,,,,Stevenson was not listed on the Patriots' practice report Wednesday.,RB
 4428394,Walter Rouse,New England Patriots,Questionable,2026-11-26T03:41Z,Concussion,Concussion,Not Specified,2026-11-29,QUESTIONABLE,Rouse (concussion) did not practice Wednesday.,OL
 4047941,Brenden Schooler,New England Patriots,Active,2026-11-26T03:38Z,,,,,,Schooler (hamstring) was not listed on the Patriots' injury report Wednesday.,S
 4362890,Ben Brown,New England Patriots,Active,2026-11-26T03:36Z,,,,,,Brown (knee) was a full participant in Wednesday's practice.,C
-4039505,Reggie Gilliam,New England Patriots,Questionable,2026-11-26T00:12Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,FB
 4240391,Tommy DeVito,New England Patriots,Active,2026-11-24T01:15Z,,,,,,"Patriots head coach Mike Vrabel said Monday that DeVito is the team's starting quarterback, Mike Reiss of ESPN.com reports. ""We're excited about that. He had a good preseason, and Tommy's improved,"" Vrabel said of DeVito.",QB
 4259646,Alijah Vera-Tucker,New England Patriots,Injured Reserve,2026-11-24T01:00Z,Hamstring,Not Specified,Not Specified,2026-11-29,IR-R,The Patriots designated Vera-Tucker (hamstring) for return from injured reserve Monday.,G
 4431452,Drake Maye,New England Patriots,Out,2026-11-23T20:26Z,Lower Leg,Fracture,Right,2026-12-27,OUT,"For now, Maye -- who suffered a fractured right fibula during a Week 10 loss to the Lions -- remains on the Patriots' 53-man roster rather than injured reserve, with coach Mike Vrabel citing the ""balance"" the team is hoping to strike with regard to managing its remaining designated to return from IR",QB
@@ -549,9 +549,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569923,Andy Borregales,New England Patriots,Active,2026-11-15T19:38Z,,,,,,Borregales made his sole field-goal attempt and one PAT in the Patriots' 35-10 loss to the Lions in Munich on Sunday.,PK
 3046439,Hunter Henry,New England Patriots,Active,2026-11-15T19:21Z,,,,,,Henry caught two of three passes for 22 yards during the Patriots' 35-10 loss to the Lions on Sunday in Munich.,TE
 4431431,Corey Kiner,New England Patriots,Active,2026-11-15T18:47Z,,,,,,Kiner carried the ball 10 times for 25 yards in Sunday's 35-10 loss to Detroit.,RB
+4429568,Martin Emerson Jr.,New Orleans Saints,Active,2026-11-28T00:24Z,,,,,,Emerson (concussion) does not carry an official injury designation ahead of Sunday's game at Cincinnati.,CB
+4241993,Pete Werner,New Orleans Saints,Active,2026-11-28T00:19Z,,,,,,Werner (hamstring) does not carry an official injury designation ahead of Sunday's game at Cincinnati.,LB
 4036131,Noah Fant,New Orleans Saints,Questionable,2026-11-27T20:45Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Fant (calf) is questionable for Sunday's game against the Bengals, while Juwan Johnson (hamstring) has been ruled out, Matthew Paras of the New Orleans Times-Picayune reports.",TE
-4241993,Pete Werner,New Orleans Saints,Active,2026-11-27T20:31Z,,,,,,,LB
-4429568,Martin Emerson Jr.,New Orleans Saints,Active,2026-11-27T20:31Z,,,,,,,CB
 3917660,David Edwards,New Orleans Saints,Active,2026-11-27T20:30Z,,,,,,,G
 3929645,Juwan Johnson,New Orleans Saints,Out,2026-11-27T19:55Z,Hamstring,Not Specified,Not Specified,2026-12-06,OUT,"Johnson (hamstring) has been ruled out for Sunday's game at Cincinnati, Katherine Terrell of ESPN.com reports.",TE
 3917331,Erik McCoy,New Orleans Saints,Active,2026-11-27T02:05Z,,,,,,McCoy (biceps) was listed as a full participant during New Orleans' practice estimate Thursday.,C
@@ -574,11 +574,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569682,Audric Estime,New Orleans Saints,Active,2026-11-22T16:43Z,,,,,,Estime (coach's decision) is inactive for Sunday's game against the Bears.,RB
 4605498,Decamerion Richardson,New Orleans Saints,Active,2026-11-22T16:39Z,,,,,,,CB
 4566088,Jaylan Ford,New Orleans Saints,Active,2026-11-16T19:32Z,,,,,,,LB
-4431321,Dru Phillips,New York Giants,Active,2026-11-27T21:36Z,,,,,,,CB
-4950400,Arvell Reese,New York Giants,Active,2026-11-27T21:36Z,,,,,,,LB
-16837,Shelby Harris,New York Giants,Out,2026-11-27T21:35Z,Illness,Not Specified,Not Specified,2026-12-06,OUT,out,DT
+16837,Shelby Harris,New York Giants,Out,2026-11-28T00:57Z,Illness,Not Specified,Not Specified,2026-12-06,OUT,Harris (illness) has been ruled out for Sunday's game against the Colts.,DT
+4431321,Dru Phillips,New York Giants,Active,2026-11-28T00:55Z,,,,,,Phillips (illness) does not carry an injury designation into Sunday's game against the Colts.,CB
+4950400,Arvell Reese,New York Giants,Active,2026-11-28T00:53Z,,,,,,Reese (back) does not carry an injury designation into Sunday's game against the Colts.,LB
+4725996,Abdul Carter,New York Giants,Active,2026-11-27T23:16Z,,,,,,Carter (calf/illness) does not carry an injury designation into Sunday's game against the Colts.,LB
 4361050,Isaiah Likely,New York Giants,Active,2026-11-27T21:08Z,,,,,,"Likely (groin) doesn't have a designation for Sunday's contest at Indianapolis, Dan Salomone of the Giants' official site reports.",TE
-4725996,Abdul Carter,New York Giants,Active,2026-11-26T23:09Z,,,,,,"Carter (calf/illness) did not participate in Thursday's practice, Pat Leonard of the New York Daily News reports.",LB
 2531358,Chris Manhertz,New York Giants,Active,2026-11-25T16:18Z,,,,,,Mahertz secured his lone target for a 14-yard reception in Sunday's 23-18 win over the Jaguars.,TE
 4428328,Deonte Banks,New York Giants,Active,2026-11-25T02:15Z,,,,,,"Banks recorded six total tackles (five solo) and three passes defensed, including an interception, during Sunday's 23-18 win over the Jaguars.",CB
 3042476,Dawuane Smoot,New York Giants,Active,2026-11-25T02:06Z,,,,,,"The Giants signed Smoot off the practice squad to the active roster Tuesday, Dan Salomone of the team's official site reports.",LB
@@ -599,6 +599,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4433970,J.J. McCarthy,New York Giants,Active,2026-11-23T02:57Z,,,,,,McCarthy completed 18 of 38 passes for 173 yards with a touchdown and no interceptions and rushed seven times for 33 yards in the Giants' 23-18 win over the Jaguars on Sunday.,QB
 4696981,Cam Skattebo,New York Giants,Active,2026-11-23T02:32Z,,,,,,Skattebo rushed 14 times for 34 yards and brought in three of seven targets for 14 yards in the Giants' 23-18 win over the Jaguars on Sunday. He also lost a fumble.,RB
 4595348,Malik Nabers,New York Giants,Active,2026-11-23T02:10Z,,,,,,Nabers brought in seven of 12 targets for 55 yards and a touchdown in the Giants' 23-18 win over the Jaguars on Sunday.,WR
+4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-11-28T00:37Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,Sweat (knee) is questionable for Sunday's game against the Dolphins.,DT
 4243375,Dylan Parham,New York Jets,Active,2026-11-27T20:25Z,,,,,,,G
 4362094,Joseph Ossai,New York Jets,Active,2026-11-27T20:25Z,,,,,,,DE
 4723820,Omar Cooper Jr.,New York Jets,Out,2026-11-27T15:56Z,Ankle,Not Specified,Right,2026-12-13,OUT,"Head coach Aaron Glenn announced Friday that Cooper (ankle/groin) will remain out for Sunday's game against the Dolphins, Brian Costello of the New York Post reports.",WR
@@ -606,7 +607,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4569371,Isaiah Williams,New York Jets,Active,2026-11-26T21:20Z,,,,,,"Williams (ribs) practiced fully Thursday, Rich Cimini of ESPN.com reports.",WR
 4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-26T01:10Z,Abdomen,Surgery,Not Specified,2026-11-29,IR-R,Onyemata (abdomen) was estimated as a full practice participant on Wednesday's report.,DT
 4683815,Trevin Wallace,New York Jets,Active,2026-11-26T01:01Z,,,,,,Wallace (groin) was not listed on Wednesday's estimated practice report.,LB
-4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-11-25T22:18Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,"The Jets designated Sweat (knee) for return from injured reserve Wednesday, Eric Allen of the Jets' official site reports.",DT
 4361372,Jeremy Ruckert,New York Jets,Active,2026-11-25T16:29Z,,,,,,Ruckert went without a target while logging 16 of the Jets' 60 snaps on offense in Sunday's 27-24 win over the Chargers.,TE
 3125107,Andrew Beck,New York Jets,Active,2026-11-25T16:26Z,,,,,,Beck played all but one of his 13 snaps on special teams in Sunday's 27-24 win over the Chargers.,FB
 14958,Demario Davis,New York Jets,Active,2026-11-25T02:35Z,,,,,,Davis registered six tackles (four solo) during Sunday's 27-24 win over the Chargers on Sunday.,LB
@@ -649,11 +649,16 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4432777,Jeremiah Trotter Jr.,Philadelphia Eagles,Active,2026-11-24T03:35Z,,,,,,Trotter logged 13 tackles (nine solo) during Philadelphia's win over the Steelers on Sunday.,LB
 4685279,Jaydon Blue,Philadelphia Eagles,Active,2026-11-24T02:59Z,,,,,,Blue returned his lone kickoff for 23 yards but fumbled the ball in the process during the Eagles' 19-16 win over the Steelers on Sunday.,RB
 4431574,Eli Stowers,Philadelphia Eagles,Active,2026-11-24T02:56Z,,,,,,Stowers didn't log any offensive snaps in Sunday's 19-16 win over the Steelers.,TE
+4035687,Michael Pittman Jr.,Pittsburgh Steelers,Active,2026-11-28T00:54Z,,,,,,Pittman caught one of two targets for seven yards in Friday's 27-5 win over the Broncos.,WR
+4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-28T00:26Z,,,,,,Metcalf caught three of four targets for 36 yards and a touchdown in Friday's 27-5 win over Denver.,WR
+4038815,Rico Dowdle,Pittsburgh Steelers,Active,2026-11-28T00:21Z,,,,,,Dowdle carried the ball 11 times for 71 yards in Friday's 27-5 win over the Broncos.,RB
+4569987,Jaylen Warren,Pittsburgh Steelers,Active,2026-11-28T00:18Z,,,,,,Warren carried the ball 20 times for 46 yards and caught one of two targets for zero yards in Friday's 27-5 win over the Broncos.,RB
+3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-11-28T00:12Z,,,,,,Rudolph completed nine of 15 passes for 142 yards and a touchdown in Friday's 27-5 win over the Broncos.,QB
 4567979,Brandin Echols,Pittsburgh Steelers,Questionable,2026-11-27T22:06Z,Quadriceps,,,2026-12-06,QUESTIONABLE,"Echols (quadriceps) has been ruled out for the rest of Friday's game against the Broncos, Alan Saunders of SteelersNow.com reports.",CB
 4431590,Jack Sawyer,Pittsburgh Steelers,Questionable,2026-11-27T22:03Z,Knee,Not Specified,Not Specified,2026-12-06,QUESTIONABLE,"Sawyer (knee) has been ruled out for the rest of Friday's game against the Broncos, Burt Lauten of the Steelers' official site reports.",LB
 3116689,Cole Holcomb,Pittsburgh Steelers,Out,2026-11-27T19:24Z,Heel,Not Specified,Not Specified,2026-12-06,INACTIVE,Holcomb (heel) is inactive Friday against the Broncos.,LB
 5081338,Kaden Wetjen,Pittsburgh Steelers,Out,2026-11-27T19:21Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Wetjen (coach's decision) is inactive Friday against the Broncos.,WR
-4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-27T19:18Z,,,,,,"Howard is active and will work as Mason Rudolph's backup Friday against the Broncos, Brain Batko of the Steelers' official site reports.",QB
+4429955,Will Howard,Pittsburgh Steelers,Active,2026-11-27T19:18Z,,,,,,"Howard is active and will work as Mason Rudolph's backup Friday against the Broncos, Brian Batko of the Steelers' official site reports.",QB
 4714771,Drew Allar,Pittsburgh Steelers,Out,2026-11-27T19:05Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,Allar (coach's decision) is inactive for Friday's game against the Broncos but will serve as Pittsburgh's emergency third QB.,QB
 4431533,Gabriel Rubio,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,DE
 3932886,Sean Murphy-Bunting,Pittsburgh Steelers,Out,2026-11-27T18:42Z,Coach's Decision,Not Specified,Not Specified,2026-12-06,INACTIVE,inactive,CB
@@ -664,20 +669,15 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4037333,Alex Highsmith,Pittsburgh Steelers,Out,2026-11-26T22:46Z,Ankle,Not Specified,Not Specified,2026-12-06,INACTIVE,"Highsmith (ankle) has been ruled out for Friday's game against the Broncos, Teresa Varley of the Steelers' official site reports.",LB
 4035656,Ben Skowronek,Pittsburgh Steelers,Injured Reserve,2026-11-26T22:43Z,Calf,Not Specified,Not Specified,2026-12-27,IR,"The Steelers placed Skowronek (calf) on injured reserve Thursday, Teresa Varley of the team's official site reports.",WR
 4694237,Max Hurleman,Pittsburgh Steelers,Active,2026-11-26T22:39Z,,,,,,"The Steelers signed Hurleman off the practice squad to the active roster Thursday, Teresa Varley of the team's official site reports.",WR
-4035687,Michael Pittman Jr.,Pittsburgh Steelers,Active,2026-11-26T19:53Z,,,,,,"Pittman (foot), who was activated from IR on Thursday, doesn't carry an injury designation for Friday's game against the Broncos, Mike DeFabo of The Athletic reports.",WR
-3116407,Mason Rudolph,Pittsburgh Steelers,Active,2026-11-25T21:48Z,,,,,,Rudolph will start Friday's game against the Broncos and could remain atop the depth chart for the rest of the season with the Steelers waiving Aaron Rodgers on Wednesday.,QB
 3045373,Jalen Ramsey,Pittsburgh Steelers,Active,2026-11-25T01:42Z,,,,,,Ramsey recorded one solo tackle and a pass defensed during Sunday's 19-16 loss to the Eagles.,CB
 4242207,Patrick Queen,Pittsburgh Steelers,Active,2026-11-25T01:39Z,,,,,,Queen recorded four total tackles (three solo) during Sunday's 19-16 loss to the Eagles.,LB
 4361652,Payton Wilson,Pittsburgh Steelers,Active,2026-11-24T04:31Z,,,,,,Wilson recorded just three tackles (one solo) and a pass breakup in Sunday's 19-16 loss to the Eagles.,LB
 4431492,Roman Wilson,Pittsburgh Steelers,Active,2026-11-24T02:24Z,,,,,,Wilson caught three of six targets for 43 yards in Sunday's 19-16 loss to the Eagles.,WR
 4685261,Germie Bernard,Pittsburgh Steelers,Active,2026-11-24T02:08Z,,,,,,Bernard caught six passes for 40 yards on 10 targets in Sunday's 19-16 loss to the Eagles.,WR
-4047650,DK Metcalf,Pittsburgh Steelers,Active,2026-11-23T21:08Z,,,,,,"Metcalf won't receive a suspension after he was ejected from Sunday's 19-16 loss to the Eagles, but the NFL is still reviewing discipline for the receiver that could include a fine, Adam Schefter of ESPN reports.",WR
-17372,Chris Boswell,Pittsburgh Steelers,Active,2026-11-23T05:23Z,,,,,,Boswell went 3-for-3 on field-goal attempts and made his lone PAT in Sunday's 19-16 loss to the Eagles.,PK
-4430802,Darnell Washington,Pittsburgh Steelers,Active,2026-11-23T04:38Z,,,,,,Washington caught all three targets for 22 yards in Sunday's 19-16 loss to the Eagles.,TE
 4431466,Jordan Watkins,San Francisco 49ers,Out,2026-11-27T23:00Z,Groin,Not Specified,Not Specified,2026-12-06,OUT,Watkins (groin) has been ruled out for Sunday's game against the Seahawks.,WR
 4242488,Deommodore Lenoir,San Francisco 49ers,Active,2026-11-27T22:55Z,,,,,,,CB
 4565779,Carver Willis,San Francisco 49ers,Active,2026-11-27T22:55Z,,,,,,,OT
-4241464,Mac Jones,San Francisco 49ers,Active,2026-11-27T22:40Z,,,,,,Head coach Kyle Shanahan announced Jones will start in place of Brock Purdy (ankle) on Sunday against the Seahawks.,QB
+4241464,Mac Jones,San Francisco 49ers,Active,2026-11-27T22:40Z,,,,,,Head coach Kyle Shanahan announced that Jones will start in place of Brock Purdy (ankle) on Sunday against the Seahawks.,QB
 16737,Mike Evans,San Francisco 49ers,Questionable,2026-11-27T22:32Z,Achilles,Tendinitis,Right,2026-11-29,QUESTIONABLE,"Evans (Achilles) is listed as questionable for Sunday's contest against the Seahawks, Matt Maiocco of NBC Sports Bay Area reports.",WR
 4361741,Brock Purdy,San Francisco 49ers,Out,2026-11-27T22:25Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Head coach Kyle Shanahan said Friday that Purdy (ankle) has been ruled out for Sunday's game versus the Seahawks, Jennifer Lee Chan of NBC Sports Bay Area reports.",QB
 3920814,Austen Pleasants,San Francisco 49ers,Injured Reserve,2026-11-26T03:11Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,"The 49ers designated Pleasants (knee) to return from injured reserve Wednesday, Matt Maiocco of NBC Sports Bay Area reports.",OT
@@ -699,10 +699,10 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4034949,Eddy Pineiro,San Francisco 49ers,Active,2026-11-24T00:33Z,,,,,,Pineiro made all five of his PATs in Sunday night's 35-10 win over the Vikings.,PK
 4691556,Enrique Cruz Jr.,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,OT
 4430431,Kurtis Rourke,San Francisco 49ers,Active,2026-11-23T15:50Z,,,,,,,QB
+3924327,Drew Lock,Seattle Seahawks,Active,2026-11-27T22:57Z,,,,,,Lock (elbow) does not carry an injury designation into Sunday's game against the 49ers.,QB
 2971622,Leonard Williams,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,DT
 4364623,Patrick O'Connell,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,LB
 3120358,Uchenna Nwosu,Seattle Seahawks,Active,2026-11-27T22:49Z,,,,,,,LB
-3924327,Drew Lock,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,QB
 4429211,Anthony Bradford,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,G
 4362851,Ernest Jones IV,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,LB
 4432734,Jalen Milroe,Seattle Seahawks,Active,2026-11-27T22:48Z,,,,,,,QB
@@ -724,19 +724,19 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4032473,Rashid Shaheed,Seattle Seahawks,Active,2026-11-16T05:27Z,,,,,,Shaheed caught one pass for eight yards on two targets in Sunday's 21-13 win over the Raiders.,WR
 4685512,Jadarian Price,Seattle Seahawks,Active,2026-11-16T01:55Z,,,,,,Price posted nine carries for 36 yards and one touchdown and gathered in his only target for eight yards during Sunday's 21-13 victory at Las Vegas.,RB
 4426385,Zach Charbonnet,Seattle Seahawks,Active,2026-11-16T01:48Z,,,,,,Charbonnet churned out 94 yards on 20 carries during Sunday's 21-13 win in Las Vegas.,RB
+4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-11-28T00:38Z,Hamstring,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Morrison (hamstring) did not practice Friday.,CB
+4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-28T00:36Z,,,,,,Parrish (back) was a full participant in Friday's practice.,CB
+4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-28T00:34Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Winfield (ankle) did not participate in Friday's practice.,S
+4870998,Josiah Trotter,Tampa Bay Buccaneers,Questionable,2026-11-28T00:25Z,Oblique,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Trotter (oblique) was a limited participant in Friday's practice.,LB
+4608810,Tez Johnson,Tampa Bay Buccaneers,Questionable,2026-11-28T00:24Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Johnson did not participate in Friday's practice due to an illness.,WR
 4430834,Jalen McMillan,Tampa Bay Buccaneers,Injured Reserve,2026-11-27T20:51Z,Knee - PCL,Sprain,Left,2026-11-30,IR-R,McMillan (knee/calf) was limited at Friday's practice.,WR
-4608810,Tez Johnson,Tampa Bay Buccaneers,Questionable,2026-11-27T20:42Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,WR
 4429511,SirVocea Dennis,Tampa Bay Buccaneers,Questionable,2026-11-27T20:42Z,Back,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
-4912847,Jacob Parrish,Tampa Bay Buccaneers,Active,2026-11-27T00:59Z,,,,,,Parrish (back) was listed a limited participant in Tampa Bay's practice estimate Thursday.,CB
-4034790,Antoine Winfield Jr.,Tampa Bay Buccaneers,Questionable,2026-11-27T00:53Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Winfield (ankle) was listed a non-participant in Tampa Bay's practice estimate Thursday.,S
-4870998,Josiah Trotter,Tampa Bay Buccaneers,Questionable,2026-11-27T00:43Z,Oblique,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Trotter (oblique) was listed as a limited participant in Tampa Bay's practice estimate Thursday.,LB
 3909013,Christian Rozeboom,Tampa Bay Buccaneers,Injured Reserve,2026-11-26T02:46Z,Finger,Not Specified,Not Specified,2026-11-30,IR-R,"The Buccaneers opened the 21-day practice window for Rozeboom (finger) on Wednesday, Scott Smith of the team's official site reports.",LB
 4034779,Ko Kieft,Tampa Bay Buccaneers,Active,2026-11-25T17:24Z,,,,,,Kieft played all 12 of his snaps on special teams in Sunday's 31-21 loss to the Lions.,TE
 4890373,Bauer Sharp,Tampa Bay Buccaneers,Active,2026-11-25T17:18Z,,,,,,Sharp went without a target while logging 12 of the Buccaneers' 69 offensive snaps in Sunday's 31-21 loss to the Lions.,TE
 4372505,Payne Durham,Tampa Bay Buccaneers,Active,2026-11-25T17:15Z,,,,,,Durham wasn't targeted while playing 15 of the Buccaneers' 69 snaps on offense and 15 on special teams in Sunday's 31-21 loss to the Lions.,TE
 4428522,Tykee Smith,Tampa Bay Buccaneers,Active,2026-11-25T02:59Z,,,,,,Smith logged nine tackles (six solo) during Tampa Bay's loss to the Lions on Sunday.,S
 4430478,Elijah Simmons,Tampa Bay Buccaneers,Questionable,2026-11-24T00:56Z,Concussion,Concussion,Not Specified,2026-11-30,QUESTIONABLE,"Simmons is in concussion protocol following Sunday's loss to the Lions, Brianna Dix of the Buccaneers' official site reports.",DT
-4816107,Benjamin Morrison,Tampa Bay Buccaneers,Questionable,2026-11-24T00:52Z,Hamstring,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,"Morrison (hamstring) underwent an MRI on Monday, Brianna Dix of the Buccaneers' official site reports.",CB
 3150744,Chase McLaughlin,Tampa Bay Buccaneers,Active,2026-11-24T00:37Z,,,,,,McLaughlin made all three of his extra-point attempts in Sunday's 31-21 loss to the Lions.,PK
 4890885,Ayden Garnes,Tampa Bay Buccaneers,Active,2026-11-23T15:51Z,,,,,,,CB
 4427140,Trevor Keegan,Tampa Bay Buccaneers,Active,2026-11-23T15:51Z,,,,,,,G
@@ -749,11 +749,11 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4371733,Kenny Gainwell,Tampa Bay Buccaneers,Active,2026-11-23T00:51Z,,,,,,Gainwell rushed four times for 16 yards and brought in four of five targets for 43 yards in the Buccaneers 31-21 loss to the Lions on Sunday.,RB
 4567750,Emeka Egbuka,Tampa Bay Buccaneers,Active,2026-11-23T00:37Z,,,,,,Egbuka brought in two of five targets for 18 yards in the Buccaneers' 31-21 loss to the Lions on Sunday.,WR
 3052587,Baker Mayfield,Tampa Bay Buccaneers,Active,2026-11-23T00:01Z,,,,,,Mayfield completed 20 of 33 passes for 187 yards with two touchdowns and no interceptions and rushed six times for 36 yards in the Buccaneers' 31-21 loss to the Lions on Sunday. He also committed a fumble that stayed with Tampa Bay.,QB
+4240532,Tony Adams,Tennessee Titans,Active,2026-11-27T23:22Z,,,,,,"Adams (illness) does not carry an injury designation into Sunday's game against the Jaguars, Jim Wyatt of the Titans' official site reports.",S
+4429607,Cor'Dale Flott,Tennessee Titans,Out,2026-11-27T23:12Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,"Flott (neck) has been ruled out for Sunday's game against the Jaguars, Jim Wyatt of the Titans' official site reports.",CB
 4573318,Dorian Mausi,Tennessee Titans,Active,2026-11-27T20:36Z,,,,,,,LB
-4429607,Cor'Dale Flott,Tennessee Titans,Out,2026-11-27T17:25Z,Neck,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 4035663,Terrell Burgess,Tennessee Titans,Out,2026-11-27T17:25Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,out,S
 3120464,John Franklin-Myers,Tennessee Titans,Active,2026-11-26T23:05Z,,,,,,Franklin-Myers (back) was a full participant in Thursday's practice.,DE
-4240532,Tony Adams,Tennessee Titans,Active,2026-11-26T01:34Z,,,,,,"Adams (illness) was a full participant in Wednesday's practice, Turron Davenport of ESPN.com reports.",S
 4039160,Kylen Granson,Tennessee Titans,Active,2026-11-25T17:31Z,,,,,,Granson logged all 16 of his snaps on special teams in Sunday's 51-30 loss to the Cowboys.,TE
 4360978,David Martin-Robinson,Tennessee Titans,Active,2026-11-25T17:27Z,,,,,,Martin-Robinson played all but one of his 24 snaps on special teams in Sunday's 51-30 loss to the Cowboys.,TE
 4685617,Kevin Winston Jr.,Tennessee Titans,Active,2026-11-25T03:00Z,,,,,,Winston recorded seven total tackles (four solo) during Sunday's 51-30 loss to the Cowboys.,S
@@ -774,9 +774,9 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 3925357,Calvin Ridley,Tennessee Titans,Active,2026-11-23T01:41Z,,,,,,Ridley caught five of six targets for 68 yards and a touchdown during Sunday's 51-30 loss to the Cowboys.,WR
 4688380,Cam Ward,Tennessee Titans,Active,2026-11-22T23:38Z,,,,,,Ward completed 21 of 30 passes for 248 yards with two touchdowns and no interceptions while rushing twice for three yards and another score in the Titans' 51-30 loss to the Cowboys on Sunday. He also lost a fumble.,QB
 4871023,Carnell Tate,Tennessee Titans,Active,2026-11-22T23:27Z,,,,,,Tate brought in two of five targets for 58 yards and a touchdown in the Titans' 51-30 loss to the Cowboys on Sunday.,WR
+4239694,Amik Robertson,Washington Commanders,Out,2026-11-27T23:50Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,"Robertson (ankle) has been ruled out for Sunday's game against the Cardinals, John Keim of ESPN.com reports.",CB
 3929865,Charles Omenihu,Washington Commanders,Active,2026-11-27T21:24Z,,,,,,,DE
 4567156,Treylon Burks,Washington Commanders,Active,2026-11-27T21:21Z,,,,,,Burks (foot) doesn't have a designation for Sunday's game in Arizona.,WR
-4239694,Amik Robertson,Washington Commanders,Out,2026-11-27T19:17Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,out,CB
 2976212,Stefon Diggs,Washington Commanders,Active,2026-11-26T20:42Z,,,,,,Diggs (personal) was removed from the Commanders' injury report Thursday.,WR
 4048228,John Bates,Washington Commanders,Active,2026-11-25T01:34Z,,,,,,Bates didn't garner a target during Monday night's 22-20 win over the Bengals.,TE
 4690923,Ben Sinnott,Washington Commanders,Active,2026-11-25T01:31Z,,,,,,"Sinnott played played 33 snaps (24 on offense, nine on special teams) but didn't show up in the box score otherwise during the Commanders' 22-20 win over the Bengals on Monday.",TE
