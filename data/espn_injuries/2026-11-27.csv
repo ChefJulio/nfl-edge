@@ -199,7 +199,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4241463,Jerry Jeudy,Cleveland Browns,Active,2026-11-16T01:53Z,,,,,,Jeudy recorded two catches on four targets for 74 yards in a 27-24 victory over the Texans on Sunday.,WR
 4870653,KC Concepcion,Cleveland Browns,Active,2026-11-16T01:18Z,,,,,,Concepcion caught three of eight targets for 21 yards in Sunday's 27-24 win over Houston. He also gained six yards on one carry.,WR
 3122840,Deshaun Watson,Cleveland Browns,Active,2026-11-16T00:06Z,,,,,,Watson completed 25 of 40 passes for 312 yards with no touchdowns and one interception while adding eight rushes for 49 yards and a score in the Browns' 27-24 win over the Texans on Sunday. He also committed a fumble that remained with Cleveland.,QB
-4040982,Quinnen Williams,Dallas Cowboys,Questionable,2026-11-27T23:24Z,Back,Spasms,Not Specified,2026-12-07,QUESTIONABLE,"Head coach Brian Schottenheimer said Friday that Williams has been diagnosed with a back strain and spasms following Thursday's 39-38 loss to the Eagles, Calvin Watkins of The Dallas Morning News reports.",DT
+4040982,Quinnen Williams,Dallas Cowboys,Questionable,2026-11-27T23:24Z,Back,Spasms,Not Specified,2026-12-07,QUESTIONABLE,"Head coach Brian Schottenheimer said Friday that Williams has been diagnosed with a back strain and back spasms following Thursday's 39-38 loss to the Eagles, Calvin Watkins of The Dallas Morning News reports.",DT
 4372519,Jashaun Corbin,Dallas Cowboys,Active,2026-11-27T22:37Z,,,,,,Corbin turned five carries into 21 yards during the Cowboys' 39-38 loss to the Eagles on Thursday.,RB
 4360967,Brevyn Spann-Ford,Dallas Cowboys,Active,2026-11-27T02:44Z,,,,,,Spann-Ford caught his lone target for 15 yards during Dallas' loss to the Eagles on Thursday.,TE
 3953687,Brandon Aubrey,Dallas Cowboys,Active,2026-11-27T02:39Z,,,,,,Aubrey converted one of his two field-goal attempts and all five of his extra-point tries during Dallas' 39-38 loss to the Eagles on Thursday.,PK
@@ -399,13 +399,13 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4362759,Nick Bolton,Kansas City Chiefs,Active,2026-11-24T03:37Z,,,,,,Bolton recorded five total tackles (two solo) and a pass defensed during Sunday's 34-7 win over Arizona.,LB
 4426659,George Karlaftis,Kansas City Chiefs,Active,2026-11-24T03:32Z,,,,,,"Karlaftis recorded four total tackles (three solo), including 2.5 sacks, and a forced fumble during Sunday's 34-7 win over the Cardinals.",DE
 4685489,Jaydn Ott,Kansas City Chiefs,Active,2026-11-24T01:56Z,,,,,,Ott logged five rushing attempts for 12 yards and logged one tackle on kick coverage in the Chiefs' 34-7 win over the Cardinals on Sunday.,RB
+4429109,Tonka Hemingway,Las Vegas Raiders,Out,2026-11-28T01:03Z,Upper Body,Stinger,Not Specified,2026-12-13,OUT,"Hemingway (stinger) has been ruled out for Sunday's game against the Browns, Scott Petrak of the Elyria Chronicle-Telegram reports.",DT
 4685978,Darrell Luter Jr.,Las Vegas Raiders,Questionable,2026-11-27T21:58Z,Knee,,,2026-11-29,QUESTIONABLE,questionable,CB
 4430896,JJ Pegues,Las Vegas Raiders,Questionable,2026-11-27T21:58Z,Elbow,,,2026-11-29,QUESTIONABLE,questionable,DT
 4431414,Tim Keenan III,Las Vegas Raiders,Out,2026-11-27T21:57Z,Knee,Not Specified,Not Specified,2026-12-13,OUT,out,DT
 2972342,Adam Butler,Las Vegas Raiders,Out,2026-11-27T21:56Z,Concussion,Concussion,Not Specified,2026-12-13,OUT,out,DT
 4875295,Jackson Powers-Johnson,Las Vegas Raiders,Out,2026-11-27T21:54Z,Achilles,,,2026-12-13,OUT,out,G
 4432665,Brock Bowers,Las Vegas Raiders,Questionable,2026-11-27T20:47Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Bowers (ankle) will be listed as questionable for Sunday night's game against the Browns, Adam Hill of the Las Vegas Review-Journal reports.",TE
-4429109,Tonka Hemingway,Las Vegas Raiders,Out,2026-11-27T00:36Z,Upper Body,Stinger,Not Specified,2026-12-13,OUT,"Hemingway (upper body) was listed as a non-participant in Las Vegas' practice estimate Thursday, Sam Warren of The Athletic reports.",DT
 4243916,Patrick Johnson,Las Vegas Raiders,Injured Reserve,2026-11-26T03:07Z,Neck,Stinger,Not Specified,2026-11-29,IR-R,The Raiders designated Johnson (neck) to return from injured reserve Wednesday.,DE
 4401805,Dareke Young,Las Vegas Raiders,Active,2026-11-26T01:44Z,,,,,,"Young (stinger) was a full participant in Wednesday's practice, Ryan McFadden of ESPN.com reports.",WR
 4043169,Jeremy Chinn,Las Vegas Raiders,Active,2026-11-25T01:49Z,,,,,,Chinn recorded seven total tackles (five solo) during Sunday's 38-24 loss to the Broncos.,S
@@ -424,18 +424,18 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4837248,Fernando Mendoza,Las Vegas Raiders,Active,2026-11-23T02:09Z,,,,,,"Mendoza was 18-for-37 passing for 267 yards, three touchdowns and one interception and had four carries for 22 yards during Sunday's 38-24 loss in Denver.",QB
 4890973,Ashton Jeanty,Las Vegas Raiders,Active,2026-11-23T01:44Z,,,,,,Jeanty tallied 11 carries for 79 yards and gathered in five of eight targets for 90 yards and one touchdown during Sunday's 38-24 loss at Denver.,RB
 4603186,Jack Bech,Las Vegas Raiders,Active,2026-11-23T01:31Z,,,,,,Bech caught eight of nine targets for 88 yards and a touchdown during Sunday's 38-24 loss to the Broncos.,WR
-4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-27T22:30Z,Hamstring,,Not Specified,2026-11-29,DOUBTFUL,doubtful,WR
-4429190,Akheem Mesidor,Los Angeles Chargers,Doubtful,2026-11-27T22:30Z,Ankle,Not Specified,Not Specified,2026-11-29,DOUBTFUL,doubtful,LB
+4431442,Tuli Tuipulotu,Los Angeles Chargers,Questionable,2026-11-28T01:31Z,Ankle,,,2026-11-29,QUESTIONABLE,"Tuipulotu (ankle) is listed as questionable for Sunday's game against the Patriots, Omar Navarro of the Chargers' official site reports.",LB
+4685553,Brenen Thompson,Los Angeles Chargers,Doubtful,2026-11-28T01:24Z,Hamstring,,Not Specified,2026-11-29,DOUBTFUL,"Thompson (hamstring) is listed as doubtful for Sunday's game against the Patriots, Omar Navarro of the Chargers' official site reports.",WR
+4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-28T01:22Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,"Still (ankle) is officially listed as questionable for Sunday's game versus the Patriots, Omar Navarro of the Chargers' official site reports.",CB
+4429190,Akheem Mesidor,Los Angeles Chargers,Doubtful,2026-11-28T01:13Z,Ankle,Not Specified,Not Specified,2026-11-29,DOUBTFUL,"Mesidor (ankle) is officially listed as doubtful for Sunday's game versus the Patriots, Omar Navarro of the Chargers' official site reports.",LB
+4241597,Daiyan Henley,Los Angeles Chargers,Out,2026-11-28T01:08Z,Knee,Soreness,Not Specified,2026-12-06,OUT,"Henley (knee) is officially listed as out for Sunday's game versus New England, Omar Navarro of the Chargers' official site reports.",LB
 4429020,DJ Uiagalelei,Los Angeles Chargers,Active,2026-11-27T22:29Z,,,,,,"Uiagalelei will be the Chargers' starting quarterback against the Patriots on Sunday due to the absence of Justin Herbert (concussion), Mike Garafolo of NFL Network reports.",QB
 4038941,Justin Herbert,Los Angeles Chargers,Out,2026-11-27T22:24Z,Concussion,Concussion,Not Specified,2026-12-06,OUT,Herbert (concussion) has been ruled out for Sunday's game against the Patriots.,QB
 3123076,David Njoku,Los Angeles Chargers,Questionable,2026-11-27T22:23Z,Shoulder,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Njoku (shoulder) is listed as questionable for Sunday's game against New England.,TE
 4596334,Keaton Mitchell,Los Angeles Chargers,Out,2026-11-27T22:20Z,Knee,Not Specified,Not Specified,2026-12-06,OUT,Mitchell (knee) has been ruled out for Sunday's game against the Patriots.,RB
-4241597,Daiyan Henley,Los Angeles Chargers,Out,2026-11-27T22:19Z,Knee,Soreness,Not Specified,2026-12-06,OUT,out,LB
 4690171,Deane Leonard,Los Angeles Chargers,Injured Reserve,2026-11-26T19:00Z,Groin,,,2026-12-27,IR,The Chargers placed Leonard (groin) on injured reserve Thursday.,CB
 3886812,Jake Browning,Los Angeles Chargers,Active,2026-11-26T18:51Z,,,,,,The Chargers signed Browning to their active roster Thursday.,QB
-4431442,Tuli Tuipulotu,Los Angeles Chargers,Questionable,2026-11-26T02:30Z,Ankle,,,2026-11-29,QUESTIONABLE,Tuipulotu (ankle) did not participate in Wednesday's practice.,LB
 2979860,Dalvin Tomlinson,Los Angeles Chargers,Questionable,2026-11-26T02:19Z,Knee,,,2026-11-29,QUESTIONABLE,Tomlinson (knee) did not participate in Wednesday's practice.,DT
-4432571,Tarheeb Still,Los Angeles Chargers,Questionable,2026-11-26T02:12Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Still (ankle) did not participate in Wednesday's practice.,CB
 4595342,Oronde Gadsden,Los Angeles Chargers,Active,2026-11-24T15:18Z,,,,,,Gadsden went without a target while taking the field for 23 of the Chargers' 60 snaps on offense in Sunday's 27-24 loss to the Jets.,TE
 4360745,Kendall Williamson,Los Angeles Chargers,Questionable,2026-11-24T12:39Z,Calf,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,questionable,S
 4243328,Elijah Molden,Los Angeles Chargers,Active,2026-11-24T03:53Z,,,,,,Molden recorded eight tackles (four solo) in Sunday's 27-24 loss to the Jets.,CB
@@ -449,6 +449,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4612826,Ladd McConkey,Los Angeles Chargers,Active,2026-11-23T01:20Z,,,,,,McConkey caught five of eight targets for 37 yards and two touchdowns in Sunday's 27-24 loss to the Jets.,WR
 4685382,Omarion Hampton,Los Angeles Chargers,Active,2026-11-23T01:15Z,,,,,,Hampton carried the ball 14 times for 89 yards and caught his only target for four yards in Sunday's 27-24 loss to the Jets.,RB
 4411189,Trey Pipkins III,Los Angeles Chargers,Active,2026-11-22T20:07Z,,,,,,Pipkins (knee) is active for Sunday's matchup against the Jets.,OT
+3912189,Bill Murray,Los Angeles Rams,Out,2026-11-28T01:24Z,Achilles,,,2027-02-15,OUT,out,G
 4426553,Davis Allen,Los Angeles Rams,Doubtful,2026-11-27T20:01Z,Ankle,Sprain,Not Specified,2026-12-03,DOUBTFUL,"Allen is dealing with a high-ankle sprain, according to sources, Ian Rapoport of NFL Network reports.",TE
 2573401,Tyler Higbee,Los Angeles Rams,Questionable,2026-11-27T19:53Z,Chest,Bruise,Not Specified,2026-12-03,QUESTIONABLE,"Higbee (chest) is considered week-to-week, though it's too early to tell if he may be available Thursday, Dec. 3, against the Chiefs, Adam Schefter of ESPN reports Friday.",TE
 16339,Brandon McManus,Los Angeles Rams,Active,2026-11-26T17:31Z,,,,,,McManus made all four of his field-goal tries and both of his point-after attempts Thursday in a 26-13 victory over Green Bay.,PK
@@ -457,7 +458,6 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4386544,Xavier Smith,Los Angeles Rams,Active,2026-11-26T16:40Z,,,,,,Smith gained 11 yards on two carries and caught his only target for four yards in a 26-13 win against Green Bay on Wednesday. He added 15 yards on his lone punt return.,WR
 4243003,Ronnie Rivers,Los Angeles Rams,Active,2026-11-26T16:32Z,,,,,,Rivers returned four kickoffs for 102 yards and did not log a snap on offense in Wednesday's 26-13 victory over the Packers.,RB
 4242557,Colby Parkinson,Los Angeles Rams,Active,2026-11-26T15:30Z,,,,,,Parkinson caught both of his targets for minus-1 yard in a 26-13 victory over the Packers on Wednesday.,TE
-3912189,Bill Murray,Los Angeles Rams,Questionable,2026-11-26T15:09Z,Leg,,,2026-12-03,QUESTIONABLE,"Murray (leg) exited the Rams' locker room in a walking boot and on crutches following Wednesday's 26-13 victory over Green Bay, Nate Atkins of The Athletic reports.",G
 4710855,Konata Mumpfield,Los Angeles Rams,Active,2026-11-26T05:42Z,,,,,,Mumpfield brought in four of five targets for 69 yards in the Rams' 26-13 win over the Packers on Wednesday night.,WR
 12483,Matthew Stafford,Los Angeles Rams,Active,2026-11-26T05:24Z,,,,,,Stafford completed 16 of 23 passes for 141 yards with no touchdowns and one interception and rushed once for no gain in the Rams' 26-13 win over the Packers on Wednesday night. He also committed a fumble recovered by Los Angeles.,QB
 4430737,Kyren Williams,Los Angeles Rams,Active,2026-11-26T04:59Z,,,,,,Williams rushed 12 times for 46 yards and a touchdown and brought in four of five targets for 19 yards in the Rams' 26-13 win over the Packers on Wednesday night.,RB
