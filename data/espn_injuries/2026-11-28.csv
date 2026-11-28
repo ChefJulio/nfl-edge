@@ -99,16 +99,16 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4030899,Spencer Brown,Buffalo Bills,Active,2026-11-24T22:37Z,,,,,,,OT
 4036060,Damar Hamlin,Buffalo Bills,Active,2026-11-24T22:37Z,,,,,,,S
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-24T03:39Z,,,,,,Hooker logged two solo tackles and one pass defensed in the Bills' 26-9 win over the Dolphins on Sunday.,S
+4242975,Jaelan Phillips,Carolina Panthers,Active,2026-11-28T17:38Z,,,,,,,LB
+4036063,Patrick Jones II,Carolina Panthers,Out,2026-11-28T17:37Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,out,LB
+4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-11-28T17:32Z,,,,,,"McMillan (foot) doesn't have an injury designation for Monday's game against Tampa Bay, Joe Person of The Athletic reports.",WR
 4034948,Feleipe Franks,Carolina Panthers,Questionable,2026-11-28T00:14Z,Wrist,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Franks (wrist) was a limited participant at practice Friday.,TE
-3117253,Bobby Okereke,Carolina Panthers,Questionable,2026-11-28T00:11Z,Foot,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Okereke (foot) did not participate at practice Friday.,LB
+3117253,Bobby Okereke,Carolina Panthers,Out,2026-11-28T00:11Z,Foot,Not Specified,Not Specified,2026-12-06,OUT,Okereke (foot) did not participate at practice Friday.,LB
 4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-27T20:57Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Evans (Achilles) was a limited participant at practice Friday.,TE
 4372780,Tommy Tremble,Carolina Panthers,Active,2026-11-27T20:51Z,,,,,,Tremble (knee) remained a limited participant at practice Friday.,TE
 4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-27T20:49Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,Brooks (groin) practiced without limitations Friday.,RB
-2576925,Darren Waller,Carolina Panthers,Questionable,2026-11-27T20:26Z,Knee,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Waller (knee) practiced in a limited fashion Friday.,TE
-4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-11-27T18:33Z,,,,,,"McMillan (foot) was not in uniform for the team stretch portion of Friday's practice, but he did suit up afterward, Joe Person of The Athletic reports.",WR
-4242975,Jaelan Phillips,Carolina Panthers,Questionable,2026-11-26T21:36Z,,,,,,questionable,LB
+2576925,Darren Waller,Carolina Panthers,Active,2026-11-27T20:26Z,,,,,,Waller (knee) practiced in a limited fashion Friday.,TE
 4875592,Jackson Kuwatch,Carolina Panthers,Questionable,2026-11-26T21:35Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
-4036063,Patrick Jones II,Carolina Panthers,Questionable,2026-11-26T21:35Z,Ankle,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4714157,Thomas Incoom,Carolina Panthers,Injured Reserve,2026-11-26T02:55Z,Calf,Not Specified,Not Specified,2026-11-30,IR-R,"The Panthers designated Incoom (calf) to return from injured reserve Wednesday, Mike Kaye of ESPN.com reports.",LB
 4035232,Tyrel Dodson,Carolina Panthers,Active,2026-11-25T02:33Z,,,,,,"Dodson tallied eight tackles (five solo), an interception and a fumble recovery during Carolina's win over the Ravens on Sunday,",LB
 4256062,Brady Christensen,Carolina Panthers,Injured Reserve,2026-11-25T02:01Z,Hamstring,Not Specified,Not Specified,2027-02-15,IR,"Christensen (hamstring) reverted to season-ending injured reserve after his 21-day practice window closed Tuesday, Mike Kaye of ESPN.com reports.",G
@@ -601,7 +601,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4595348,Malik Nabers,New York Giants,Active,2026-11-23T02:10Z,,,,,,Nabers brought in seven of 12 targets for 55 yards and a touchdown in the Giants' 23-18 win over the Jaguars on Sunday.,WR
 4002046,David Onyemata,New York Jets,Injured Reserve,2026-11-28T15:13Z,Abdomen,Surgery,Not Specified,2026-11-29,IR-R,"Onyemata (abdomen) is listed as questionable for Sunday's game against Miami, but the veteran defensive tackle told reporters Friday that he expects to be activated from injured reserve and be available for Week 12, Howie Kussoy of the New York Post reports.",DT
 3117255,Harrison Phillips,New York Jets,Questionable,2026-11-28T02:08Z,Ankle,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Phillips (ankle) is questionable for Sunday's game against the Dolphins.,DT
-4428617,T'Vondre Sweat,New York Jets,Injured Reserve,2026-11-28T00:37Z,Knee,Not Specified,Not Specified,2026-11-29,IR-R,Sweat (knee) is questionable for Sunday's game against the Dolphins.,DT
+4428617,T'Vondre Sweat,New York Jets,Questionable,2026-11-28T00:37Z,Knee,Not Specified,Not Specified,2026-11-29,QUESTIONABLE,Sweat (knee) is questionable for Sunday's game against the Dolphins.,DT
 4243375,Dylan Parham,New York Jets,Active,2026-11-27T20:25Z,,,,,,,G
 4362094,Joseph Ossai,New York Jets,Active,2026-11-27T20:25Z,,,,,,,DE
 4723820,Omar Cooper Jr.,New York Jets,Out,2026-11-27T15:56Z,Ankle,Not Specified,Right,2026-12-13,OUT,"Head coach Aaron Glenn announced Friday that Cooper (ankle/groin) will remain out for Sunday's game against the Dolphins, Brian Costello of the New York Post reports.",WR
