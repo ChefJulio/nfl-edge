@@ -99,14 +99,14 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4030899,Spencer Brown,Buffalo Bills,Active,2026-11-24T22:37Z,,,,,,,OT
 4036060,Damar Hamlin,Buffalo Bills,Active,2026-11-24T22:37Z,,,,,,,S
 4036134,Amani Hooker,Buffalo Bills,Active,2026-11-24T03:39Z,,,,,,Hooker logged two solo tackles and one pass defensed in the Bills' 26-9 win over the Dolphins on Sunday.,S
+4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-28T17:43Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,"Brooks (groin) is listed as questionable for Monday's game against the Buccaneers, Sheena Quick of Fox Sports Radio 1340 reports.",RB
 4242975,Jaelan Phillips,Carolina Panthers,Active,2026-11-28T17:38Z,,,,,,,LB
 4036063,Patrick Jones II,Carolina Panthers,Out,2026-11-28T17:37Z,Ankle,Not Specified,Not Specified,2026-12-06,OUT,out,LB
 4685472,Tetairoa McMillan,Carolina Panthers,Active,2026-11-28T17:32Z,,,,,,"McMillan (foot) doesn't have an injury designation for Monday's game against Tampa Bay, Joe Person of The Athletic reports.",WR
 4034948,Feleipe Franks,Carolina Panthers,Questionable,2026-11-28T00:14Z,Wrist,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Franks (wrist) was a limited participant at practice Friday.,TE
 3117253,Bobby Okereke,Carolina Panthers,Out,2026-11-28T00:11Z,Foot,Not Specified,Not Specified,2026-12-06,OUT,Okereke (foot) did not participate at practice Friday.,LB
-4683243,Mitchell Evans,Carolina Panthers,Questionable,2026-11-27T20:57Z,Achilles,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,Evans (Achilles) was a limited participant at practice Friday.,TE
+4683243,Mitchell Evans,Carolina Panthers,Active,2026-11-27T20:57Z,,,,,,Evans (Achilles) was a limited participant at practice Friday.,TE
 4372780,Tommy Tremble,Carolina Panthers,Active,2026-11-27T20:51Z,,,,,,Tremble (knee) remained a limited participant at practice Friday.,TE
-4678008,Jonathon Brooks,Carolina Panthers,Injured Reserve,2026-11-27T20:49Z,Groin,Surgery,Not Specified,2026-11-30,IR-R,Brooks (groin) practiced without limitations Friday.,RB
 2576925,Darren Waller,Carolina Panthers,Active,2026-11-27T20:26Z,,,,,,Waller (knee) practiced in a limited fashion Friday.,TE
 4875592,Jackson Kuwatch,Carolina Panthers,Questionable,2026-11-26T21:35Z,Illness,Not Specified,Not Specified,2026-11-30,QUESTIONABLE,questionable,LB
 4714157,Thomas Incoom,Carolina Panthers,Injured Reserve,2026-11-26T02:55Z,Calf,Not Specified,Not Specified,2026-11-30,IR-R,"The Panthers designated Incoom (calf) to return from injured reserve Wednesday, Mike Kaye of ESPN.com reports.",LB
@@ -511,7 +511,7 @@ espn_id,name,team,status,updated,type,detail,side,return_date,fantasy_status,com
 4046537,Joshua Metellus,Minnesota Vikings,Active,2026-11-25T02:50Z,,,,,,Metellus posted five assisted tackles during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,S
 3056916,Eric Wilson,Minnesota Vikings,Active,2026-11-25T02:44Z,,,,,,Wilson recorded 1.0 sacks during the Vikings' 35-10 loss to the 49ers on Sunday in Mexico City.,LB
 4433959,Ben Yurosek,Minnesota Vikings,Active,2026-11-24T16:53Z,,,,,,Yurosek failed to draw a target while playing 29 of the Vikings' 67 offensive snaps in Sunday's 35-10 loss to the 49ers in Mexico City.,TE
-3728281,Blake Cashman,Minnesota Vikings,Active,2026-11-24T05:14Z,,,,,,Cashman recorded nine tackles (four solo) in Sunday night's 35-10 loss to the 49ers.,LB
+3728281,Blake Cashman,Minnesota Vikings,Active,2026-11-24T05:14Z,Back,,,2026-11-29,QUESTIONABLE,Cashman recorded nine tackles (four solo) in Sunday night's 35-10 loss to the 49ers.,LB
 4708049,Gavin Bartholomew,Minnesota Vikings,Active,2026-11-24T03:12Z,,,,,,Bartholomew caught one of three targets for five yards in Sunday night's 35-10 loss to the 49ers.,TE
 4567104,Will Reichard,Minnesota Vikings,Active,2026-11-24T00:44Z,,,,,,Reichard went 1-for-3 on field-goal attempts and made his lone extra-point try during Sunday's 35-10 loss to the 49ers in Mexico City.,PK
 4360569,Jordan Mason,Minnesota Vikings,Active,2026-11-23T05:02Z,,,,,,Mason rushed 11 times for 38 yards while catching his lone target for minus-1 yard in Sunday's 35-10 loss to the 49ers.,RB
